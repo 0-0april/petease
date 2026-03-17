@@ -4,7 +4,8 @@ import { adoptionService } from '../../services/adoptionService';
 
 const STATUS_STYLES = {
   pending:   'bg-yellow-100 text-yellow-800',
-  approved:  'bg-green-100 text-green-800',
+  approved:  'bg-blue-100 text-blue-800',
+  completed: 'bg-green-100 text-green-800',
   rejected:  'bg-red-100 text-red-800',
   cancelled: 'bg-gray-100 text-gray-600',
 };
@@ -261,6 +262,24 @@ const IncomingList = ({ requests, onApprove, onReject, actionLoading, formatDate
                   Rejection reason: {req.rejectionReason}
                 </div>
               )}
+              {req.status === 'approved' && (
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-start space-x-2">
+                  <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-blue-800">
+                    Adoption approved. Both parties must visit the <span className="font-semibold">Provincial Veterinary Office</span> to sign the waiver and complete the adoption process.
+                  </p>
+                </div>
+              )}
+              {req.status === 'completed' && (
+                <div className="mt-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-start space-x-2">
+                  <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-green-800 font-medium">Adoption completed by vet staff.</p>
+                </div>
+              )}
             </div>
 
             {req.status === 'pending' && (
@@ -322,6 +341,24 @@ const SentList = ({ requests, onCancel, actionLoading, formatDate }) => {
               {req.status === 'rejected' && req.rejectionReason && (
                 <div className="mt-2 bg-red-50 rounded-lg px-3 py-2 text-sm text-red-700">
                   Reason: {req.rejectionReason}
+                </div>
+              )}
+              {req.status === 'approved' && (
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-start space-x-2">
+                  <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-blue-800">
+                    Your request was approved. Please visit the <span className="font-semibold">Provincial Veterinary Office</span> together with the owner to sign the adoption waiver and claim your pet.
+                  </p>
+                </div>
+              )}
+              {req.status === 'completed' && (
+                <div className="mt-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-start space-x-2">
+                  <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-green-800 font-medium">Adoption completed. Congratulations on your new pet!</p>
                 </div>
               )}
             </div>

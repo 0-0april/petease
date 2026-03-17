@@ -1,9 +1,9 @@
 import { mockAdoptionRequests, mockPets } from '../data/mockData';
 
-let adoptionRequests = [...mockAdoptionRequests];
+// Shared mutable array — vet and user services both reference this
+export let adoptionRequests = [...mockAdoptionRequests];
 
 export const adoptionService = {
-  // Submit a new adoption request (as adopter)
   requestAdoption: async (petId, message = '') => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -26,7 +26,6 @@ export const adoptionService = {
     return newRequest;
   },
 
-  // Cancel own adoption request (as adopter)
   cancelAdoption: async (adoptionId) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
@@ -37,7 +36,6 @@ export const adoptionService = {
     throw new Error('Request not found');
   },
 
-  // Approve an incoming request (as pet owner)
   approveAdoption: async (adoptionId) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
@@ -49,13 +47,24 @@ export const adoptionService = {
     throw new Error('Request not found');
   },
 
-  // Reject an incoming request with a reason (as pet owner)
   rejectAdoption: async (adoptionId, reason = '') => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
     if (index !== -1) {
       adoptionRequests[index].status = 'rejected';
       adoptionRequests[index].rejectionReason = reason;
+      return adoptionRequests[index];
+    }
+    throw new Error('Request not found');
+  },
+
+  // Called by vet to finalize adoption
+  completeAdoption: async (adoptionId) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
+    if (index !== -1) {
+      adoptionRequests[index].status = 'completed';
+      adoptionRequests[index].completedAt = new Date().toISOString();
       return adoptionRequests[index];
     }
     throw new Error('Request not found');

@@ -1,163 +1,237 @@
 import { useState, useEffect } from 'react';
 import VetLayout from '../../components/VetLayout';
 import Pagination from '../../components/Pagination';
-import Modal from '../../components/Modal';
 import { vetService } from '../../services/vetService';
+
+const STATUS_STYLES = {
+  approved:  'bg-blue-100 text-blue-800',
+  completed: 'bg-green-100 text-green-800',
+};
+
+const CompleteModal = ({ adoption, onConfirm, onClose }) => {
+  const [waiver, setWaiver] = useState('');
+  const [service, setService] = useState('');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!waiver.trim()) return;
+    setLoading(true);
+    try {
+      await onConfirm({ waiver, service, notes });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">Complete Adoption</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Finalize the adoption of <span className="font-medium text-gray-700">{adoption.petName}</span> by{' '}
+          <span className="font-medium text-gray-700">{adoption.adopterName}</span>.
+        </p>
+
+        {/* Parties info */}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-xs text-gray-400 mb-1">Adopter</p>
+            <p className="text-sm font-medium text-gray-900">{adoption.adopterName}</p>
+            <p className="text-xs text-gray-500">{adoption.adopterEmail}</p>
+            <p className="text-xs text-gray-500">{adoption.adopterPhone}</p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-xs text-gray-400 mb-1">Pet</p>
+            <p className="text-sm font-medium text-gray-900">{adoption.petName}</p>
+            <p className="text-xs text-gray-500">ID: {adoption.petId}</p>
+          </div>
+        </div>
+
+        {/* Waiver */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Waiver Document <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={waiver}
+            onChange={e => setWaiver(e.target.value)}
+            placeholder="e.g. waiver-adoption-001.pdf"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-800 space-y-0.5">
+            <p className="font-medium">Waiver Requirements:</p>
+            <p>✓ Owner signature</p>
+            <p>✓ Adopter signature</p>
+            <p>✓ Vet staff witness signature</p>
+          </div>
+        </div>
+
+        {/* Medical record */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Service Performed <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={service}
+            onChange={e => setService(e.target.value)}
+            placeholder="e.g. General health check, Deworming, Vaccination..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Medical Notes <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Notes about the pet's condition or services rendered during the meetup..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+          />
+        </div>
+
+        <div className="flex space-x-3">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!waiver.trim() || loading}
+            className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            {loading ? 'Completing...' : 'Mark as Completed'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const VetAdoptions = () => {
   const [adoptions, setAdoptions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showWaiverModal, setShowWaiverModal] = useState(false);
   const [selectedAdoption, setSelectedAdoption] = useState(null);
-  const [waiverFile, setWaiverFile] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [successId, setSuccessId] = useState(null);
 
   useEffect(() => {
     fetchAdoptions();
   }, [currentPage]);
 
   const fetchAdoptions = async () => {
+    setLoading(true);
     try {
-      const data = await vetService.getPendingAdoptions(currentPage, 10);
+      const data = await vetService.getApprovedAdoptions(currentPage, 10);
       setAdoptions(data.adoptions);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching adoptions:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUploadWaiver = (adoption) => {
-    setSelectedAdoption(adoption);
-    setShowWaiverModal(true);
+  const handleComplete = async ({ waiver, service, notes }) => {
+    await vetService.completeAdoption(
+      selectedAdoption.id,
+      { waiverDocument: waiver },
+      { petId: selectedAdoption.petId, service, notes }
+    );
+    setSuccessId(selectedAdoption.id);
+    setSelectedAdoption(null);
+    fetchAdoptions();
   };
 
-  const handleSubmitWaiver = async (e) => {
-    e.preventDefault();
-    if (!waiverFile) {
-      alert('Please enter waiver document name');
-      return;
-    }
-    try {
-      await vetService.confirmAdoptionWithWaiver(selectedAdoption.id, {
-        waiverDocument: waiverFile
-      });
-      setShowWaiverModal(false);
-      setWaiverFile('');
-      fetchAdoptions();
-      alert('Adoption confirmed with waiver uploaded successfully');
-    } catch (error) {
-      alert('Failed to upload waiver');
-    }
-  };
+  const formatDate = (iso) =>
+    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
     <VetLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Adoption Management</h1>
-
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Adopter</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {adoptions.map(adoption => (
-                <tr key={adoption.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adoption.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adoption.petName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adoption.adopterName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adoption.ownerId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(adoption.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                      {adoption.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button
-                      onClick={() => handleUploadWaiver(adoption)}
-                      className="text-primary hover:text-primary-dark"
-                    >
-                      Upload Waiver
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Adoption Management</h1>
+          <p className="text-gray-500 mt-1">Approved adoptions awaiting vet processing and waiver signing.</p>
         </div>
 
-        {adoptions.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-600">No pending adoptions</p>
+        {successId && (
+          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center justify-between">
+            <p className="text-sm text-green-800 font-medium">Adoption #{successId} marked as completed.</p>
+            <button onClick={() => setSuccessId(null)} className="text-green-600 hover:text-green-800 text-lg leading-none">×</button>
           </div>
         )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {loading ? (
+          <div className="text-center py-16 text-gray-400">Loading...</div>
+        ) : adoptions.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+            <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-gray-600 font-medium">No approved adoptions yet</p>
+            <p className="text-sm text-gray-400 mt-1">Approved adoption requests will appear here for processing.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {adoptions.map(adoption => (
+              <div key={adoption.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="font-semibold text-gray-900">{adoption.petName}</h3>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[adoption.status] || 'bg-gray-100 text-gray-600'}`}>
+                        {adoption.status.charAt(0).toUpperCase() + adoption.status.slice(1)}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-600 mb-2">
+                      <span><span className="text-gray-400">Adopter:</span> {adoption.adopterName}</span>
+                      <span><span className="text-gray-400">Email:</span> {adoption.adopterEmail}</span>
+                      <span><span className="text-gray-400">Phone:</span> {adoption.adopterPhone}</span>
+                      <span><span className="text-gray-400">Submitted:</span> {formatDate(adoption.createdAt)}</span>
+                    </div>
+                    {adoption.message && (
+                      <p className="text-sm text-gray-500 italic bg-gray-50 rounded-lg px-3 py-2">"{adoption.message}"</p>
+                    )}
+                    {adoption.status === 'completed' && adoption.completedAt && (
+                      <p className="text-xs text-green-700 mt-2">Completed on {formatDate(adoption.completedAt)}</p>
+                    )}
+                    {adoption.waiverDocument && (
+                      <p className="text-xs text-gray-400 mt-1">Waiver: {adoption.waiverDocument}</p>
+                    )}
+                  </div>
+
+                  {adoption.status === 'approved' && (
+                    <button
+                      onClick={() => setSelectedAdoption(adoption)}
+                      className="flex-shrink-0 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
+                    >
+                      Complete Adoption
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
 
-      <Modal
-        isOpen={showWaiverModal}
-        onClose={() => setShowWaiverModal(false)}
-        title="Upload Adoption Waiver"
-      >
-        {selectedAdoption && (
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p className="text-sm text-gray-600">Pet: <span className="font-semibold">{selectedAdoption.petName}</span></p>
-              <p className="text-sm text-gray-600">Adopter: <span className="font-semibold">{selectedAdoption.adopterName}</span></p>
-              <p className="text-sm text-gray-600">Owner ID: <span className="font-semibold">{selectedAdoption.ownerId}</span></p>
-            </div>
-
-            <form onSubmit={handleSubmitWaiver} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-2">Waiver Document Name</label>
-                <input
-                  type="text"
-                  value={waiverFile}
-                  onChange={(e) => setWaiverFile(e.target.value)}
-                  placeholder="e.g., waiver-adoption-001.pdf"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter the name of the signed waiver document
-                </p>
-              </div>
-
-              <div className="bg-blue-50 p-4 rounded-md">
-                <p className="text-sm text-blue-900 font-semibold mb-2">Waiver Requirements:</p>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>✓ Owner signature required</li>
-                  <li>✓ Adopter signature required</li>
-                  <li>✓ Vet staff witness signature required</li>
-                </ul>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark"
-              >
-                Confirm Adoption & Upload Waiver
-              </button>
-            </form>
-          </div>
-        )}
-      </Modal>
+      {selectedAdoption && (
+        <CompleteModal
+          adoption={selectedAdoption}
+          onConfirm={handleComplete}
+          onClose={() => setSelectedAdoption(null)}
+        />
+      )}
     </VetLayout>
   );
 };
