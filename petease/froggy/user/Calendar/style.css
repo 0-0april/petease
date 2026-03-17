@@ -1,0 +1,85 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f8f0; /* Light green background */
+}
+
+.calendar {
+    width: 350px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #4CAF50; /* Green header */
+    color: white;
+}
+
+.header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.header h2 {
+    margin: 0;
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #e8f5e8; /* Light green */
+    padding: 10px 0;
+}
+
+.weekdays div {
+    text-align: center;
+    font-weight: bold;
+    color: #2e7d32; /* Dark green */
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 10px;
+}
+
+.day {
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.day:hover {
+    background-color: #c8e6c9; /* Light green hover */
+}
+
+.day.selected {
+    background-color: #4CAF50; /* Green selected */
+    color: white;
+}
+
+.day.weekend {
+    background-color: #f5f5f5; /* Gray for weekends */
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.day.other-month {
+    color: #ccc;
+}

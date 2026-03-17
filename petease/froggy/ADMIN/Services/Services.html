@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Services.css">
+    <title>PetEase - Set Service Availability</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../../USER/Homepage/logo.png" alt="PetEase Logo">
+            <h1>PetEase Admin</h1>
+        </div>
+        <div class="header-nav">
+            <a href="../../user/login/index.html" id="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="admin" href="../Admin.html">Dashboard</a></li>
+                    <li><a class="user-reports" href="../UserReports/UserReports.html">User Reports</a></li>
+                    <li><a class="manage-users" href="../ManageUsers/ManageUsers.html">Manage Users</a></li>
+                    <li><a class="announcements" href="../Announcements/Announcements.html">Announcements</a></li>
+                    <li><a class="services" href="../Services/Services.html">Services</a></li>
+                    <li><a class="register-adminstaff" href="../RegisterAdminStaff/RegisterAdminStaff.html">Register Admin/Staff</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section class="service-availability">
+                <h2>Services</h2>
+                <p>Manage the availability of veterinary services for booking.</p>
+
+                <form id="availability-form" class="availability-form">
+                    <div class="form-section">
+                        <h3>Services Offered</h3>
+                        <p>Enable or disable services and configure their availability settings.</p>
+
+                        <div class="add-service">
+                            <h3>Add New Service</h3>
+                            <input type="text" id="new-service-name" placeholder="Enter service name" >
+                            <button type="button" id="add-service-btn">Add Service</button>
+                        </div>
+
+                        <div class="services-list">
+                            <div class="service-item original-service">
+                                <div class="service-header">
+                                    <label class="service-name">Consultation</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="consultation-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="service-details" id="consultation-details">
+                                    <div class="detail-row">
+                                        <label>Slots:</label>
+                                        <div class="slot-options">
+                                            <label><input type="radio" name="consultation-slots" value="unlimited" checked> Unlimited</label>
+                                            <label><input type="radio" name="consultation-slots" value="limited"> Limited to <input type="number" min="1" value="10"></label>
+                                        </div>
+                                    </div>
+                                    <div class="detail-row">
+                                        <label>Date Available:</label>
+                                        <div class="date-options">
+                                            <label><input type="radio" name="consultation-date" value="forever" checked> Forever</label>
+                                            <label><input type="radio" name="consultation-date" value="specific"> Until <input type="date"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="service-item original-service">
+                                <div class="service-header">
+                                    <label class="service-name">Rabies Vaccination</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="vaccination-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="service-details" id="vaccination-details">
+                                    <div class="detail-row">
+                                        <label>Slots:</label>
+                                        <div class="slot-options">
+                                            <label><input type="radio" name="vaccination-slots" value="unlimited" checked> Unlimited</label>
+                                            <label><input type="radio" name="vaccination-slots" value="limited"> Limited to <input type="number" min="1" value="15"></label>
+                                        </div>
+                                    </div>
+                                    <div class="detail-row">
+                                        <label>Date Available:</label>
+                                        <div class="date-options">
+                                            <label><input type="radio" name="vaccination-date" value="forever" checked> Forever</label>
+                                            <label><input type="radio" name="vaccination-date" value="specific"> Until <input type="date"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="service-item original-service">
+                                <div class="service-header">
+                                    <label class="service-name">Neuter</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="surgery-enabled">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="service-details" id="surgery-details" style="display: none;">
+                                    <div class="detail-row">
+                                        <label>Slots:</label>
+                                        <div class="slot-options">
+                                            <label><input type="radio" name="surgery-slots" value="unlimited" checked> Unlimited</label>
+                                            <label><input type="radio" name="surgery-slots" value="limited"> Limited to <input type="number" min="1" value="5"></label>
+                                        </div>
+                                    </div>
+                                    <div class="detail-row">
+                                        <label>Date Available:</label>
+                                        <div class="date-options">
+                                            <label><input type="radio" name="surgery-date" value="forever" checked> Forever</label>
+                                            <label><input type="radio" name="surgery-date" value="specific"> Until <input type="date"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="service-item original-service">
+                                <div class="service-header">
+                                    <label class="service-name">Spay</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="dental-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="service-details" id="dental-details">
+                                    <div class="detail-row">
+                                        <label>Slots:</label>
+                                        <div class="slot-options">
+                                            <label><input type="radio" name="dental-slots" value="unlimited" checked> Unlimited</label>
+                                            <label><input type="radio" name="dental-slots" value="limited"> Limited to <input type="number" min="1" value="8"></label>
+                                        </div>
+                                    </div>
+                                    <div class="detail-row">
+                                        <label>Date Available:</label>
+                                        <div class="date-options">
+                                            <label><input type="radio" name="dental-date" value="forever" checked> Forever</label>
+                                            <label><input type="radio" name="dental-date" value="specific"> Until <input type="date"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="service-item original-service">
+                                <div class="service-header">
+                                    <label class="service-name">Deworming</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="emergency-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="service-details" id="emergency-details">
+                                    <div class="detail-row">
+                                        <label>Slots:</label>
+                                        <div class="slot-options">
+                                            <label><input type="radio" name="emergency-slots" value="unlimited" checked> Unlimited</label>
+                                            <label><input type="radio" name="emergency-slots" value="limited"> Limited to <input type="number" min="1" value="20"></label>
+                                        </div>
+                                    </div>
+                                    <div class="detail-row">
+                                        <label>Date Available:</label>
+                                        <div class="date-options">
+                                            <label><input type="radio" name="emergency-date" value="forever" checked> Forever</label>
+                                            <label><input type="radio" name="emergency-date" value="specific"> Until <input type="date"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                        <button type="button" class="reset-btn">Reset to Default</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="Services.js"></script>
+</body>
+</html>

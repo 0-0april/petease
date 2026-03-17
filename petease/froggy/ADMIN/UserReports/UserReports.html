@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="UserReports.css">
+    <title>PetEase - Review User Reports</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../../USER/Homepage/logo.png" alt="PetEase Logo">
+            <h1>PetEase Admin</h1>
+        </div>
+        <div class="header-nav">
+            <a href="../../user/login/index.html" id="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="admin" href="../Admin.html">Dashboard</a></li>
+                    <li><a class="user-reports" href="../UserReports/UserReports.html">User Reports</a></li>
+                    <li><a class="manage-users" href="../ManageUsers/ManageUsers.html">Manage Users</a></li>
+                    <li><a class="announcements" href="../Announcements/Announcements.html">Announcements</a></li>
+                    <li><a class="services" href="../Services/Services.html">Services</a></li>
+                    <li><a class="register-adminstaff" href="../RegisterAdminStaff/RegisterAdminStaff.html">Register Admin/Staff</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section class="reports-section">
+                <h2>User Reports</h2>
+                <p>View and manage flagged users or chats submitted by users.</p>
+
+                <div class="filters">
+                    <select id="report-type">
+                        <option value="">All Reports</option>
+                        <option value="user">User Reports</option>
+                        <option value="chat">Chat Reports</option>
+                    </select>
+                    <select id="report-status">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                    <button id="filter-btn">Apply Filters</button>
+                </div>
+
+                <div class="reports-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reported User</th>
+                                <th>Reporter</th>
+                                <th>Type of Report</th>
+                                <th>Date Reported</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-body">
+                            <tr>
+                                <td>john_doe</td>
+                                <td>doe_john</td>
+                                <td>Inappropriate content</td>
+                                <td>2023-10-15</td>
+                                <td><span class="status pending">Pending</span></td>
+                                <td>
+                                    <button class="view-btn">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>jane_smith</td>
+                                <td>smith_jane</td>
+                                <td>Harassment</td>
+                                <td>2023-10-14</td>
+                                <td><span class="status resolved">Resolved</span></td>
+                                <td>
+                                    <button class="view-btn">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>mike_jones</td>
+                                <td>jones_mike</td>
+                                <td>Spam</td>
+                                <td>2023-10-13</td>
+                                <td><span class="status resolved">Resolved</span></td>
+                                <td>
+                                    <button class="view-btn">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="report-details-modal" id="report-details-modal" style="display: none;">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content">
+                        <h3>Report Details</h3>
+                        <div class="details-content">
+                            <p><strong>Reported User's Username:</strong> <span id="detail-reported-user"></span></p>
+                            <p><strong>Reporter's Username:</strong> <span id="detail-reporter"></span></p>
+                            <p><strong>Type of Report:</strong> <span id="detail-type"></span></p>
+                            <p><strong>Date Reported:</strong> <span id="detail-date"></span></p>
+                            <p><strong>Status:</strong> <span id="detail-status"></span></p>
+                            <div class="message-logs">
+                                <strong>Message Logs (Proof):</strong>
+                                <div id="message-logs-content">
+                                    <!-- Placeholder for message logs -->
+                                    <p>User A: Hello, this is inappropriate.</p>
+                                    <p>User B: Please stop.</p>
+                                    <p>Reporter: This user is harassing me.</p>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button id="disable-account">Disable Account</button>
+                                <button id="keep-account-active">Keep Account Active</button>
+                                <button id="close-modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="UserReports.js"></script>
+</body>
+</html>

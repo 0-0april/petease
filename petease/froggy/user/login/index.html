@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetEase - User Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    
+        <div class="main-content">
+            <header>
+                <h1>Login/Register to</h1>
+                <h1 class="logo">PetEase</h1>
+            </header>
+            <div class="form-container">
+                <div class="tab-buttons">
+                    <button id="login-tab" class="tab active">Login</button>
+                    <button id="register-tab" class="tab">Register</button>
+                </div>
+                <form id="login-form" class="form">
+                    <div class="form-group">
+                        <label for="login-username">Username/Email</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                <form id="register-form" class="form hidden">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email/Phone Number</label>
+                        <input type="text" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="register-password">Re-type Password</label>
+                        <input type="password" id="retype-register-password" required>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <form id="authentication-form" class="form hidden">
+                    <div class="form-group">
+                        <label for="authentication-code">Authentication Code</label>
+                        <input type="text" id="authentication-code" required>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

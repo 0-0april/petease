@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Message.css">
+    <link rel="stylesheet" href="../browse_pets/style.css">
+    <title>Messages - PetEase</title>
+</head>
+<body>
+    <div class="sidebar">
+            <h2><i class="fas fa-paw"></i> PetEase</h2>
+            <ul>
+                <li><a href="../browse_pets/index.html">Browse</a></li>
+                <li><a href="../MyProfile/MyProfile.html"> Profile</a></li>
+                <li><a href="../Appointment/Appointment.html"></i> Appointment</a></li>
+                <li><a href="../RegisterPet/RegisterPet.html">Register Pet</a></li>
+                <li><a href="Message.html"> Messages</a></li>
+                <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+                <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+            </ul>
+    </div>
+
+    <div class="main-container">
+        <header>
+            <h1>Messages</h1>
+        </header>
+        <div class="search-message">
+            <input type="text" id="search-input" placeholder="Search messages...">
+            <button type="submit" class="search-btn">Search</button>
+        </div>
+        <div class="messages-container">
+            <div class="messages-list" onclick="window.location.href='../MessageUser/MessageUser.html'">
+                <!-- Messages will be populated here -->
+            </div>
+        </div>
+          
+    </div>
+
+    <script src="Message.js"></script>
+</body>
+</html>

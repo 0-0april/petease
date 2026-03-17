@@ -1,0 +1,537 @@
+:root {
+    --brown: hsl(27, 50%, 24%);
+    --light-yellow: linear-gradient(135deg, hsl(57, 90%, 73%), hsl(48, 100%, 60%));
+    --yellow: hsl(48, 100%, 35%);
+    --yellower: hsl(48, 100%, 30%);
+    --white: #ffffff;
+    --slight-yellow: linear-gradient(135deg, hsl(57, 97%, 87%), hsl(48, 64%, 80%));
+    --gray: #f5f5f5;
+    --text-dark: #333;
+    --text-light: #666;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logout-btn{
+    margin-top: 60%;
+}
+
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.header {
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.container {
+    display: flex;
+    min-height: calc(100vh - 80px);
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar nav ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar nav ul li a:hover,
+.sidebar nav ul li a.active {
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.main-content h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Feedback Message */
+.feedback {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.feedback.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.feedback.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.feedback.hidden {
+    display: none;
+}
+
+/* Appointments List */
+.appointments-list {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.appointment-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.appointment-item:hover {
+    background-color: #f9f9f9;
+}
+
+.appointment-item:last-child {
+    border-bottom: none;
+}
+
+.appointment-checkbox {
+    margin-right: 15px;
+}
+
+.appointment-details {
+    flex: 1;
+}
+
+.appointment-details h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.appointment-details p {
+    margin: 2px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Delete Button */
+.delete-btn {
+    background-color: var(--yellow);
+    color: var(--brown);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover:not(:disabled) {
+    background-color: var(--yellower);
+}
+
+.delete-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Add Appointment Button */
+.add-appointment-btn {
+    background-color: var(--yellow);
+    color: var(--brown);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+}
+
+.add-appointment-btn:hover {
+    background-color: var(--yellower);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: var(--slight-yellow);
+    margin: auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 50%;
+    height: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    border: 2px solid var(--light-yellow);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+/* Form Styles */
+.appointment-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="date"] {
+    cursor: pointer;
+}
+
+.btn {
+    background-color: var(--yellow);
+    color: var(--brown);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: var(--yellower);
+}
+
+.btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Unavailable Message */
+.unavailable-message {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ffeaa7;
+    margin-top: 15px;
+    display: none;
+}
+
+/* Step Indicator */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ddd;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+.step.active {
+    background-color: var(--yellow);
+    color: var(--brown);
+}
+
+
+
+.calendar {
+    width: 350px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* overflow: hidden; */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--yellow);
+    color: var(--brown);
+}
+
+.header button {
+    background: none;
+    border: none;
+    color: var(--brown);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.header h2 {
+    margin: 0;
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: var(--slight-yellow);
+    padding: 10px 0;
+}
+
+.weekdays div {
+    text-align: center;
+    font-weight: bold;
+    color: var(--brown);
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 10px;
+}
+
+.day {
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: backgro2und-color 0.3s;
+}
+
+.day:hover {
+    background-color: var(--slight-yellow);
+}
+
+.day.selected {
+    background-color: var(--yellow);
+    color: var(--brown);
+}
+
+.day.weekend {
+    background-color: #f5f5f5; /* Gray for weekends */
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.day.other-month {
+    color: #ccc;
+}
+
+.day.disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+
+/* Pet List Styles */
+.pet-item {
+    display: flex;
+    margin-bottom: 10px;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.pet-item input[type="checkbox"] {
+    display: none;
+}
+
+.pet-item label {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Pet Button Styles */
+.pet-button {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px solid var(--yellow);
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: var(--brown);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pet-button:hover {
+    background-color: var(--yellow);
+    color: var(--brown);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pet-button.selected {
+    background-color: var(--yellow);
+    color: var(--brown);
+    border-color: var(--yellow);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Appointment Types Styles */
+#appointment-types {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style-type: none;
+}
+
+#appointment-types button {
+    width: 100%;
+    padding: 15px 25px;
+    border: 2px solid var(--yellow);
+    background-color: var(--slight-yellow);
+    color: var(--brown);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s;
+}
+
+#appointment-types button:hover {
+    background-color: var(--yellow);
+    color: var(--brown);
+}
+
+#appointment-types button.selected {
+    background-color: var(--yellow);
+    color: var(--brown);
+}
+
+
+
+/* Form Actions */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+/* 
+.form-actions #back-btn {
+    width: 48%;
+    background: var(--slight-yellow);
+    border-color: var(--yellow);
+    border-width: 1px;
+}
+.form-actions #next-btn {
+    width: 48%;
+    background: var(--yellow);
+} */
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: 2;
+    }
+
+    .main-content {
+        order: 1;
+    }
+
+    .appointment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .appointment-checkbox {
+        margin-bottom: 10px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20% auto;
+    }
+
+    #appointment-types {
+        flex-direction: column;
+    }
+
+    .calendar {
+        max-width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

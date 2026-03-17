@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Admin.css">
+    <title>PetEase - Admin Panel</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../USER/Homepage/logo.png" alt="PetEase Logo">
+            <h1>PetEase - Admin</h1>
+        </div>
+        <div class="header-nav">
+            <a href="../user/login/index.html" id="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="admin" href="Admin.html">Dashboard</a></li>
+                    <li><a class="user-reports" href="UserReports/UserReports.html">User Reports</a></li>
+                    <li><a class="manage-users" href="ManageUsers/ManageUsers.html">Manage Users</a></li>
+                    <li><a class="announcements" href="Announcements/Announcements.html">Announcements</a></li>
+                    <li><a class="services" href="Services/Services.html">Services</a></li>
+                    <li><a class="register-adminstaff" href="RegisterAdminStaff/RegisterAdminStaff.html">Register Admin/Staff</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section class="dashboard-overview">
+                <h2>Dashboard Overview</h2>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <p>1,250</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Appointments</h3>
+                        <p>45</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Reports</h3>
+                        <p>12</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Announcements</h3>
+                        <p>8</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-cards">
+                    <div class="card">
+                        <h3>Review Reports</h3>
+                        <p>Check flagged users and chats</p>
+                        <button onclick="window.location.href='UserReports/UserReports.html'">Review</button>
+                    </div>
+                    <div class="card">
+                        <h3>Manage Users</h3>
+                        <p>Disable or enable user accounts</p>
+                        <button onclick="window.location.href='ManageUsers/ManageUsers.html'">Manage</button>
+                    </div>
+                    <div class="card">
+                        <h3>Post Announcement</h3>
+                        <p>Publish system updates</p>
+                        <button onclick="window.location.href='Announcements/Announcements.html'">Post</button>
+                    </div>
+                    <div class="card">
+                        <h3>Set Services</h3>
+                        <p>Configure service hours</p>
+                        <button onclick="window.location.href='Services/Services.html'">Set</button>
+                    </div>
+                    <div class="card">
+                        <h3>Register Staff/Admin</h3>
+                        <p>Add new admin or vet staff</p>
+                        <button onclick="window.location.href='RegisterAdminStaff/RegisterAdminStaff.html'">Register</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <p>New user report submitted</p>
+                        <span>2 hours ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <p>Announcement posted: System Maintenance</p>
+                        <span>1 day ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <p>User account disabled</p>
+                        <span>3 days ago</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="Admin.js"></script>
+</body>
+</html>

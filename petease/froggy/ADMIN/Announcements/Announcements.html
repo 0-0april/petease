@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Announcements.css">
+    <title>PetEase - Post Announcement</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../../USER/Homepage/logo.png" alt="PetEase Logo">
+            <h1>PetEase Admin</h1>
+        </div>
+        <div class="header-nav">
+            <a href="../../user/login/index.html" id="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="admin" href="../Admin.html">Dashboard</a></li>
+                    <li><a class="user-reports" href="../UserReports/UserReports.html">User Reports</a></li>
+                    <li><a class="manage-users" href="../ManageUsers/ManageUsers.html">Manage Users</a></li>
+                    <li><a class="announcements" href="../Announcements/Announcements.html">Announcements</a></li>
+                    <li><a class="services" href="../Services/Services.html">Services</a></li>
+                    <li><a class="register-adminstaff" href="../RegisterAdminStaff/RegisterAdminStaff.html">Register Admin/Staff</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section class="post-announcement">
+                <h2>Post Announcement</h2>
+                <p>Publish important updates such as events, reminders, or system notices.</p>
+
+                <form id="announcement-form" class="announcement-form">
+                    <div class="form-group">
+                        <label for="announcement-title">Title</label>
+                        <input type="text" id="announcement-title" placeholder="Enter announcement title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announcement-type">Type</label>
+                        <select id="announcement-type" required>
+                            <option value="">Select announcement type</option>
+                            <option value="event">Event</option>
+                            <option value="reminder">Reminder</option>
+                            <option value="system">System Notice</option>
+                            <option value="update">Update</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announcement-priority">Priority</label>
+                        <select id="announcement-priority">
+                            <option value="normal">Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announcement-content">Content</label>
+                        <textarea id="announcement-content" placeholder="Enter announcement content..." rows="8" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announcement-date">Publish Date</label>
+                        <input type="datetime-local" id="announcement-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target-audience">Target Audience</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="all" checked> All Users</label>
+                            <label><input type="checkbox" value="active"> Active Users Only</label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Post Announcement</button>
+                        <button type="button" class="preview-btn">Preview</button>
+                        <button type="reset" class="clear-btn">Clear</button>
+                    </div>
+                </form>
+
+                <div class="preview-section" id="preview-section" style="display: none;">
+                    <h3>Announcement Preview</h3>
+                    <div class="announcement-preview">
+                        <div class="preview-header">
+                            <h4 id="preview-title"></h4>
+                            <span class="preview-type" id="preview-type"></span>
+                            <span class="preview-priority" id="preview-priority"></span>
+                        </div>
+                        <div class="preview-content" id="preview-content"></div>
+                        <div class="preview-meta">
+                            <span id="preview-date"></span>
+                            <span id="preview-audience"></span>
+                        </div>
+                    </div>
+                    <div class="preview-actions">
+                        <button id="edit-preview">Edit</button>
+                        <button id="confirm-post">Confirm Post</button>
+                    </div>
+                </div>
+
+                <div class="recent-announcements">
+                    <h3>Recent Announcements</h3>
+                    <div class="announcement-list">
+                        <div class="announcement-item">
+                            <div class="view-mode">
+                                <div class="content">
+                                    <h4>System Maintenance Scheduled</h4>
+                                    <p>Scheduled maintenance on October 20th...</p>
+                                    <span class="announcement-date">Posted: 2023-10-15</span>
+                                    <button class="edit-btn">Edit</button>
+                                </div>
+                            </div>
+                            <div class="edit-mode" style="display: none;">
+                                <form class="edit-form">
+                                    <div class="form-group">
+                                        <label for="edit-title-1">Title</label>
+                                        <input type="text" id="edit-title-1" value="System Maintenance Scheduled" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-content-1">Content</label>
+                                        <textarea id="edit-content-1" rows="4" required>Scheduled maintenance on October 20th...</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-date-1">Date</label>
+                                        <input type="text" id="edit-date-1" value="Posted: 2023-10-15" required>
+                                    </div>
+                                    <button type="submit">Save</button>
+                                    <button type="button" class="cancel-btn">Cancel</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="announcement-item">
+                            <div class="view-mode">
+                                <div class="content">
+                                    <h4>New Feature: Pet Matching</h4>
+                                    <p>We've introduced a new pet matching feature...</p>
+                                    <span class="announcement-date">Posted: 2023-10-10</span>
+                                    <button class="edit-btn">Edit</button>
+                                </div>
+                            </div>
+                            <div class="edit-mode" style="display: none;">
+                                <form class="edit-form">
+                                    <div class="form-group">
+                                        <label for="edit-title-2">Title</label>
+                                        <input type="text" id="edit-title-2" value="New Feature: Pet Matching" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-content-2">Content</label>
+                                        <textarea id="edit-content-2" rows="4" required>We've introduced a new pet matching feature...</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-date-2">Date</label>
+                                        <input type="text" id="edit-date-2" value="Posted: 2023-10-10" required>
+                                    </div>
+                                    <button type="submit">Save</button>
+                                    <button type="button" class="cancel-btn">Cancel</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="Announcements.js"></script>
+</body>
+</html>

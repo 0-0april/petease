@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Dashboard.css">
+    <title>Vet Staff Panel - PetEase</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../logo.png" alt="PetEase Logo">
+            <h1>PetEase - Vet Staff</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="../user/login/index.html" id="logout-btn" >Logout</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="dashboard" href="Dashboard.html">Dashboard</a></li>
+                    <li><a class="pending-appointments" href="PendingAppointments/PendingAppointments.html">Pending Appointments</a></li>
+                    <li><a class="confirmed-appointments" href="ConfirmedAppointment/ConfirmedAppointments.html">Confirmed Appointments</a></li>
+                    <li><a class="appointment-logs" href="AppointmentLogs/AppointmentLogs.html">Appointment Logs</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h2>Welcome to Vet Staff Panel</h2>
+            <p>Select an option from the sidebar to manage appointments.</p>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Appointments</h3>
+                    <p id="total-appointments">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Completed</h3>
+                    <p id="completed-appointments">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Cancelled</h3>
+                    <p id="cancelled-appointments">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>No Shows</h3>
+                    <p id="no-show-appointments">0</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="Dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment - PET-EASE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="Appointment.css">
+    <link rel="stylesheet" href="../browse_pets/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2><i class="fas fa-paw"></i> PetEase</h2>
+            <ul>
+                <li><a href="../browse_pets/index.html">Browse</a></li>
+                <li><a href="../MyProfile/MyProfile.html"> Profile</a></li>
+                <li><a href="/Appointment.html"></i> Appointment</a></li>
+                <li><a href="../RegisterPet/RegisterPet.html">Register Pet</a></li>
+                <li><a href="../Message/Message.html"> Messages</a></li>
+                <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+                <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <header>
+                <h1>My Appointments</h1>
+            </header>
+
+            <div id="feedback-message" class="feedback hidden"></div>
+
+            <button id="add-appointment-btn" class="add-appointment-btn">Add New Appointment</button>
+
+            <div class="appointments-list">
+                <!-- Appointments will be rendered here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding appointments -->
+    <div id="appointment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Appointment</h2>
+
+            <div id="modal-feedback-message" class="feedback hidden"></div>
+
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+                <div class="step">4</div>
+            </div>
+
+            <form id="appointment-form" class="appointment-form">
+                <!-- Step 1: Select Pet -->
+                <div id="step-1" class="form-step">
+                    <h3>Select Pet(s)</h3>
+                    <div id="pet-list" class="pet-list">
+                        <!-- Pet buttons will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Appointment Type -->
+                <div id="step-2" class="form-step" style="display: none;">
+                    <h3>Select Appointment Type</h3>
+                    <ul id="appointment-types">
+                        <li><button type="button" data-type="Consultation">Consultation</button></li>
+                        <li><button type="button" data-type="Anti-Rabies Vaccination">Anti-Rabies Vaccination</button></li>
+                        <li><button type="button" data-type="Deworming">Deworming</button></li>
+                        <li><button type="button" data-type="Spay">Spay</button></li>
+                        <li><button type="button" data-type="Neuter">Neuter</button></li>
+                    </ul>
+                    <div id="unavailable-message" class="unavailable-message">
+                        This service is not available yet. Please wait for notifications.
+                    </div>
+                </div>
+
+                <!-- Step 3: Select Date -->
+                <div id="step-3" class="form-step" style="display: none;">
+                    <h3>Select Date</h3>
+                    <div class="calendar">
+                        <div class="header">
+                            <button id="previous"><</button>
+                            <h2 id="month-year"></h2>
+                            <button id="next">></button>
+                        </div>
+                        <div class="weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        <div id="days" class="days">
+                            <!-- Calendar days will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Confirmation -->
+                <div id="step-4" class="form-step" style="display: none;">
+                    <h3>Confirm Appointment</h3>
+                    <div id="confirmation-details">
+                        <!-- Confirmation details will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="back-btn" class="btn" style="display: none;">Back</button>
+                    <button type="button" id="next-btn" class="btn">Next</button>
+                    <button type="submit" id="submit-btn" class="btn" style="display: none;">Book Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="Appointment.js"></script>
+</body>
+</html>

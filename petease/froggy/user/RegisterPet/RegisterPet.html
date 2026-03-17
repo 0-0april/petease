@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="RegisterPet.css">
+    <link rel="stylesheet" href="../browse_pets/style.css">
+    <title>Register Pet - PetEase</title>
+</head>
+<body>
+    <div class="container"> 
+
+        <div class="sidebar">
+            <h2><i class="fas fa-paw"></i> PetEase</h2>
+            <ul>
+                <li><a href="../browse_pets/index.html">Browse</a></li>
+                <li><a href="../MyProfile/MyProfile.html"> Profile</a></li>
+                <li><a href="../Appointment/Appointment.html"></i> Appointment</a></li>
+                <li><a href="RegisterPet/RegisterPet.html">Register Pet</a></li>
+                <li><a href="../Message/Message.html"> Messages</a></li>
+                <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+                <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+            </ul>
+        </div>
+            
+        <div class="main-content" id="main-content">
+            <section class="pets-section">
+                <h2>Registered Pets</h2>
+                <button id="register-new-pet-btn" class="btn-register">Register New Pet</button>
+                <div class="toggle">
+                    <button class="toggle-btn selected">Appointments</button>
+                    <button class="toggle-btn" >Adoptions</button>
+                </div>
+                <div id="pets-container" class="pets-container">
+                    <!-- Pet cards will be displayed here -->
+                </div>
+            </section>
+
+            <!-- Form for registering/editing pet -->
+            <div id="pet-form-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" id="close-modal">&times;</span>
+                    <h2 id="form-title">Register New Pet</h2>
+                    <form id="pet-form">
+                        <div class="form-group">
+                            <label for="pet-name">Name</label>
+                            <input type="text" id="pet-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-type">Type</label>
+                            <select id="pet-type" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="dog">Dog</option>
+                                <option value="cat">Cat</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-breed">Breed</label>
+                            <input type="text" id="pet-breed" name="breed" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-color">Color</label>
+                            <input type="text" id="pet-color" name="color" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-birthday">Birthday</label>
+                            <input type="date" id="pet-birthday" name="birthday" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select name="gender" id="gender">
+                                <option value="">Male</option>
+                                <option value="">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-description">Description</label>
+                            <textarea id="pet-description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-medical">Medical History</label>
+                            <textarea id="pet-medical" name="medicalHistory" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="regiter-type">Registration Type</label>
+                            <select name="type" id="register-type">
+                                <option value="">Select Registration Type</option>
+                                <option value="">For Adoption</option>
+                                <option value="">For Appointment</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pet-image">Upload Image</label>
+                            <input type="file" id="pet-image" name="image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn-submit">Save Pet</button>
+                        <button type="button" id="cancel-form" class="btn-cancel">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+
+    <script src="RegisterPet.js"></script>
+</body>
+</html>

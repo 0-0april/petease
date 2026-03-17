@@ -1,0 +1,583 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, hsl(160, 80%, 15%) 0%, hsl(160, 80%, 5%) 100%);
+    color: #e8f5e8;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, hsl(160, 80%, 25%) 0%, hsl(160, 80%, 15%) 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 50px;
+    height: 50px;
+    margin-right: 1rem;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.header-nav #logout-btn {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    margin-right: 5px;
+}
+
+.header-nav #logout-btn:hover {
+    background: linear-gradient(135deg, hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+}
+
+/* Container */
+.container {
+    display: flex;
+    margin-top: 80px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 10%) 100%);
+    padding: 2rem 1rem;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.3);
+    position: fixed;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+.sidebar nav ul {
+    list-style: none;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 1rem;
+}
+
+.sidebar nav ul li a {
+    text-decoration: none;
+    color: #ecf0f1;
+    font-weight: 500;
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar nav ul li a:hover {
+    background: linear-gradient(135deg, hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar nav ul li a.active {
+    background: linear-gradient(135deg, hsl(160, 80%, 12%) 0%, hsl(160, 80%, 7%) 100%);
+    color: white;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    background: linear-gradient(135deg, hsl(160, 80%, 10%) 0%, hsl(160, 80%, 5%) 100%);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+.register-staff h2 {
+    margin-bottom: 1rem;
+    color: #e8f5e8;
+    font-size: 2rem;
+    border-bottom: 2px solid hsl(160, 80%, 35%);
+    padding-bottom: 0.5rem;
+}
+
+.register-staff > p {
+    margin-bottom: 2rem;
+    color: #e8f5e8;
+}
+
+/* Form */
+.registration-form {
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 15%) 100%);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.form-section h3 {
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.form-section h4 {
+    margin-bottom: 1rem;
+    color: #667eea;
+    font-size: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: white;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    background-color: hsl(160, 80%, 90%);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.help-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color:#cccccc;
+}
+
+/* Password strength */
+.password-strength {
+    margin-top: 0.5rem;
+}
+
+.strength-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-fill.weak {
+    background-color: #dc3545;
+}
+
+.strength-fill.medium {
+    background-color: #ffc107;
+}
+
+.strength-fill.strong {
+    background-color: #28a745;
+}
+
+#strength-text {
+    font-size: 0.8rem;
+    color: #cccccc;
+}
+
+/* Permissions */
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.permissions-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.permissions-grid label:hover {
+    background-color: #f8f9fa;
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+    margin-bottom: 2rem;
+}
+
+.register-btn, .clear-btn, .preview-btn {
+    background: linear-gradient(hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-btn:hover, .clear-btn:hover, .preview-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.clear-btn {
+    background: #6c757d;
+}
+
+/* Registration preview */
+.registration-preview {
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 15%) 100%);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.registration-preview h3 {
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.preview-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.preview-section {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.preview-section h4 {
+    margin-bottom: 1rem;
+    color: #667eea;
+}
+
+.preview-section p {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.preview-actions button {
+    background: linear-gradient(hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preview-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#edit-registration {
+    background: #6c757d;
+}
+
+/* Recent registrations */
+.recent-registrations h3 {
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.registrations-list {
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 15%) 100%);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.registration-item {
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+}
+
+.registration-item:last-child {
+    border-bottom: none;
+}
+
+.registration-item h4 {
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.registration-item p {
+    color: #c5c9c5;
+    margin-bottom: 0.25rem;
+}
+
+.registration-date {
+    font-size: 0.9rem;
+    color: #999;
+}
+
+/* Toggle status button */
+.toggle-status-btn {
+    background: linear-gradient(hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.toggle-status-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.toggle-status-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Disabled state for registration items */
+.registration-item.disabled {
+    position: relative;
+}
+
+.registration-item.disabled h4,
+.registration-item.disabled p {
+    color: hsl(0, 0%, 60%);
+}
+
+.registration-item.disabled::after {
+    content: "Disabled";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #dc3545;
+    color: hsl(0, 0%, 100%);
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.registration-item.disabled .toggle-status-btn {
+    background: #28a745;
+}
+
+.registration-item.disabled .toggle-status-btn:hover {
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.modal-content p {
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.confirm-btn, .cancel-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.confirm-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+
+    .main-content {
+        margin-left: 200px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .permissions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .preview-content {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+
+    .container {
+        flex-direction: column;
+        margin-top: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .header {
+        position: static;
+        padding: 1rem;
+    }
+
+    .container {
+        margin-top: 0;
+    }
+
+    .registration-form {
+        padding: 1rem;
+    }
+
+    .preview-content {
+        gap: 1rem;
+    }
+}
