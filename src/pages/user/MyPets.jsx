@@ -253,7 +253,7 @@ const MyPets = () => {
             <div>
               <label className="block text-gray-700 mb-2">Image URL</label>
               <input
-                type="text"
+                type="file"
                 value={formData.image}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"

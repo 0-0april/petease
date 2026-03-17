@@ -21,6 +21,7 @@ const Layout = ({ children }) => {
                 <Link to="/browse-pets" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Browse Pets</Link>
                 <Link to="/my-pets" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">My Pets</Link>
                 <Link to="/appointments" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Appointments</Link>
+                <Link to="/adoption-requests" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Adoptions</Link>
                 <Link to="/messages" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Messages</Link>
               </div>
             </div>

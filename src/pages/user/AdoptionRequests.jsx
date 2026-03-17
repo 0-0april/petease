@@ -1,0 +1,345 @@
+import { useState, useEffect } from 'react';
+import Layout from '../../components/Layout';
+import { adoptionService } from '../../services/adoptionService';
+
+const STATUS_STYLES = {
+  pending:   'bg-yellow-100 text-yellow-800',
+  approved:  'bg-green-100 text-green-800',
+  rejected:  'bg-red-100 text-red-800',
+  cancelled: 'bg-gray-100 text-gray-600',
+};
+
+const PRESET_REASONS = [
+  'Pet has already been adopted',
+  'Applicant does not meet our requirements',
+  'We have concerns about the living environment',
+  'The adopter already has too many pets',
+  'Request was incomplete or missing information',
+];
+
+const RejectModal = ({ request, onConfirm, onClose }) => {
+  const [selected, setSelected] = useState('');
+  const [custom, setCustom] = useState('');
+
+  const finalReason = selected === '__other__' ? custom.trim() : selected;
+
+  const toggle = (val) => setSelected(prev => prev === val ? '' : val);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">Reject Adoption Request</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Rejecting <span className="font-medium text-gray-700">{request.adopterName}</span>'s
+          request for <span className="font-medium text-gray-700">{request.petName}</span>.
+          Select a reason or write your own.
+        </p>
+
+        <div className="space-y-2 mb-3">
+          {PRESET_REASONS.map(r => (
+            <button
+              key={r}
+              onClick={() => toggle(r)}
+              className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                selected === r
+                  ? 'border-red-400 bg-red-50 text-red-700 font-medium'
+                  : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {selected === r && <span className="mr-2">✓</span>}{r}
+            </button>
+          ))}
+          <button
+            onClick={() => toggle('__other__')}
+            className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+              selected === '__other__'
+                ? 'border-red-400 bg-red-50 text-red-700 font-medium'
+                : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {selected === '__other__' && <span className="mr-2">✓</span>}Other reason...
+          </button>
+        </div>
+
+        {selected === '__other__' && (
+          <textarea
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+            rows={3}
+            placeholder="Write your reason here..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-3"
+            autoFocus
+          />
+        )}
+
+        <div className="flex space-x-3 mt-1">
+          <button
+            onClick={onClose}
+            className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(finalReason)}
+            disabled={!finalReason}
+            className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            Confirm Rejection
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdoptionRequests = () => {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('incoming');
+  const [sentRequests, setSentRequests] = useState([]);
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const [incoming, sent] = await Promise.all([
+        adoptionService.getIncomingRequests(),
+        adoptionService.getMyAdoptionRequests(),
+      ]);
+      setRequests(incoming);
+      setSentRequests(sent);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    setActionLoading(id + '-approve');
+    try {
+      await adoptionService.approveAdoption(id);
+      await fetchAll();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectConfirm = async (reason) => {
+    setActionLoading(rejectTarget.id + '-reject');
+    try {
+      await adoptionService.rejectAdoption(rejectTarget.id, reason);
+      setRejectTarget(null);
+      await fetchAll();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancel = async (id) => {
+    setActionLoading(id + '-cancel');
+    try {
+      await adoptionService.cancelAdoption(id);
+      await fetchAll();
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const formatDate = (iso) =>
+    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const pendingIncoming = requests.filter(r => r.status === 'pending').length;
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Adoption Requests</h1>
+        <p className="text-gray-500 mb-6">Manage requests for your pets and track your own adoption applications.</p>
+
+        {/* Tabs */}
+        <div className="flex space-x-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
+          <button
+            onClick={() => setActiveTab('incoming')}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
+              activeTab === 'incoming' ? 'bg-white text-primary shadow' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <span>Incoming Requests</span>
+            {pendingIncoming > 0 && (
+              <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {pendingIncoming}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('sent')}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'sent' ? 'bg-white text-primary shadow' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            My Applications
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-16 text-gray-400">Loading...</div>
+        ) : activeTab === 'incoming' ? (
+          <IncomingList
+            requests={requests}
+            onApprove={handleApprove}
+            onReject={setRejectTarget}
+            actionLoading={actionLoading}
+            formatDate={formatDate}
+          />
+        ) : (
+          <SentList
+            requests={sentRequests}
+            onCancel={handleCancel}
+            actionLoading={actionLoading}
+            formatDate={formatDate}
+          />
+        )}
+      </div>
+
+      {rejectTarget && (
+        <RejectModal
+          request={rejectTarget}
+          onConfirm={handleRejectConfirm}
+          onClose={() => setRejectTarget(null)}
+        />
+      )}
+    </Layout>
+  );
+};
+
+const IncomingList = ({ requests, onApprove, onReject, actionLoading, formatDate }) => {
+  if (requests.length === 0) {
+    return (
+      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+        <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <p className="text-gray-600 font-medium">No incoming requests</p>
+        <p className="text-sm text-gray-400 mt-1">When someone wants to adopt your pet, it will appear here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {requests.map(req => (
+        <div key={req.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-1">
+                <h3 className="font-semibold text-gray-900">{req.adopterName}</h3>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[req.status]}`}>
+                  {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mb-1">
+                Wants to adopt <span className="font-medium text-gray-700">{req.petName}</span>
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400 mb-3">
+                <span>{req.adopterEmail}</span>
+                <span>{req.adopterPhone}</span>
+                <span>Submitted {formatDate(req.createdAt)}</span>
+              </div>
+              {req.message && (
+                <div className="bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600 italic">
+                  "{req.message}"
+                </div>
+              )}
+              {req.status === 'rejected' && req.rejectionReason && (
+                <div className="mt-2 bg-red-50 rounded-lg px-3 py-2 text-sm text-red-700">
+                  Rejection reason: {req.rejectionReason}
+                </div>
+              )}
+            </div>
+
+            {req.status === 'pending' && (
+              <div className="flex flex-col space-y-2 flex-shrink-0">
+                <button
+                  onClick={() => onApprove(req.id)}
+                  disabled={!!actionLoading}
+                  className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium"
+                >
+                  {actionLoading === req.id + '-approve' ? 'Approving...' : 'Approve'}
+                </button>
+                <button
+                  onClick={() => onReject(req)}
+                  disabled={!!actionLoading}
+                  className="px-4 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium"
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const SentList = ({ requests, onCancel, actionLoading, formatDate }) => {
+  if (requests.length === 0) {
+    return (
+      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+        <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <p className="text-gray-600 font-medium">No applications yet</p>
+        <p className="text-sm text-gray-400 mt-1">Browse pets and submit an adoption request to get started.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {requests.map(req => (
+        <div key={req.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-1">
+                <h3 className="font-semibold text-gray-900">{req.petName}</h3>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[req.status]}`}>
+                  {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mb-2">Submitted {formatDate(req.createdAt)}</p>
+              {req.message && (
+                <div className="bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600 italic">
+                  "{req.message}"
+                </div>
+              )}
+              {req.status === 'rejected' && req.rejectionReason && (
+                <div className="mt-2 bg-red-50 rounded-lg px-3 py-2 text-sm text-red-700">
+                  Reason: {req.rejectionReason}
+                </div>
+              )}
+            </div>
+
+            {req.status === 'pending' && (
+              <button
+                onClick={() => onCancel(req.id)}
+                disabled={!!actionLoading}
+                className="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium flex-shrink-0"
+              >
+                {actionLoading === req.id + '-cancel' ? 'Cancelling...' : 'Cancel'}
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default AdoptionRequests;

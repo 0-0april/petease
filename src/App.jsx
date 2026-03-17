@@ -23,12 +23,15 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminSystemAnnouncements from './pages/admin/AdminSystemAnnouncements';
+import AdoptionRequests from './pages/user/AdoptionRequests';
+import Landing from './pages/Landing';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/landing" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
@@ -37,6 +40,7 @@ function App() {
           <Route path="/my-pets" element={<PrivateRoute><MyPets /></PrivateRoute>} />
           <Route path="/appointments" element={<PrivateRoute><Appointments /></PrivateRoute>} />
           <Route path="/book-appointment" element={<PrivateRoute><BookAppointment /></PrivateRoute>} />
+          <Route path="/adoption-requests" element={<PrivateRoute><AdoptionRequests /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           
