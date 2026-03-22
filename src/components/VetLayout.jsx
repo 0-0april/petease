@@ -7,7 +7,7 @@ const VetLayout = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/landing');
   };
 
   return (
@@ -19,9 +19,9 @@ const VetLayout = ({ children }) => {
               <Link to="/vet/dashboard" className="text-2xl font-bold text-primary">PetEase Vet</Link>
               <div className="hidden md:flex space-x-4">
                 <Link to="/vet/appointments" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Appointments</Link>
-                <Link to="/vet/attendance" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Attendance</Link>
-                <Link to="/vet/medical-records" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Medical Records</Link>
+
                 <Link to="/vet/adoptions" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Adoptions</Link>
+                <Link to="/vet/services" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Services</Link>
                 <Link to="/vet/announcements" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Announcements</Link>
               </div>
             </div>

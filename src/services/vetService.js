@@ -1,4 +1,5 @@
-import { mockAppointments, mockAppointmentLogs, mockAnnouncements, mockAdoptionRequests, mockAdoptionWaivers, mockMedicalHistory } from '../data/mockData';
+import { mockAppointments, mockAppointmentLogs, mockAnnouncements, mockAdoptionWaivers, mockMedicalHistory } from '../data/mockData';
+import { adoptionRequests } from './adoptionService';
 
 let appointments = [...mockAppointments];
 let appointmentLogs = [...mockAppointmentLogs];
@@ -142,21 +143,25 @@ export const vetService = {
     return announcements.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
-  getPendingAdoptions: async (page = 1, limit = 10) => {
+  // Get all approved adoptions waiting for vet processing
+  getApprovedAdoptions: async (page = 1, limit = 10) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const pending = mockAdoptionRequests.filter(r => r.status === 'pending');
+    const approved = adoptionRequests.filter(r => r.status === 'approved' || r.status === 'completed');
+    const sorted = [...approved].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return {
-      adoptions: pending.slice(startIndex, endIndex),
-      total: pending.length,
-      page,
-      totalPages: Math.ceil(pending.length / limit)
+      adoptions: sorted.slice(startIndex, endIndex),
+      total: approved.length,
+      totalPages: Math.ceil(approved.length / limit)
     };
   },
 
-  confirmAdoptionWithWaiver: async (adoptionId, waiverData) => {
+  // Complete adoption: upload waiver + add medical record + mark completed
+  completeAdoption: async (adoptionId, waiverData, medicalData) => {
     await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Save waiver
     const waiver = {
       id: adoptionWaivers.length + 1,
       adoptionRequestId: parseInt(adoptionId),
@@ -168,7 +173,30 @@ export const vetService = {
       witnessSignature: true
     };
     adoptionWaivers.push(waiver);
-    return waiver;
+
+    // Save medical record
+    if (medicalData?.service) {
+      const record = {
+        id: medicalHistory.length + 1,
+        petId: medicalData.petId,
+        medication: medicalData.service,
+        date: new Date().toISOString().split('T')[0],
+        notes: medicalData.notes || 'Service performed during adoption meetup',
+        veterinarian: 'Dr. Sarah Wilson',
+        createdAt: new Date().toISOString()
+      };
+      medicalHistory.push(record);
+    }
+
+    // Mark adoption completed via shared array
+    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
+    if (index !== -1) {
+      adoptionRequests[index].status = 'completed';
+      adoptionRequests[index].completedAt = new Date().toISOString();
+      adoptionRequests[index].waiverDocument = waiverData.waiverDocument;
+    }
+
+    return { waiver };
   },
 
   exportAppointmentsToCSV: async (appointments) => {
@@ -192,5 +220,60 @@ export const vetService = {
     ].join('\n');
     
     return csvContent;
-  }
+  },
+
+  // Services Management
+  getServices: async () => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const services = [
+      {
+        id: 1,
+        name: 'Spay/Neuter',
+        description: 'Surgical sterilization procedure for pets',
+        availabilityType: 'recurring',
+        createdAt: '2024-01-15T10:00:00Z',
+      },
+      {
+        id: 2,
+        name: 'Consultation',
+        description: 'General health check and consultation',
+        availabilityType: 'recurring',
+        createdAt: '2024-01-15T10:00:00Z',
+      },
+      {
+        id: 3,
+        name: 'Anti-Rabies Vaccination',
+        description: 'Rabies vaccination for dogs and cats',
+        availabilityType: 'specific',
+        specificDate: '2024-04-15',
+        createdAt: '2024-01-15T10:00:00Z',
+      },
+    ];
+    return services;
+  },
+
+  createService: async (serviceData) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const newService = {
+      id: Date.now(),
+      ...serviceData,
+      createdAt: new Date().toISOString(),
+    };
+    return newService;
+  },
+
+  updateService: async (id, serviceData) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    // In a real app, this would update the service and notify users
+    if (serviceData.notifyUsers) {
+      // Simulate notification to all users
+      console.log(`Notifying all users about service update: ${serviceData.name}`);
+    }
+    return { id, ...serviceData, updatedAt: new Date().toISOString() };
+  },
+
+  deleteService: async (id) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  },
 };

@@ -77,7 +77,7 @@ export const mockPets = [
     description: 'Friendly and energetic dog, loves to play fetch and go for walks. Great with kids and other pets.',
     image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400',
     status: 'available',
-    ownerId: 2
+    ownerId: 1
   },
   {
     id: 2,
@@ -89,7 +89,7 @@ export const mockPets = [
     description: 'Calm and affectionate cat, enjoys quiet environments and gentle petting. Perfect lap cat.',
     image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400',
     status: 'available',
-    ownerId: 2
+    ownerId: 1
   },
   {
     id: 3,
@@ -137,7 +137,7 @@ export const mockPets = [
     description: 'Large and gentle giant, very friendly and sociable with everyone.',
     image: 'https://images.unsplash.com/photo-1571566882372-1598d88abd90?w=400',
     status: 'available',
-    ownerId: 2
+    ownerId: 1
   }
 ];
 
@@ -250,11 +250,61 @@ export const mockAdoptionRequests = [
     id: 1,
     petId: 1,
     petName: 'Max',
+    adopterId: 2,
+    adopterName: 'Jane Smith',
+    adopterEmail: 'jane@example.com',
+    adopterPhone: '098-765-4321',
+    ownerId: 1,
+    ownerName: 'John Doe',
+    status: 'pending',
+    message: 'I have a big yard and would love to give Max a great home!',
+    rejectionReason: null,
+    createdAt: '2024-03-01T10:00:00'
+  },
+  {
+    id: 2,
+    petId: 2,
+    petName: 'Luna',
+    adopterId: 5,
+    adopterName: 'Bob Johnson',
+    adopterEmail: 'bob@example.com',
+    adopterPhone: '555-111-2222',
+    ownerId: 1,
+    ownerName: 'John Doe',
+    status: 'pending',
+    message: 'I live alone and would love a calm cat companion.',
+    rejectionReason: null,
+    createdAt: '2024-03-03T14:00:00'
+  },
+  {
+    id: 3,
+    petId: 6,
+    petName: 'Milo',
+    adopterId: 2,
+    adopterName: 'Jane Smith',
+    adopterEmail: 'jane@example.com',
+    adopterPhone: '098-765-4321',
+    ownerId: 1,
+    ownerName: 'John Doe',
+    status: 'approved',
+    message: 'Maine Coons are my favorite breed!',
+    rejectionReason: null,
+    createdAt: '2024-02-20T09:00:00'
+  },
+  {
+    id: 4,
+    petId: 3,
+    petName: 'Buddy',
     adopterId: 1,
     adopterName: 'John Doe',
+    adopterEmail: 'john@example.com',
+    adopterPhone: '123-456-7890',
     ownerId: 2,
+    ownerName: 'Jane Smith',
     status: 'pending',
-    createdAt: '2024-03-01'
+    message: 'I would love to adopt Buddy for my family.',
+    rejectionReason: null,
+    createdAt: '2024-03-05T11:00:00'
   }
 ];
 

@@ -7,7 +7,7 @@ const AdminLayout = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/landing');
   };
 
   return (
@@ -18,13 +18,17 @@ const AdminLayout = ({ children }) => {
             <div className="flex items-center space-x-8">
               <Link to="/admin/dashboard" className="text-2xl font-bold text-primary">PetEase Admin</Link>
               <div className="hidden md:flex space-x-4">
-                <Link to="/admin/users" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Users</Link>
-                <Link to="/admin/reports" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Reports</Link>
+                <Link to="/admin/users" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Manage Users</Link>
+                <Link to="/admin/reports" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Manage Reports</Link>
                 <Link to="/admin/announcements" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">Announcements</Link>
-                <Link to="/admin/system-announcements" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md">System Updates</Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link to="/admin/notifications" className="text-gray-600 hover:text-primary relative" title="Notification">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </Link>
               <span className="text-gray-700">{user?.name}</span>
               <button onClick={handleLogout} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
                 Logout

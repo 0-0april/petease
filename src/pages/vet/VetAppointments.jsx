@@ -4,17 +4,39 @@ import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import { vetService } from '../../services/vetService';
 
+const STATUS_STYLES = {
+  confirmed: 'bg-green-100 text-green-800',
+  pending: 'bg-yellow-100 text-yellow-800',
+  cancelled: 'bg-red-100 text-red-800',
+  completed: 'bg-blue-100 text-blue-800',
+};
+
+const SERVICE_LABELS = {
+  consultation: 'Consultation',
+  'anti-rabies': 'Rabies Vaccination',
+  spay: 'Spay',
+  neuter: 'Neuter',
+};
+
 const VetAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [activeTab, setActiveTab] = useState('pending'); // pending, confirmed, completed
+  const [filterDate, setFilterDate] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [cancelModal, setCancelModal] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [attendanceModal, setAttendanceModal] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentPage]);
+  }, [currentPage, activeTab]);
 
   const fetchAppointments = async () => {
     try {
@@ -26,13 +48,18 @@ const VetAppointments = () => {
     }
   };
 
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleViewDetails = async (appointment) => {
     setSelectedAppointment(appointment);
     try {
       const appointmentLogs = await vetService.getAppointmentLogs(appointment.id);
       setLogs(appointmentLogs);
-    } catch (error) {
-      console.error('Error fetching logs:', error);
+    } catch {
+      setLogs([]);
     }
     setShowDetailModal(true);
   };
@@ -41,114 +68,234 @@ const VetAppointments = () => {
     try {
       await vetService.confirmAppointment(id);
       fetchAppointments();
-      alert('Appointment confirmed successfully');
-    } catch (error) {
-      alert('Failed to confirm appointment');
+      showToast('Appointment confirmed.');
+    } catch {
+      showToast('Failed to confirm appointment.', 'error');
     }
   };
 
-  const handleCancel = async (id) => {
-    const reason = prompt('Enter cancellation reason:');
-    if (reason) {
-      try {
-        await vetService.cancelAppointment(id, reason);
-        fetchAppointments();
-        alert('Appointment cancelled successfully');
-      } catch (error) {
-        alert('Failed to cancel appointment');
+  const handleCancelSubmit = async () => {
+    if (!cancelReason.trim()) return;
+    try {
+      await vetService.cancelAppointment(cancelModal.id, cancelReason);
+      setCancelModal(null);
+      setCancelReason('');
+      fetchAppointments();
+      showToast('Appointment cancelled.');
+    } catch {
+      showToast('Failed to cancel appointment.', 'error');
+    }
+  };
+
+  const handleMarkAttendance = async (attended) => {
+    if (!attendanceModal) return;
+    try {
+      await vetService.markAttendance(attendanceModal.id, attended);
+      if (attended) {
+        await vetService.addMedicalHistory(attendanceModal.pets[0]?.id, {
+          medication: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          date: attendanceModal.date,
+          notes: `Service performed: ${SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date} at ${attendanceModal.time}.`,
+          diagnosis: '',
+          treatment: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          followUp: ''
+        });
       }
+      setAttendanceModal(null);
+      fetchAppointments();
+      showToast(attended ? 'Marked as Show. Medical record updated.' : 'Marked as No Show.');
+    } catch {
+      showToast('Failed to update attendance.', 'error');
     }
   };
 
   const handleExportCSV = async () => {
     try {
-      const csvContent = await vetService.exportAppointmentsToCSV(appointments);
+      const completedAppointments = appointments.filter(a => a.status === 'completed' && a.attended === true);
+      const csvContent = await vetService.exportAppointmentsToCSV(completedAppointments);
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `appointments-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `completed-appointments-${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      alert('Failed to export CSV');
+      showToast('CSV exported successfully.');
+    } catch {
+      showToast('Failed to export CSV.', 'error');
     }
   };
+
+  const displayed = appointments
+    .filter(a => {
+      // Filter by tab
+      if (activeTab === 'pending' && a.status !== 'pending') return false;
+      if (activeTab === 'confirmed' && a.status !== 'confirmed') return false;
+      if (activeTab === 'completed' && (a.status !== 'completed' || a.attended !== true)) return false;
+
+      // Filter by date
+      if (filterDate && a.date !== filterDate) return false;
+
+      // Search by user name
+      if (searchQuery && !a.userName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      const diff = new Date(a.date) - new Date(b.date);
+      return sortOrder === 'asc' ? diff : -diff;
+    });
 
   return (
     <VetLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <button
-            onClick={handleExportCSV}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>Export CSV</span>
-          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Appointments Management</h1>
+          {activeTab === 'completed' && (
+            <button
+              onClick={handleExportCSV}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2 text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Export CSV</span>
+            </button>
+          )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        {/* Tabs */}
+        <div className="flex bg-gray-100 rounded-lg p-1 space-x-1">
+          {[
+            { value: 'pending', label: 'Pending Appointments' },
+            { value: 'confirmed', label: 'Confirmed Appointments' },
+            { value: 'completed', label: 'Completed Appointments' },
+          ].map(tab => (
+            <button
+              key={tab.value}
+              onClick={() => { setActiveTab(tab.value); setCurrentPage(1); }}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === tab.value ? 'bg-white text-primary shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3">
+          <input
+            type="date"
+            value={filterDate}
+            onChange={e => setFilterDate(e.target.value)}
+            placeholder="Filter by date"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          {activeTab === 'completed' && (
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by user name..."
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]"
+            />
+          )}
+          <select
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+          {(filterDate || searchQuery) && (
+            <button
+              onClick={() => { setFilterDate(''); setSearchQuery(''); }}
+              className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+
+        {toast && (
+          <div className={`rounded-xl px-4 py-3 text-sm font-medium ${toast.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200'
+            }`}>
+            {toast.msg}
+          </div>
+        )}
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {appointments.map(appointment => (
-                <tr key={appointment.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.time}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{appointment.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.userName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {appointment.pets.map(p => p.name).join(', ')}
+            <tbody className="divide-y divide-gray-100">
+              {displayed.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-10 text-center text-gray-400 text-sm">
+                    No appointments found.
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {appointment.status}
+                </tr>
+              ) : displayed.map(apt => (
+                <tr key={apt.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-500">#{apt.id}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.time}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {SERVICE_LABELS[apt.type] || apt.type}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {apt.pets.map(p => p.name).join(', ')}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
+                      {apt.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    <button
-                      onClick={() => handleViewDetails(appointment)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </button>
-                    {appointment.status === 'pending' && (
-                      <>
+                  <td className="px-6 py-4 text-sm">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleViewDetails(apt)}
+                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                      >
+                        View
+                      </button>
+                      {activeTab === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleConfirm(apt.id)}
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => { setCancelModal(apt); setCancelReason(''); }}
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {activeTab === 'confirmed' && (
                         <button
-                          onClick={() => handleConfirm(appointment.id)}
-                          className="text-green-600 hover:text-green-800"
+                          onClick={() => setAttendanceModal(apt)}
+                          className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors"
                         >
-                          Confirm
+                          Mark Attendance
                         </button>
-                        <button
-                          onClick={() => handleCancel(appointment.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -156,74 +303,149 @@ const VetAppointments = () => {
           </table>
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
 
-      <Modal
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        title="Appointment Details"
-      >
+      {/* Detail Modal */}
+      <Modal isOpen={showDetailModal} onClose={() => setShowDetailModal(false)} title="Appointment Details">
         {selectedAppointment && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Patient Name</p>
+                <p className="text-xs text-gray-500">Patient</p>
                 <p className="font-semibold">{selectedAppointment.userName}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Phone</p>
+                <p className="text-xs text-gray-500">Phone</p>
                 <p className="font-semibold">{selectedAppointment.userPhone}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Date</p>
+                <p className="text-xs text-gray-500">Date</p>
                 <p className="font-semibold">{selectedAppointment.date}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Time</p>
+                <p className="text-xs text-gray-500">Time</p>
                 <p className="font-semibold">{selectedAppointment.time}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Type</p>
-                <p className="font-semibold capitalize">{selectedAppointment.type}</p>
+                <p className="text-xs text-gray-500">Service</p>
+                <p className="font-semibold capitalize">
+                  {SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
+                </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Status</p>
-                <p className="font-semibold capitalize">{selectedAppointment.status}</p>
+                <p className="text-xs text-gray-500">Status</p>
+                <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[selectedAppointment.status] || 'bg-gray-100 text-gray-600'}`}>
+                  {selectedAppointment.status}
+                </span>
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Pets</p>
+              <p className="text-xs text-gray-500 mb-1">Pet(s)</p>
               {selectedAppointment.pets.map(pet => (
-                <p key={pet.id} className="font-semibold">{pet.name} - {pet.breed}</p>
+                <p key={pet.id} className="font-semibold">{pet.name} — {pet.breed}</p>
               ))}
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Notes</p>
-              <p className="font-semibold">{selectedAppointment.notes || 'No notes'}</p>
-            </div>
-            
+            {selectedAppointment.notes && (
+              <div>
+                <p className="text-xs text-gray-500">Notes</p>
+                <p className="text-sm text-gray-800">{selectedAppointment.notes}</p>
+              </div>
+            )}
             <div className="border-t pt-4">
-              <h4 className="font-semibold mb-2">Appointment History</h4>
+              <p className="text-sm font-semibold text-gray-700 mb-2">Activity Log</p>
               {logs.length === 0 ? (
-                <p className="text-gray-600 text-sm">No history available</p>
+                <p className="text-sm text-gray-400">No activity recorded.</p>
               ) : (
                 <div className="space-y-2">
                   {logs.map(log => (
                     <div key={log.id} className="text-sm border-l-2 border-primary pl-3">
-                      <p className="font-semibold capitalize">{log.action}</p>
+                      <p className="font-medium capitalize">{log.action}</p>
                       <p className="text-gray-600">{log.notes}</p>
-                      <p className="text-gray-500 text-xs">
-                        {new Date(log.timestamp).toLocaleString()} - {log.performedBy}
+                      <p className="text-xs text-gray-400">
+                        {new Date(log.timestamp).toLocaleString()} · {log.performedBy}
                       </p>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Cancel Modal */}
+      <Modal isOpen={!!cancelModal} onClose={() => setCancelModal(null)} title="Cancel Appointment">
+        {cancelModal && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-700">
+              Cancel appointment for <span className="font-semibold">{cancelModal.userName}</span> on{' '}
+              <span className="font-semibold">{cancelModal.date}</span>?
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Reason <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={e => setCancelReason(e.target.value)}
+                rows={3}
+                placeholder="Enter cancellation reason..."
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setCancelModal(null)}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleCancelSubmit}
+                disabled={!cancelReason.trim()}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
+              >
+                Cancel Appointment
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Attendance Modal */}
+      <Modal isOpen={!!attendanceModal} onClose={() => setAttendanceModal(null)} title="Mark Attendance">
+        {attendanceModal && (
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              Mark attendance for <span className="font-semibold">{attendanceModal.userName}</span>'s appointment on{' '}
+              <span className="font-semibold">{attendanceModal.date}</span> at{' '}
+              <span className="font-semibold">{attendanceModal.time}</span>
+            </p>
+            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-800">
+              If marked as "Show", a medical record will be automatically created for{' '}
+              <span className="font-medium">{attendanceModal.pets.map(p => p.name).join(', ')}</span> with the service:{' '}
+              <span className="font-medium">{SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}</span>.
+            </div>
+            <div className="flex space-x-3 pt-2">
+              <button
+                onClick={() => setAttendanceModal(null)}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleMarkAttendance(false)}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 text-sm font-medium"
+              >
+                No Show
+              </button>
+              <button
+                onClick={() => handleMarkAttendance(true)}
+                className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 text-sm font-medium"
+              >
+                Show
+              </button>
             </div>
           </div>
         )}
