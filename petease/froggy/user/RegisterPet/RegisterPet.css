@@ -1,0 +1,499 @@
+:root {
+    --dark-green: linear-gradient(135deg, hsl(161, 70%, 14%), hsl(147, 75%, 25%));
+    --darker-green: hsl(147, 75%, 25%);
+    --brown: hsl(27, 50%, 24%);
+    --light-yellow: linear-gradient(135deg, hsl(57, 90%, 73%), hsl(48, 100%, 60%));
+    --yellow: hsl(48, 100%, 50%);
+    --white: #ffffff;
+    --slight-yellow: linear-gradient(135deg, hsl(57, 97%, 87%), hsl(48, 64%, 80%));
+    --gray: #f5f5f5;
+    --text-dark: #333;
+    --text-light: #666;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+html{
+    overflow-y: hidden;
+}
+
+.logout-btn{
+    margin-top: 60%;
+}
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--slight-yellow);
+    color: var(--brown);
+    line-height: 1.7;
+    font-size: 16px;
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: var(--light-yellow);
+    color: var(--brown);
+    padding: 20px;
+    position: fixed;
+    height: 100vh;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    margin-bottom: 10px;
+}
+
+.sidebar a {
+    color: var(--brown);
+    text-decoration: none;
+    display: block;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar a:hover, .sidebar .active a {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main content */
+#main-content {
+    padding: 0;
+    position: fixed;
+    /* left: 250px; */
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    height: 100vh;
+    color: var(--brown);
+    margin: 1% 3% 1% calc(250px + 3%);
+
+}
+
+/* Pets section */
+.pets-section {
+    width: 100%;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    overflow-y: auto; 
+    height: 100vh;
+}
+
+.pets-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--dark-green);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.btn-register {
+    background: var(--light-yellow);
+    color: var(--brown);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-register:hover {
+    background: var(--yellow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toggle{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 30px;
+}
+
+.toggle .toggle-btn{
+    width: 50%;
+    height: 30px;
+    border-width: 0;
+    margin-left: 1px;
+    background: var(--light-yellow);
+}
+
+.toggle .toggle-btn:hover{
+    background: var(--yellow);
+}
+
+.pets-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.pet-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pet-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.pet-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.pet-card .card-content {
+    padding: 1.5rem;
+}
+
+.pet-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-green);
+}
+
+.pet-card p {
+    margin-bottom: 0.5rem;
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.pet-card .edit-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--yellow);
+    color: var(--brown);
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pet-card .edit-btn:hover {
+    background: var(--light-yellow);
+    transform: scale(1.1);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--slight-yellow);
+    padding: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 90%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.close {
+    color: var(--brown);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--darker-green);
+    transform: scale(1.1);
+}
+
+#form-title {
+    margin-bottom: 1rem;
+    color: var(--dark-green);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Form */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--brown);
+    font-size: 1rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--darker-green);
+    box-shadow: 0 0 0 3px rgba(147, 75, 25, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn-submit,
+.btn-cancel {
+    background: linear-gradient(135deg, var(--yellow), var(--light-yellow));
+    color: var(--brown);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit:hover,
+.btn-cancel:hover {
+    background: var(--light-yellow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cancel {
+    background: var(--white);
+    color: var(--brown);
+    border: 2px solid var(--yellow);
+}
+
+.btn-cancel:hover {
+    background: var(--yellow);
+    color: var(--brown);
+}
+
+/* Appointments section */
+.appointments-section {
+    width: 100%;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-top: 2rem;
+}
+
+.appointments-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--dark-green);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+#appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.appointment-item {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+}
+
+.appointment-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-item p {
+    margin: 0;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+/* Calendar styles */
+.calendar {
+    width: 100%;
+    max-width: 350px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.calendar .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.calendar .header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.calendar .header h2 {
+    margin: 0;
+}
+
+.calendar .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #e8f5e8;
+    padding: 10px 0;
+}
+
+.calendar .weekdays div {
+    text-align: center;
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.calendar .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 10px;
+}
+
+.calendar .day {
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.calendar .day:hover {
+    background-color: #c8e6c9;
+}
+
+.calendar .day.selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.calendar .day.disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.calendar .day.other-month {
+    color: #ccc;
+}
+
+.calendar-modal-content {
+    max-width: 400px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+
+    #main-content {
+        left: 200px;
+        width: calc(100vw - 200px);
+    }
+
+    .pets-container {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .calendar-modal-content {
+        max-width: 95%;
+    }
+
+    .calendar {
+        max-width: 100%;
+    }
+}

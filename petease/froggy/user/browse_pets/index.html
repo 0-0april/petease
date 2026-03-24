@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetEase - Browse Pets</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2><i class="fas fa-paw"></i> PetEase</h2>
+            <ul>
+                <li><a href="index.html">Browse</a></li>
+                <li><a href="../MyProfile/MyProfile.html"> Profile</a></li>
+                <li><a href="../Appointment/Appointment.html"></i> Appointment</a></li>
+                <li><a href="../RegisterPet/RegisterPet.html">Register Pet</a></li>
+                <li><a href="../Message/Message.html"> Messages</a></li>
+                <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+                <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <header>
+                <h1>Browse Pets</h1>
+            </header>
+            <div class="search-filter">
+                <input type="text" id="search-input" placeholder="Search pets by name, breed...">
+                <button type="submit" class="search-btn" onclick="window.location.href='../Search/Search.html'">Search</button>
+            </div>
+
+            <!-- Recommended Pets Section -->
+            <section class="recommended-pets">
+                <h2>Recommended Pets</h2>
+                <div class="pets-grid horizontal-scroll" id="recommended-pets-container">
+                    <!-- Recommended pets will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Pet Categories Section -->
+            <section class="pet-categories">
+                <h2>Pet Categories</h2>
+                <div class="categories-buttons">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="dog">Dogs</button>
+                    <button class="category-btn" data-category="cat">Cats</button>
+                    <button class="category-btn" data-category="other">Others</button>
+                </div>
+            </section>
+
+            <!-- Quick Actions Section -->
+            <section class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <div class="action-card" onclick="window.location.href='../Appointment/Appointment.html'">
+                        <img src="../assets/browndog.jpg" alt="Book Appointment">
+                        <h3>Book Appointment</h3>
+                        <p>Schedule a visit with our vet staff</p>
+                    </div>
+                    <div class="action-card" onclick="window.location.href='../RegisterPet/RegisterPet.html'">
+                        <img src="../assets/whitecat.jpg" alt="Register Pet">
+                        <h3>Register Pet</h3>
+                        <p>Add your pet to our system</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+        <div id="pet-profile">
+            <!-- Pet profile content will be loaded here -->
+        </div>
+       
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+- [x] Create index.html with basic calendar structure
+- [x] Create style.css with green theme and weekend disable styles
+- [x] Create script.js to generate calendar and handle weekday selection
+- [x] Test calendar by opening index.html in browser

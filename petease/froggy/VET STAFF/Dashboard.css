@@ -1,0 +1,211 @@
+
+
+
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, hsl(160, 80%, 15%) 0%, hsl(160, 80%, 5%) 100%);
+    color: #e8f5e8;
+}
+
+.header {
+    background: linear-gradient(135deg, hsl(160, 80%, 25%) 0%, hsl(160, 80%, 15%) 100%);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    position: fixed;
+    top:0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.header-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    margin-right: 50px;
+}
+
+.header-nav a:hover {
+    background: linear-gradient(135deg, hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+}
+
+.container {
+    display: flex;
+    min-height: calc(100vh - 80px);
+}
+
+.sidebar {
+    width: 20%;
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 10%) 100%);
+    padding: 2rem 1rem;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.3);
+    position: fixed;
+    height:100vh;
+    top: 15%;
+}
+
+
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    background: linear-gradient(135deg, hsl(160, 80%, 10%) 0%, hsl(160, 80%, 5%) 100%);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+    overflow-x: auto;
+    width: 72%;
+    position: absolute;
+    right: 0;
+    top: 6%;
+
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar nav ul li a {
+    color: #e8f5e8;
+    text-decoration: none;
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.sidebar nav ul li a:hover {
+    background: linear-gradient(135deg, hsl(160, 80%, 35%) 0%, hsl(160, 80%, 25%) 100%);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar nav ul li a.active {
+    background: linear-gradient(135deg, hsl(160, 80%, 12%) 0%, hsl(160, 80%, 7%) 100%);
+    color: white;
+}
+
+.main-content h2 {
+    margin-bottom: 1rem;
+    color: #e8f5e8;
+    font-size: 2rem;
+    border-bottom: 2px solid hsl(160, 80%, 35%);
+    padding-bottom: 0.5rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, hsl(160, 80%, 20%) 0%, hsl(160, 80%, 15%) 100%);
+    border: 1px solid hsl(160, 80%, 25%);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.stat-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: #e8f5e8;
+    font-size: 1.1rem;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: hsl(160, 80%, 35%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 1rem;
+        order: 2;
+    }
+
+    .sidebar nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .sidebar nav ul li {
+        flex: 1 1 auto;
+        min-width: 150px;
+    }
+
+    .main-content {
+        order: 1;
+        padding: 1rem;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar nav ul li {
+        min-width: 120px;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+}

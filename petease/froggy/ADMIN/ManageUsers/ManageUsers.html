@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ManageUsers.css">
+    <title>PetEase - Disable/Enable User</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="../../USER/Homepage/logo.png" alt="PetEase Logo">
+            <h1>PetEase Admin</h1>
+        </div>
+        <div class="header-nav">
+            <a href="../../user/login/index.html" id="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a class="admin" href="../Admin.html">Dashboard</a></li>
+                    <li><a class="user-reports" href="../UserReports/UserReports.html">User Reports</a></li>
+                    <li><a class="manage-users" href="../ManageUsers/ManageUsers.html">Manage Users</a></li>
+                    <li><a class="announcements" href="../Announcements/Announcements.html">Announcements</a></li>
+                    <li><a class="services" href="../Services/Services.html">Services</a></li>
+                    <li><a class="register-adminstaff" href="../RegisterAdminStaff/RegisterAdminStaff.html">Register Admin/Staff</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section class="user-management">
+                <h2>Manage Users</h2>
+                <p>Deactivate or reactivate user accounts based on policy violations or review outcomes.</p>
+
+                <div class="search-user">
+                    <input type="text" id="user-search" placeholder="Search for user by username or email...">
+                    <select id="year-filter">
+                        <option value="">All Years</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                    </select>
+                    <button id="search-user-btn">Search</button>
+                </div>
+
+                <div class="user-list">
+                    <h3>User Accounts</h3>
+                    <div class="user-cards">
+                        <div class="user-card">
+                            <div class="user-info">
+                                <h4>john_doe</h4>
+                                <p>Email: john@example.com</p>
+                                <p>Status: <span class="status active">Active</span></p>
+                                <p>Last Login: 2023-10-15</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="disable-btn">Disable Account</button>
+                                <button class="view-details-btn">View Details</button>
+                            </div>
+                        </div>
+                        <div class="user-card">
+                            <div class="user-info">
+                                <h4>jane_smith</h4>
+                                <p>Email: jane@example.com</p>
+                                <p>Status: <span class="status disabled">Disabled</span></p>
+                                <p>Last Login: 2023-10-10</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="enable-btn">Enable Account</button>
+                                <button class="view-details-btn">View Details</button>
+                            </div>
+                        </div>
+                        <div class="user-card">
+                            <div class="user-info">
+                                <h4>mike_jones</h4>
+                                <p>Email: mike@example.com</p>
+                                <p>Status: <span class="status active">Active</span></p>
+                                <p>Last Login: 2023-10-14</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="disable-btn">Disable Account</button>
+                                <button class="view-details-btn">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-details" id="user-details" style="display: none;">
+                    <h3>User Details</h3>
+                    <div class="details-content">
+                        <p><strong>Username:</strong> <span id="detail-username"></span></p>
+                        <p><strong>Email:</strong> <span id="detail-email"></span></p>
+                        <p><strong>Full Name:</strong> <span id="detail-fullname"></span></p>
+                        <p><strong>Status:</strong> <span id="detail-status"></span></p>
+                        <p><strong>Registration Date:</strong> <span id="detail-regdate"></span></p>
+                        <p><strong>Last Login:</strong> <span id="detail-lastlogin"></span></p>
+                        <p><strong>Violation History:</strong></p>
+                        <ul id="violation-list">
+                            <li>No violations recorded</li>
+                        </ul>
+                        <div class="actions">
+                            <button id="toggle-status">Toggle Status</button>
+                            <button id="close-details">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="disable-reason" id="disable-reason" style="display: none;">
+                    <h3>Reason for Disabling Account</h3>
+                    <form id="disable-form">
+                        <textarea id="reason-text" placeholder="Enter reason for disabling the account..." required></textarea>
+                        <div class="form-actions">
+                            <button type="submit">Confirm Disable</button>
+                            <button type="button" id="cancel-disable">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="ManageUsers.js"></script>
+</body>
+</html>

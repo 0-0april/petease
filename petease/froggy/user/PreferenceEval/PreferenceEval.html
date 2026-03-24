@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="PreferenceEval.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>New User Preferences - PetEase</title>
+</head>
+<body>
+    <div class="container">
+        <div class="wizard-form">
+            <div class="progress-indicator">
+                <span id="stepIndicator">Step 1 of 6</span>
+            </div>
+            <form id="preferencesForm">
+                <!-- Step 1: Intention -->
+                <div class="step active" id="step1">
+                    <h2>What is your intention?</h2>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="intention" value="upload" required>
+                            Upload pet for adoption
+                        </label>
+                        <label>
+                            <input type="radio" name="intention" value="browse">
+                            Browse for pets available for adoption
+                        </label>
+                        <label>
+                            <input type="radio" name="intention" value="book">
+                            Book vet appointments
+                        </label>
+                    </div>
+                </div>
+                <!-- Step 2: Pet Type -->
+                <div class="step" id="step2">
+                    <h2>What type of pet are you interested in?</h2>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="petType" value="dog" required>
+                            Dog
+                        </label>
+                        <label>
+                            <input type="radio" name="petType" value="cat">
+                            Cat
+                        </label>
+                    </div>
+                </div>
+                <!-- Step 3: Gender -->
+                <div class="step" id="step3">
+                    <h2>What gender do you prefer?</h2>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="gender" value="male" required>
+                            Male
+                        </label>
+                        <label>
+                            <input type="radio" name="gender" value="female">
+                            Female
+                        </label>
+                        <label>
+                            <input type="radio" name="gender" value="any">
+                            Any
+                        </label>
+                    </div>
+                </div>
+                <!-- Step 4: Color -->
+                <div class="step" id="step4">
+                    <h2>What color do you prefer?</h2>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="color" value="black" required>
+                            Black
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="white">
+                            White
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="brown">
+                            Brown
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="mixed">
+                            Mixed
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="any">
+                            Any
+                        </label>
+                    </div>
+                </div>
+                <!-- Step 5: Age -->
+                <div class="step" id="step5">
+                    <h2>What age range do you prefer?</h2>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="age" value="puppy" required>
+                            Puppy (0-1 year)
+                        </label>
+                        <label>
+                            <input type="radio" name="age" value="adult">
+                            Adult (1-7 years)
+                        </label>
+                        <label>
+                            <input type="radio" name="age" value="senior">
+                            Senior (7+ years)
+                        </label>
+                        <label>
+                            <input type="radio" name="age" value="any">
+                            Any
+                        </label>
+                    </div>
+                </div>
+                <!-- Step 6: Breed -->
+                <div class="step" id="step6">
+                    <h2>What breed do you prefer?</h2>
+                    <div class="form-group">
+                        <select id="breed" name="breed" required>
+                            <option value="">Select a breed</option>
+                            <!-- Options will be populated dynamically based on pet type -->
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <div class="navigation">
+                <button type="button" id="prevBtn" class="btn-nav" disabled>Previous</button>
+                <button type="button" id="nextBtn" class="btn-nav">Next</button>
+            </div>
+        </div>
+    </div>
+    <script src="Preference Eval.js"></script>
+</body>
+</html>

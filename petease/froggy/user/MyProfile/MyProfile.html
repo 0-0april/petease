@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetEase - My Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="MyProfile.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2><i class="fas fa-paw"></i> PetEase</h2>
+            <ul>
+                <li><a href="../browse_pets/index.html">Browse</a></li>
+                <li><a href="MyProfile.html"> Profile</a></li>
+                <li><a href="../Appointment/Appointment.html"></i> Appointment</a></li>
+                <li><a href="../RegisterPet/RegisterPet.html">Register Pet</a></li>
+                <li><a href="../Message/Message.html"> Messages</a></li>
+                <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+                <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <header>
+                <h1>My Profile</h1>
+            </header>
+            <div class="profile-section">
+                <div class="profile-pic">
+                    <img src="../assets/browndog.jpg" alt="Profile Picture">
+                </div>
+                <div class="profile-info">
+                    <h2>Username: petlover123</h2>
+                    <p><strong>Name:</strong> John Doe</p>
+                    <p><strong>Address:</strong> 123 Pet Street, Animal City</p>
+                    <p><strong>Email:</strong> john.doe@example.com</p>
+                    <p><strong>Phone:</strong> +1 (123) 456-7890</p>
+                </div>
+                <button class="edit-btn">Edit</button>
+            </div>
+            <div class="pets-navigation">
+                <button class="nav-btn active" data-category="appointment">Registered for Appointment Pets</button>
+                <button class="nav-btn" data-category="adoption">Registered for Adoption Pets</button>
+                <button class="nav-btn" data-category="adopted">Adopted Pets</button>
+            </div>
+            <div class="pets-section">
+                <div class="pets-grid" id="pets-container">
+                    <!-- Pets will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="MyProfile.js"></script>
+</body>
+</html>

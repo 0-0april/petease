@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="MessageUser.css">
+    <link rel="stylesheet" href="../browse_pets/style.css">
+    <title>Chat - PetEase</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h2><i class="fas fa-paw"></i> PetEase</h2>
+        <ul>
+            <li><a href="../browse_pets/index.html">Browse</a></li>
+            <li><a href="../MyProfile/MyProfile.html"> Profile</a></li>
+            <li><a href="../Appointment/Appointment.html"></i> Appointment</a></li>
+            <li><a href="../RegisterPet/RegisterPet.html">Register Pet</a></li>
+            <li><a href="../Message/Message.html"> Messages</a></li>
+            <li><a href="../AdoptionRequest/AdoptionRequest.html" class="active"> Adoption Requests</a></li>
+            <li class="logout-btn"><a href='../login/index.html'> Logout</a></li>
+        </ul>
+</div>
+    <div class="main-container">
+        <div class="messages-section">
+            <header>
+                <h2>Messages</h2>
+            </header>
+            <div class="search-message">
+                <input type="text" id="search-input" placeholder="Search messages...">
+                <button type="submit" class="search-btn">Search</button>
+            </div>
+            <div class="messages-container">
+                <div class="messages-list">
+                    <div class="message-item message-unread">
+                        <div class="message-avatar">A</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Notification</span>
+                                <span class="message-time">2 min ago</span>
+                            </div>
+                            <div class="message-preview">Good news, users! The system udate churva... </div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">B</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Bob Smith</span>
+                                <span class="message-time">1 hour ago</span>
+                            </div>
+                            <div class="message-preview">Thanks for the information. I'll be in touch soon.</div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">C</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Charlie Brown</span>
+                                <span class="message-time">3 hours ago</span>
+                            </div>
+                            <div class="message-preview">Can we schedule a meeting for tomorrow?</div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">D</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Diana Prince</span>
+                                <span class="message-time">Yesterday</span>
+                            </div>
+                            <div class="message-preview">The adoption process was smooth. Thank you!</div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">E</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Ethan Hunt</span>
+                                <span class="message-time">2 days ago</span>
+                            </div>
+                            <div class="message-preview">Please send more details about the pet's health.</div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">F</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Fiona Green</span>
+                                <span class="message-time">3 days ago</span>
+                            </div>
+                            <div class="message-preview">Looking forward to meeting the new family member!</div>
+                        </div>
+                    </div>
+                    <div class="message-item">
+                        <div class="message-avatar">G</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">George Lucas</span>
+                                <span class="message-time">1 week ago</span>
+                            </div>
+                            <div class="message-preview">All documents have been submitted successfully.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-section">
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <div class="chat-avatar">J</div>
+                    <div class="chat-details">
+                        <h3 id="chat-user-name">John Doe</h3>
+                        <span class="chat-status">Online</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button id="block-btn" class="action-btn">Block User</button>
+                    <button id="report-btn" class="action-btn">Report Chat</button>
+                </div>
+            </div>
+
+            <div id="feedback-message" class="feedback hidden"></div>
+
+            <div class="chat-container" id="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message received">
+                        <div class="message-content">Hi! I'm interested in adopting your pet. Can you tell me more about its personality?</div>
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">Hello! Sure, the cat is very friendly and loves to play. She's about 2 years old and has been with us since she was a kitten.</div>
+                        <div class="message-time">10:32 AM</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">That sounds perfect! Does she get along well with other pets or children?</div>
+                        <div class="message-time">10:35 AM</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">Yes, she's great with kids and other animals. We have a dog at home and they play together all the time.</div>
+                        <div class="message-time">10:37 AM</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">Wonderful! I'd love to schedule a visit to meet her. When would be a good time?</div>
+                        <div class="message-time">10:40 AM</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">How about this Saturday afternoon around 2 PM? We can meet at the local park.</div>
+                        <div class="message-time">10:42 AM</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">Saturday at 2 PM sounds great! I'll bring my family. Looking forward to it!</div>
+                        <div class="message-time">10:45 AM</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">Perfect! See you then. Don't forget to bring some treats - she loves them!</div>
+                        <div class="message-time">10:46 AM</div>
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Type your message..." maxlength="500">
+                    <button id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="MessageUser.js"></script>
+</body>
+</html>

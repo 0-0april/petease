@@ -1,0 +1,7 @@
+- [x] Remake Appointment.html structure with header, sidebar, main content
+- [x] Add appointments list section
+- [x] Add modal for adding appointments with multi-step form
+- [x] Include calendar component
+- [x] Add form elements for pet selection, appointment types, date, confirmation
+- [x] Link to Appointment.css and Appointment.js
+- [x] Verify all JS element IDs and CSS classes are present
