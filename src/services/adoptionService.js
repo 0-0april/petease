@@ -44,6 +44,19 @@ export const adoptionService = {
     return response.data;
   },
 
+  // Called by vet to finalize adoption
+  completeAdoption: async (adoptionId) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
+    if (index !== -1) {
+      adoptionRequests[index].status = 'completed';
+      adoptionRequests[index].completedAt = new Date().toISOString();
+      return adoptionRequests[index];
+    }
+    throw new Error('Request not found');
+  },
+
+  // Requests sent by the current user (as adopter)
   getMyAdoptionRequests: async () => {
     const response = await api.get('/adoptions/my-requests');
     return response.data;
