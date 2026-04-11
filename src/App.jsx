@@ -13,16 +13,16 @@ import Messages from './pages/user/Messages';
 import Notifications from './pages/user/Notifications';
 import VetDashboard from './pages/vet/VetDashboard';
 import VetAppointments from './pages/vet/VetAppointments';
-import VetAttendance from './pages/vet/VetAttendance';
-import VetMedicalRecords from './pages/vet/VetMedicalRecords';
+
 import VetAdoptions from './pages/vet/VetAdoptions';
+import VetServices from './pages/vet/VetServices';
 import VetAnnouncements from './pages/vet/VetAnnouncements';
 import VetNotifications from './pages/vet/VetNotifications';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
-import AdminSystemAnnouncements from './pages/admin/AdminSystemAnnouncements';
+import AdminNotifications from './pages/admin/AdminNotifications';
 import AdoptionRequests from './pages/user/AdoptionRequests';
 import Landing from './pages/Landing';
 
@@ -43,21 +43,21 @@ function App() {
           <Route path="/adoption-requests" element={<PrivateRoute><AdoptionRequests /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
-          
+
           <Route path="/vet/dashboard" element={<PrivateRoute><VetDashboard /></PrivateRoute>} />
           <Route path="/vet/appointments" element={<PrivateRoute><VetAppointments /></PrivateRoute>} />
-          <Route path="/vet/attendance" element={<PrivateRoute><VetAttendance /></PrivateRoute>} />
-          <Route path="/vet/medical-records" element={<PrivateRoute><VetMedicalRecords /></PrivateRoute>} />
+
           <Route path="/vet/adoptions" element={<PrivateRoute><VetAdoptions /></PrivateRoute>} />
+          <Route path="/vet/services" element={<PrivateRoute><VetServices /></PrivateRoute>} />
           <Route path="/vet/announcements" element={<PrivateRoute><VetAnnouncements /></PrivateRoute>} />
           <Route path="/vet/notifications" element={<PrivateRoute><VetNotifications /></PrivateRoute>} />
-          
+
           <Route path="/admin/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/users" element={<PrivateRoute><AdminUsers /></PrivateRoute>} />
           <Route path="/admin/reports" element={<PrivateRoute><AdminReports /></PrivateRoute>} />
           <Route path="/admin/announcements" element={<PrivateRoute><AdminAnnouncements /></PrivateRoute>} />
-          <Route path="/admin/system-announcements" element={<PrivateRoute><AdminSystemAnnouncements /></PrivateRoute>} />
-          
+          <Route path="/admin/notifications" element={<PrivateRoute><AdminNotifications /></PrivateRoute>} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

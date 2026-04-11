@@ -1,86 +1,56 @@
-import { mockAdoptionRequests, mockPets } from '../data/mockData';
-
-// Shared mutable array — vet and user services both reference this
-export let adoptionRequests = [...mockAdoptionRequests];
+import api from './api';
 
 export const adoptionService = {
-  requestAdoption: async (petId, message = '') => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const pet = mockPets.find(p => p.id === parseInt(petId));
-    const newRequest = {
-      id: adoptionRequests.length + 1,
-      petId: parseInt(petId),
-      petName: pet?.name,
-      adopterId: user.id,
-      adopterName: user.name,
-      adopterEmail: user.email,
-      adopterPhone: user.phone,
-      ownerId: pet?.ownerId,
-      status: 'pending',
-      message,
-      rejectionReason: null,
-      createdAt: new Date().toISOString()
-    };
-    adoptionRequests.push(newRequest);
-    return newRequest;
+  requestAdoption: async (petId, message = '', waiverFile = null) => {
+    const formData = new FormData();
+    formData.append('userPetId', petId);
+    formData.append('message', message);
+    if (waiverFile) {
+      formData.append('waiver', waiverFile);
+    }
+
+    const response = await api.post('/adoptions', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   },
 
   cancelAdoption: async (adoptionId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'cancelled';
-      return adoptionRequests[index];
-    }
-    throw new Error('Request not found');
+    const response = await api.put(`/adoptions/${adoptionId}/cancel`);
+    return response.data;
   },
 
   approveAdoption: async (adoptionId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'approved';
-      adoptionRequests[index].rejectionReason = null;
-      return adoptionRequests[index];
-    }
-    throw new Error('Request not found');
+    const response = await api.put(`/adoptions/${adoptionId}/approve`);
+    return response.data;
   },
 
   rejectAdoption: async (adoptionId, reason = '') => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'rejected';
-      adoptionRequests[index].rejectionReason = reason;
-      return adoptionRequests[index];
-    }
-    throw new Error('Request not found');
+    const response = await api.put(`/adoptions/${adoptionId}/reject`, { reason });
+    return response.data;
   },
 
-  // Called by vet to finalize adoption
   completeAdoption: async (adoptionId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'completed';
-      adoptionRequests[index].completedAt = new Date().toISOString();
-      return adoptionRequests[index];
-    }
-    throw new Error('Request not found');
+    const response = await api.put(`/adoptions/${adoptionId}/complete`);
+    return response.data;
   },
 
-  // Requests sent by the current user (as adopter)
+  uploadWaiver: async (adoptionId, waiverFile) => {
+    const formData = new FormData();
+    formData.append('waiver', waiverFile);
+    const response = await api.post(`/adoptions/${adoptionId}/waiver`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
   getMyAdoptionRequests: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return adoptionRequests.filter(r => r.adopterId === user.id);
+    const response = await api.get('/adoptions/my-requests');
+    return response.data;
   },
 
-  // Incoming requests for the current user's pets (as owner)
   getIncomingRequests: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return adoptionRequests.filter(r => r.ownerId === user.id);
+    const response = await api.get('/adoptions/incoming');
+    return response.data;
   }
 };

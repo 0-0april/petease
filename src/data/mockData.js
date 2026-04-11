@@ -255,8 +255,10 @@ export const mockAdoptionRequests = [
     adopterEmail: 'jane@example.com',
     adopterPhone: '098-765-4321',
     ownerId: 1,
+    ownerName: 'John Doe',
     status: 'pending',
     message: 'I have a big yard and would love to give Max a great home!',
+    rejectionReason: null,
     createdAt: '2024-03-01T10:00:00'
   },
   {
@@ -268,8 +270,10 @@ export const mockAdoptionRequests = [
     adopterEmail: 'bob@example.com',
     adopterPhone: '555-111-2222',
     ownerId: 1,
+    ownerName: 'John Doe',
     status: 'pending',
     message: 'I live alone and would love a calm cat companion.',
+    rejectionReason: null,
     createdAt: '2024-03-03T14:00:00'
   },
   {
@@ -281,6 +285,7 @@ export const mockAdoptionRequests = [
     adopterEmail: 'jane@example.com',
     adopterPhone: '098-765-4321',
     ownerId: 1,
+    ownerName: 'John Doe',
     status: 'approved',
     message: 'Maine Coons are my favorite breed!',
     rejectionReason: null,
@@ -295,8 +300,10 @@ export const mockAdoptionRequests = [
     adopterEmail: 'john@example.com',
     adopterPhone: '123-456-7890',
     ownerId: 2,
+    ownerName: 'Jane Smith',
     status: 'pending',
     message: 'I would love to adopt Buddy for my family.',
+    rejectionReason: null,
     createdAt: '2024-03-05T11:00:00'
   }
 ];

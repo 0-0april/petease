@@ -8,18 +8,20 @@ const AdminReports = () => {
   const [reports, setReports] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filter, setFilter] = useState('all');
+  const [toast, setToast] = useState(null);
+
+  // For review modal
   const [selectedReport, setSelectedReport] = useState(null);
-  const [showResolveModal, setShowResolveModal] = useState(false);
-  const [resolution, setResolution] = useState('');
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   useEffect(() => {
     fetchReports();
-  }, [currentPage, filter]);
+  }, [currentPage]);
 
   const fetchReports = async () => {
     try {
-      const data = await adminService.getAllReports(currentPage, 10, filter);
+      // Fetch all reports (pending, etc)
+      const data = await adminService.getAllReports(currentPage, 10, 'all');
       setReports(data.reports);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -27,159 +29,145 @@ const AdminReports = () => {
     }
   };
 
-  const handleResolve = (report) => {
-    setSelectedReport(report);
-    setShowResolveModal(true);
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSubmitResolution = async (e) => {
-    e.preventDefault();
-    try {
-      await adminService.resolveReport(selectedReport.id, resolution);
-      setShowResolveModal(false);
-      setResolution('');
-      fetchReports();
-      alert('Report resolved successfully');
-    } catch (error) {
-      alert('Failed to resolve report');
+  const handleReview = (report) => {
+    setSelectedReport(report);
+    setShowReviewModal(true);
+  };
+
+  const handleDisableAccount = async () => {
+    if (window.confirm(`Are you sure you want to disable ${selectedReport.reportedUserName}'s account?`)) {
+      try {
+        await adminService.updateUserStatus(selectedReport.reportedUserId, 'disabled');
+        // Resolve the report
+        await adminService.resolveReport(selectedReport.id, 'Account Disabled');
+        showToast('Account disabled and report resolved.');
+        setShowReviewModal(false);
+        fetchReports();
+      } catch (error) {
+        showToast('Failed to disable account.', 'error');
+      }
     }
   };
 
-  const handleDismiss = async (reportId) => {
-    if (window.confirm('Are you sure you want to dismiss this report?')) {
-      try {
-        await adminService.dismissReport(reportId);
-        fetchReports();
-        alert('Report dismissed');
-      } catch (error) {
-        alert('Failed to dismiss report');
-      }
+  const handleIgnore = async () => {
+    try {
+      await adminService.dismissReport(selectedReport.id);
+      showToast('Report ignored.');
+      setShowReviewModal(false);
+      fetchReports();
+    } catch (error) {
+      showToast('Failed to ignore report.', 'error');
     }
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">User Reports</h1>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Reports</option>
-            <option value="pending">Pending</option>
-            <option value="resolved">Resolved</option>
-            <option value="dismissed">Dismissed</option>
-          </select>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900">Manage Reports</h1>
 
-        <div className="space-y-4">
-          {reports.map(report => (
-            <div key={report.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">Report #{report.id}</h3>
-                    <span className={`px-3 py-1 text-xs rounded-full ${
-                      report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {report.status}
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Reported User:</span> {report.reportedUserName} (ID: {report.reportedUserId})
-                    </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Reported By:</span> {report.reportedBy}
-                    </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Reason:</span> {report.reason}
-                    </p>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Description:</span> {report.description}
-                    </p>
-                    <p className="text-gray-500 text-xs">
-                      Reported on: {new Date(report.createdAt).toLocaleString()}
-                    </p>
-                    {report.status === 'resolved' && (
-                      <>
-                        <p className="text-gray-700">
-                          <span className="font-semibold">Resolution:</span> {report.resolution}
-                        </p>
-                        <p className="text-gray-500 text-xs">
-                          Resolved by {report.resolvedBy} on {new Date(report.resolvedAt).toLocaleString()}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                {report.status === 'pending' && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleResolve(report)}
-                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                    >
-                      Resolve
-                    </button>
-                    <button
-                      onClick={() => handleDismiss(report.id)}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {reports.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-600">No reports found</p>
+        {toast && (
+          <div className={`rounded-xl px-4 py-3 text-sm font-medium ${toast.type === 'error'
+              ? 'bg-red-50 text-red-800 border border-red-200'
+              : 'bg-green-50 text-green-800 border border-green-200'
+            }`}>
+            {toast.msg}
           </div>
         )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reported User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {reports.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-gray-400 text-sm">No reports found.</td>
+                </tr>
+              ) : reports.map(report => (
+                <tr key={report.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                    {report.reportedUserName} <span className="text-xs text-gray-500">({report.reportedBy})</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-xs">{report.reason}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {new Date(report.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                        report.status === 'dismissed' ? 'bg-gray-100 text-gray-800' :
+                          'bg-yellow-100 text-yellow-800'
+                      }`}>
+                      {report.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {report.status === 'pending' ? (
+                      <button
+                        onClick={() => handleReview(report)}
+                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                      >
+                        Review
+                      </button>
+                    ) : (
+                      <span className="text-xs text-gray-400">Done</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
 
-      <Modal
-        isOpen={showResolveModal}
-        onClose={() => setShowResolveModal(false)}
-        title="Resolve Report"
-      >
+      {/* Review Report Modal */}
+      <Modal isOpen={showReviewModal} onClose={() => setShowReviewModal(false)} title="Review Report">
         {selectedReport && (
-          <form onSubmit={handleSubmitResolution} className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-md">
-              <p className="text-sm text-gray-600">Report: <span className="font-semibold">{selectedReport.reason}</span></p>
-              <p className="text-sm text-gray-600">User: <span className="font-semibold">{selectedReport.reportedUserName}</span></p>
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 border border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-500">Reported User</p>
+              <p className="font-semibold text-gray-900 mb-3">{selectedReport.reportedUserName}</p>
+              
+              <p className="text-sm text-gray-500">Reported By</p>
+              <p className="font-semibold text-gray-900 mb-3">{selectedReport.reportedBy}</p>
+
+              <p className="text-sm text-gray-500">Reason</p>
+              <p className="font-semibold text-gray-900 mb-3">{selectedReport.reason}</p>
+
+              <p className="text-sm text-gray-500">Description</p>
+              <p className="text-sm text-gray-800">{selectedReport.description}</p>
             </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Resolution Details</label>
-              <textarea
-                value={resolution}
-                onChange={(e) => setResolution(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                rows="4"
-                placeholder="Describe the action taken to resolve this report..."
-                required
-              />
+            
+            <p className="text-sm text-gray-700 font-medium pt-2">Take Action:</p>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleDisableAccount}
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+              >
+                Disable Account
+              </button>
+              <button
+                onClick={handleIgnore}
+                className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium hover:bg-gray-300"
+              >
+                Ignore
+              </button>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark"
-            >
-              Submit Resolution
-            </button>
-          </form>
+          </div>
         )}
       </Modal>
     </AdminLayout>

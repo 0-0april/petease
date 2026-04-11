@@ -1,97 +1,100 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
+import Pagination from '../../components/Pagination';
 import { adminService } from '../../services/adminService';
 
 const AdminAnnouncements = () => {
-  const [announcements, setAnnouncements] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [filter, setFilter] = useState('pending');
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [editData, setEditData] = useState({
-    title: '',
-    content: '',
-    serviceType: '',
-    availableDates: ''
-  });
+  const [activeTab, setActiveTab] = useState('system'); // 'system' or 'vet'
+
+  // --- Vet Announcements State ---
+  const [vetAnnouncements, setVetAnnouncements] = useState([]);
+  const [vetFilter, setVetFilter] = useState('pending');
+  const [vetPage, setVetPage] = useState(1);
+  const [vetTotalPages, setVetTotalPages] = useState(1);
+  const [selectedVetAnn, setSelectedVetAnn] = useState(null);
+  const [showVetRejectModal, setShowVetRejectModal] = useState(false);
+  const [vetRejectionReason, setVetRejectionReason] = useState('');
+  const [showVetEditModal, setShowVetEditModal] = useState(false);
+  const [vetEditData, setVetEditData] = useState({ title: '', content: '', serviceType: '', availableDates: '' });
+
+  // --- System Announcements State ---
+  const [sysAnnouncements, setSysAnnouncements] = useState([]);
+  const [showSysModal, setShowSysModal] = useState(false);
+  const [editingSysAnn, setEditingSysAnn] = useState(null);
+  const [sysFormData, setSysFormData] = useState({ title: '', content: '', type: 'maintenance', priority: 'medium', expiresAt: '' });
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, [currentPage, filter]);
+    if (activeTab === 'vet') fetchVetAnnouncements();
+    else fetchSysAnnouncements();
+  }, [activeTab, vetPage, vetFilter]);
 
-  const fetchAnnouncements = async () => {
+  // --- Vet Functions ---
+  const fetchVetAnnouncements = async () => {
     try {
-      const data = await adminService.getAllAnnouncements(currentPage, 10, filter);
-      setAnnouncements(data.announcements);
-      setTotalPages(data.totalPages);
+      const data = await adminService.getAllAnnouncements(vetPage, 10, vetFilter);
+      setVetAnnouncements(data.announcements);
+      setVetTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error(error);
     }
   };
 
-  const handleApprove = async (id) => {
-    if (window.confirm('Approve this announcement?')) {
-      try {
-        await adminService.approveAnnouncement(id);
-        fetchAnnouncements();
-        alert('Announcement approved');
-      } catch (error) {
-        alert('Failed to approve announcement');
+  const handleVetApprove = async (id) => {
+    try {
+      await adminService.approveAnnouncement(id);
+      fetchVetAnnouncements();
+    } catch (error) {
+      alert('Failed to approve');
+    }
+  };
+
+  const handleVetReject = async (e) => {
+    e.preventDefault();
+    try {
+      await adminService.rejectAnnouncement(selectedVetAnn.id, vetRejectionReason);
+      setShowVetRejectModal(false);
+      setVetRejectionReason('');
+      fetchVetAnnouncements();
+    } catch (error) {
+      alert('Failed to reject');
+    }
+  };
+
+  const handleVetEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const dates = vetEditData.availableDates ? vetEditData.availableDates.split(',').map(d => d.trim()) : [];
+      await adminService.editAnnouncement(selectedVetAnn.id, { ...vetEditData, availableDates: dates });
+      setShowVetEditModal(false);
+      fetchVetAnnouncements();
+    } catch (error) {
+      alert('Failed to update');
+    }
+  };
+
+  // --- System Functions ---
+  const fetchSysAnnouncements = async () => {
+    try {
+      const data = await adminService.getSystemAnnouncements();
+      setSysAnnouncements(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSysSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSysAnn) {
+        await adminService.updateSystemAnnouncement(editingSysAnn.id, sysFormData);
+      } else {
+        await adminService.createSystemAnnouncement(sysFormData);
       }
-    }
-  };
-
-  const handleReject = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setShowRejectModal(true);
-  };
-
-  const handleSubmitRejection = async (e) => {
-    e.preventDefault();
-    try {
-      await adminService.rejectAnnouncement(selectedAnnouncement.id, rejectionReason);
-      setShowRejectModal(false);
-      setRejectionReason('');
-      fetchAnnouncements();
-      alert('Announcement rejected');
+      setShowSysModal(false);
+      fetchSysAnnouncements();
     } catch (error) {
-      alert('Failed to reject announcement');
-    }
-  };
-
-  const handleEdit = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setEditData({
-      title: announcement.title,
-      content: announcement.content,
-      serviceType: announcement.serviceType,
-      availableDates: announcement.availableDates.join(', ')
-    });
-    setShowEditModal(true);
-  };
-
-  const handleSubmitEdit = async (e) => {
-    e.preventDefault();
-    try {
-      const dates = editData.availableDates
-        ? editData.availableDates.split(',').map(d => d.trim())
-        : [];
-      
-      await adminService.editAnnouncement(selectedAnnouncement.id, {
-        ...editData,
-        availableDates: dates
-      });
-      
-      setShowEditModal(false);
-      fetchAnnouncements();
-      alert('Announcement updated and approved');
-    } catch (error) {
-      alert('Failed to update announcement');
+      alert('Failed to save');
     }
   };
 
@@ -99,175 +102,130 @@ const AdminAnnouncements = () => {
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Announcement Review</h1>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Announcements</option>
-            <option value="pending">Pending Review</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <h1 className="text-3xl font-bold text-gray-900">Announcements</h1>
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('system')}
+              className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'system' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              System Announcements
+            </button>
+            <button
+              onClick={() => setActiveTab('vet')}
+              className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'vet' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Vet Submissions
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {announcements.map(announcement => (
-            <div key={announcement.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900">{announcement.title}</h3>
-                    <span className={`px-3 py-1 text-xs rounded-full ${
-                      announcement.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      announcement.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {announcement.status}
-                    </span>
-                    <span className="px-3 py-1 text-xs rounded-full bg-primary-light bg-opacity-20 text-primary capitalize">
-                      {announcement.serviceType}
-                    </span>
+        {activeTab === 'system' ? (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setEditingSysAnn(null);
+                  setSysFormData({ title: '', content: '', type: 'maintenance', priority: 'medium', expiresAt: '' });
+                  setShowSysModal(true);
+                }}
+                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+              >
+                Create Announcement
+              </button>
+            </div>
+            {sysAnnouncements.map(ann => (
+              <div key={ann.id} className="bg-white rounded-lg shadow-sm p-5 border border-gray-100 flex justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{ann.title}</h3>
+                  <p className="text-gray-700 mt-1">{ann.content}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingSysAnn(ann);
+                    setSysFormData({ ...ann, expiresAt: ann.expiresAt ? ann.expiresAt.split('T')[0] : '' });
+                    setShowSysModal(true);
+                  }}
+                  className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-sm hover:bg-blue-200"
+                >
+                  Edit
+                </button>
+              </div>
+            ))}
+            {sysAnnouncements.length === 0 && <p className="text-gray-500 text-center py-6">No system announcements.</p>}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <select value={vetFilter} onChange={(e) => setVetFilter(e.target.value)} className="px-3 py-2 border rounded-md">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+            {vetAnnouncements.map(ann => (
+              <div key={ann.id} className="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{ann.title} <span className="text-xs bg-gray-100 px-2 py-1 rounded ml-2">{ann.status}</span></h3>
+                    <p className="text-gray-700 mt-1">{ann.content}</p>
                   </div>
-                  <p className="text-gray-700 mt-2">{announcement.content}</p>
-                  {announcement.availableDates && announcement.availableDates.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-sm font-semibold text-gray-700">Available Dates:</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {announcement.availableDates.map((date, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                            {new Date(date).toLocaleDateString()}
-                          </span>
-                        ))}
-                      </div>
+                  {ann.status === 'pending' && (
+                    <div className="flex space-x-2">
+                      <button onClick={() => handleVetApprove(ann.id)} className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700">Approve</button>
+                      <button 
+                        onClick={() => {
+                          setSelectedVetAnn(ann);
+                          setVetEditData({ title: ann.title, content: ann.content, serviceType: ann.serviceType, availableDates: ann.availableDates.join(', ') });
+                          setShowVetEditModal(true);
+                        }} 
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700">Edit
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedVetAnn(ann);
+                          setShowVetRejectModal(true);
+                        }} 
+                        className="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700">Reject
+                      </button>
                     </div>
                   )}
-                  <div className="mt-3 text-sm text-gray-500">
-                    <p>Created by: {announcement.createdBy} on {new Date(announcement.createdAt).toLocaleString()}</p>
-                    {announcement.reviewedBy && (
-                      <p>Reviewed by: {announcement.reviewedBy} on {new Date(announcement.reviewedAt).toLocaleString()}</p>
-                    )}
-                    {announcement.rejectionReason && (
-                      <p className="text-red-600 mt-1">Rejection Reason: {announcement.rejectionReason}</p>
-                    )}
-                  </div>
                 </div>
-                {announcement.status === 'pending' && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleApprove(announcement.id)}
-                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleEdit(announcement)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleReject(announcement)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
-        </div>
-
-        {announcements.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-600">No announcements found</p>
+            ))}
+            {vetAnnouncements.length === 0 && <p className="text-gray-500 text-center py-6">No vet announcements found.</p>}
+            <Pagination currentPage={vetPage} totalPages={vetTotalPages} onPageChange={setVetPage} />
           </div>
         )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {/* System Edit Modal */}
+        <Modal isOpen={showSysModal} onClose={() => setShowSysModal(false)} title={editingSysAnn ? 'Edit System Announcement' : 'Create System Announcement'}>
+          <form onSubmit={handleSysSubmit} className="space-y-4">
+            <div><label>Title</label><input required className="w-full border p-2 rounded" value={sysFormData.title} onChange={e => setSysFormData({...sysFormData, title: e.target.value})} /></div>
+            <div><label>Content</label><textarea required className="w-full border p-2 rounded" rows="3" value={sysFormData.content} onChange={e => setSysFormData({...sysFormData, content: e.target.value})} /></div>
+            <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark">Save</button>
+          </form>
+        </Modal>
+
+        {/* Vet Edit Modal */}
+        <Modal isOpen={showVetEditModal} onClose={() => setShowVetEditModal(false)} title="Edit Vet Announcement">
+          <form onSubmit={handleVetEditSubmit} className="space-y-4">
+            <div><label>Title</label><input required className="w-full border p-2 rounded" value={vetEditData.title} onChange={e => setVetEditData({...vetEditData, title: e.target.value})} /></div>
+            <div><label>Content</label><textarea required className="w-full border p-2 rounded" rows="3" value={vetEditData.content} onChange={e => setVetEditData({...vetEditData, content: e.target.value})} /></div>
+            <div><label>Dates</label><input className="w-full border p-2 rounded" value={vetEditData.availableDates} onChange={e => setVetEditData({...vetEditData, availableDates: e.target.value})} /></div>
+            <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark">Update & Approve</button>
+          </form>
+        </Modal>
+
+        {/* Vet Reject Modal */}
+        <Modal isOpen={showVetRejectModal} onClose={() => setShowVetRejectModal(false)} title="Reject Announcement">
+          <form onSubmit={handleVetReject} className="space-y-4">
+            <div><label>Reason</label><textarea required className="w-full border p-2 rounded" rows="3" value={vetRejectionReason} onChange={e => setVetRejectionReason(e.target.value)} /></div>
+            <button type="submit" className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">Reject</button>
+          </form>
+        </Modal>
+
       </div>
-
-      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Announcement">
-        <form onSubmit={handleSubmitEdit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 mb-2">Title</label>
-            <input
-              type="text"
-              value={editData.title}
-              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Service Type</label>
-            <select
-              value={editData.serviceType}
-              onChange={(e) => setEditData({ ...editData, serviceType: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="spay">Spay/Neuter</option>
-              <option value="consultation">Consultation</option>
-              <option value="anti-rabies">Anti-Rabies Vaccine</option>
-              <option value="general">General Service</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Content</label>
-            <textarea
-              value={editData.content}
-              onChange={(e) => setEditData({ ...editData, content: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              rows="4"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Available Dates (comma-separated)</label>
-            <input
-              type="text"
-              value={editData.availableDates}
-              onChange={(e) => setEditData({ ...editData, availableDates: e.target.value })}
-              placeholder="2024-03-20, 2024-03-25"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark"
-          >
-            Update & Approve
-          </button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={showRejectModal} onClose={() => setShowRejectModal(false)} title="Reject Announcement">
-        <form onSubmit={handleSubmitRejection} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 mb-2">Rejection Reason</label>
-            <textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              rows="4"
-              placeholder="Explain why this announcement is being rejected..."
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700"
-          >
-            Reject Announcement
-          </button>
-        </form>
-      </Modal>
     </AdminLayout>
   );
 };
