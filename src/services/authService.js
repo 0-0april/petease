@@ -1,23 +1,27 @@
-import { mockUsers } from '../data/mockData';
+import api from './api';
 
 export const authService = {
   login: async (email, password) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const user = mockUsers.find(u => u.email === email && u.password === password);
-    if (!user) {
-      throw new Error('Invalid credentials');
+    const response = await api.post('/auth/login', { email, password });
+    if (response.data.token) {
+      localStorage.setItem('user', JSON.stringify(response.data));
     }
-    return user;
+    return response.data;
   },
 
   register: async (userData) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newUser = {
-      id: mockUsers.length + 1,
-      ...userData,
-      token: `mock-token-${Date.now()}`
-    };
-    mockUsers.push(newUser);
-    return newUser;
+    const response = await api.post('/auth/register', userData);
+    if (response.data.token) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('user');
+  },
+
+  getCurrentUser: () => {
+    return JSON.parse(localStorage.getItem('user') || 'null');
   }
 };

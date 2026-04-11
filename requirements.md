@@ -122,6 +122,28 @@ Pages:
 
 ---
 
-### Important Instructions
-- Do not add features beyond those listed.  
-- You may state assumptions where necessary (e.g., mock data, local storage, or basic state management context).
+
+### Backend
+1. Set up Supabase PostgreSQL backend. Use the petease.sql schema (already configured in Supabase). Connect authentication (login/register) to the existing database tables.
+
+2. make sure the name of the logged in user is displayed in the navigation bar between notification and logout button.
+
+3. connect the data from the supabase db (use 'backend/petease.sql' as the reference because that is the schema) to the 'user/BrowsePets.jsx' page. remove the connection from the mockData and use the values on the actual supabase. 
+
+follow the following references, don't change the ui, just change the reference for the data that is being displayed here.
+
+  pet.name should be replace with PetName,
+  pet.birthday should be replaced with PetBDay,
+  pet.species = PetSpecie 
+  pet.breed = PetBreed
+  pet.markings = PetMarkings 
+  pet.gender = PetGender 
+
+  and so on, just read all the Pet table attributes from the 'backend/petease.sql' and connect it here. use the same conditions from the mock data just change the reference for the data displayed there
+
+  4. read the 'backend/petease.sql' again and find the userpets table. this your basis for display for user/MyPets.jsx page and user/BrowsePets.jsx, and BookAppointment.js page as well. again do not change the UI, just change the data from mock data to supabase data. 
+
+  5. make sure that the following uploaded file is stored in the supabase bucket that named the following:
+  
+  adoption-waivers for AdoptionWaiver from ADOPTION table(the file name when it gets inside the bucket should be changes from its original file name to the Adopter's User's username + upload file name), and
+  pet-images for petImg attribute from PET table the file(the file name when it gets inside the bucket should be changes from its original file name to the User's username + uploded file name)

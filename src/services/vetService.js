@@ -1,5 +1,5 @@
 import { mockAppointments, mockAppointmentLogs, mockAnnouncements, mockAdoptionWaivers, mockMedicalHistory } from '../data/mockData';
-import { adoptionRequests } from './adoptionService';
+import api from './api';
 
 let appointments = [...mockAppointments];
 let appointmentLogs = [...mockAppointmentLogs];
@@ -145,58 +145,24 @@ export const vetService = {
 
   // Get all approved adoptions waiting for vet processing
   getApprovedAdoptions: async (page = 1, limit = 10) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const approved = adoptionRequests.filter(r => r.status === 'approved' || r.status === 'completed');
-    const sorted = [...approved].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return {
-      adoptions: sorted.slice(startIndex, endIndex),
-      total: approved.length,
-      totalPages: Math.ceil(approved.length / limit)
-    };
+    const response = await api.get('/vet/adoptions', { params: { page, limit } });
+    return response.data;
   },
 
   // Complete adoption: upload waiver + add medical record + mark completed
   completeAdoption: async (adoptionId, waiverData, medicalData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Save waiver
-    const waiver = {
-      id: adoptionWaivers.length + 1,
-      adoptionRequestId: parseInt(adoptionId),
-      waiverDocument: waiverData.waiverDocument,
-      uploadedBy: 'Dr. Sarah Wilson',
-      uploadedAt: new Date().toISOString(),
-      ownerSignature: true,
-      adopterSignature: true,
-      witnessSignature: true
-    };
-    adoptionWaivers.push(waiver);
-
-    // Save medical record
-    if (medicalData?.service) {
-      const record = {
-        id: medicalHistory.length + 1,
-        petId: medicalData.petId,
-        medication: medicalData.service,
-        date: new Date().toISOString().split('T')[0],
-        notes: medicalData.notes || 'Service performed during adoption meetup',
-        veterinarian: 'Dr. Sarah Wilson',
-        createdAt: new Date().toISOString()
-      };
-      medicalHistory.push(record);
+    const formData = new FormData();
+    if (waiverData.waiverFile) {
+      formData.append('waiver', waiverData.waiverFile);
+    }
+    if (medicalData) {
+      formData.append('medicalData', JSON.stringify(medicalData));
     }
 
-    // Mark adoption completed via shared array
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'completed';
-      adoptionRequests[index].completedAt = new Date().toISOString();
-      adoptionRequests[index].waiverDocument = waiverData.waiverDocument;
-    }
-
-    return { waiver };
+    const response = await api.post(`/vet/adoptions/${adoptionId}/complete`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   },
 
   exportAppointmentsToCSV: async (appointments) => {

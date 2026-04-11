@@ -8,7 +8,7 @@ const EMPTY_FORM = {
   species: 'dog',
   breed: '',
   color: '',
-  gender: 'male',
+  gender: 'Male',
   birthday: '',
   description: '',
   medicalHistory: '',
@@ -25,6 +25,8 @@ const MyPets = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => { fetchMyPets(); }, []);
 
@@ -46,18 +48,37 @@ const MyPets = () => {
     e.preventDefault();
     setSaving(true);
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('petName', formData.name);
+      formDataToSend.append('petBDay', formData.birthday);
+      formDataToSend.append('petSpecie', formData.species);
+      formDataToSend.append('petBreed', formData.breed);
+      formDataToSend.append('petMarkings', formData.color);
+      formDataToSend.append('petGender', formData.gender);
+      formDataToSend.append('petDetails', formData.description);
+      formDataToSend.append('petRegType', formData.registrationType === 'adoption' ? 'Adoption' : formData.registrationType === 'both' ? 'Both' : 'Appointment');
+      
+      if (imageFile) {
+        formDataToSend.append('image', imageFile);
+      } else if (formData.image) {
+        formDataToSend.append('petImg', formData.image);
+      }
+
       if (editingPet) {
-        await petService.updatePet(editingPet.id, formData);
+        await petService.updatePet(editingPet.id, formDataToSend);
         showFeedback('Pet updated successfully.');
       } else {
-        await petService.createPet(formData);
+        await petService.createPet(formDataToSend);
         showFeedback('Pet registered successfully.');
       }
       setShowModal(false);
       setEditingPet(null);
       setFormData(EMPTY_FORM);
+      setImageFile(null);
+      setImagePreview(null);
       fetchMyPets();
-    } catch {
+    } catch (error) {
+      console.error('Save error:', error);
       showFeedback('Failed to save pet. Please try again.', 'error');
     } finally {
       setSaving(false);
@@ -71,7 +92,7 @@ const MyPets = () => {
       species: pet.species || pet.type || 'dog',
       breed: pet.breed || '',
       color: pet.color || '',
-      gender: pet.gender || 'male',
+      gender: pet.gender || 'Male',
       birthday: pet.birthday || '',
       description: pet.description || '',
       medicalHistory: pet.medicalHistory || '',
@@ -79,7 +100,21 @@ const MyPets = () => {
       image: pet.image || '',
       vaccinationCard: pet.vaccinationCard || ''
     });
+    setImageFile(null);
+    setImagePreview(pet.image || null);
     setShowModal(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleDeleteConfirmed = async () => {
@@ -140,9 +175,13 @@ const MyPets = () => {
                   <div className="flex items-start justify-between mb-1">
                     <h3 className="text-lg font-semibold text-gray-900">{pet.name}</h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      pet.registrationType === 'adoption' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                      pet.registrationType === 'adoption' ? 'bg-green-100 text-green-700' : 
+                      pet.registrationType === 'both' ? 'bg-purple-100 text-purple-700' : 
+                      'bg-blue-100 text-blue-700'
                     }`}>
-                      {pet.registrationType === 'adoption' ? 'For Adoption' : 'For Appointment'}
+                      {pet.registrationType === 'adoption' ? 'For Adoption' : 
+                       pet.registrationType === 'both' ? 'Both' : 
+                       'For Appointment'}
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">{pet.breed} · {pet.species || pet.type} · {pet.gender}</p>
@@ -200,8 +239,8 @@ const MyPets = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Gender <span className="text-red-500">*</span></label>
               <select value={formData.gender} onChange={e => field('gender', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
               </select>
             </div>
             <div>
@@ -226,6 +265,7 @@ const MyPets = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="adoption">For Adoption</option>
                 <option value="appointment">For Appointment</option>
+                <option value="both">Both</option>
               </select>
             </div>
           </div>
@@ -242,10 +282,20 @@ const MyPets = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Pet Image URL <span className="text-red-500">*</span></label>
-            <input type="url" value={formData.image} onChange={e => field('image', e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Pet Image <span className="text-red-500">*</span></label>
+            {imagePreview && (
+              <div className="mb-2">
+                <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+              </div>
+            )}
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              required={!editingPet && !imagePreview}
+            />
+            <p className="text-xs text-gray-500 mt-1">Upload a photo of your pet</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Vaccination Card URL <span className="text-gray-400 font-normal">(optional)</span></label>
