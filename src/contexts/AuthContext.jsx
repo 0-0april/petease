@@ -16,26 +16,40 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const userData = await authService.login(email, password);
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    return userData;
+    const response = await authService.login(email, password);
+    setUser(response.user); // Store only the user object, not the whole response
+    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('token', response.token); // Store token separately
+    return response;
+  };
+
+  const loginWithGoogle = async () => {
+    return await authService.loginWithGoogle();
+  };
+
+  const handleGoogleCallback = async () => {
+    const response = await authService.handleGoogleCallback();
+    setUser(response.user); // Store only the user object, not the whole response
+    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('token', response.token); // Store token separately
+    return response;
   };
 
   const register = async (userData) => {
-    const newUser = await authService.register(userData);
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    return newUser;
+    const response = await authService.register(userData);
+    setUser(response.user); // Store only the user object, not the whole response
+    localStorage.setItem('user', JSON.stringify(response.user));
+    localStorage.setItem('token', response.token); // Store token separately
+    return response;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    authService.logout();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, handleGoogleCallback, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

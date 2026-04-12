@@ -5,6 +5,114 @@ import { supabase } from '../config/supabase.js';
 
 const router = express.Router();
 
+// Google OAuth login/register
+router.post('/google', async (req, res) => {
+  const { email, name, googleId, avatar } = req.body;
+
+  try {
+    // Check if account exists
+    const { data: existingAccount } = await supabase
+      .from('ACCOUNT')
+      .select('*')
+      .eq('AccEmail', email)
+      .single();
+
+    let accId, role, userData;
+
+    if (existingAccount) {
+      // User exists, log them in
+      accId = existingAccount.AccID;
+
+      // Determine role
+      const { data: users } = await supabase
+        .from('USER')
+        .select('*')
+        .eq('AccID', accId)
+        .single();
+
+      if (users) {
+        role = 'user';
+        userData = users;
+      } else {
+        const { data: admins } = await supabase
+          .from('ADMIN')
+          .select('*')
+          .eq('AccID', accId)
+          .single();
+
+        if (admins) {
+          role = 'admin';
+          userData = admins;
+        } else {
+          const { data: vets } = await supabase
+            .from('VETSTAFF')
+            .select('*')
+            .eq('AccID', accId)
+            .single();
+
+          if (vets) {
+            role = 'vet';
+            userData = vets;
+          }
+        }
+      }
+    } else {
+      // Create new account
+      const username = email.split('@')[0];
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      const { data: newAccount, error: accountError } = await supabase
+        .from('ACCOUNT')
+        .insert({
+          AccUserName: username,
+          AccEmail: email,
+          AccPass: hashedPassword
+        })
+        .select()
+        .single();
+
+      if (accountError) throw accountError;
+
+      accId = newAccount.AccID;
+      role = 'user';
+
+      // Create user profile
+      const { error: userError } = await supabase
+        .from('USER')
+        .insert({
+          UserName: name,
+          AccID: accId
+        });
+
+      if (userError) throw userError;
+
+      const { data: newUser } = await supabase
+        .from('USER')
+        .select('*')
+        .eq('AccID', accId)
+        .single();
+
+      userData = newUser;
+    }
+
+    const token = jwt.sign({ accId, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: {
+        accId,
+        email,
+        role,
+        ...userData
+      }
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/register', async (req, res) => {
   const { username, email, phoneNum, password, name, address, role = 'user' } = req.body;
 
@@ -109,6 +217,8 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ accId: account.AccID, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+    console.log('Login - userData from DB:', userData);
+
     res.json({
       token,
       user: {
@@ -116,6 +226,7 @@ router.post('/login', async (req, res) => {
         username: account.AccUserName,
         email: account.AccEmail,
         role,
+        UserID: userData?.UserID, // Explicitly include UserID
         ...userData
       }
     });

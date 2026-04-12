@@ -126,9 +126,7 @@ Pages:
 ### Backend
 1. Set up Supabase PostgreSQL backend. Use the petease.sql schema (already configured in Supabase). Connect authentication (login/register) to the existing database tables.
 
-2. make sure the name of the logged in user is displayed in the navigation bar between notification and logout button.
-
-3. connect the data from the supabase db (use 'backend/petease.sql' as the reference because that is the schema) to the 'user/BrowsePets.jsx' page. remove the connection from the mockData and use the values on the actual supabase. 
+2. connect the data from the supabase db (use 'backend/petease.sql' as the reference because that is the schema) to the 'user/BrowsePets.jsx' page. remove the connection from the mockData and use the values on the actual supabase. 
 
 follow the following references, don't change the ui, just change the reference for the data that is being displayed here.
 
@@ -141,9 +139,27 @@ follow the following references, don't change the ui, just change the reference 
 
   and so on, just read all the Pet table attributes from the 'backend/petease.sql' and connect it here. use the same conditions from the mock data just change the reference for the data displayed there
 
-  4. read the 'backend/petease.sql' again and find the userpets table. this your basis for display for user/MyPets.jsx page and user/BrowsePets.jsx, and BookAppointment.js page as well. again do not change the UI, just change the data from mock data to supabase data. 
+  3. read the 'backend/petease.sql' again and find the userpets table. this your basis for display for user/MyPets.jsx page and user/BrowsePets.jsx, and BookAppointment.js page as well. again do not change the UI, just change the data from mock data to supabase data. 
 
-  5. make sure that the following uploaded file is stored in the supabase bucket that named the following:
+  4. make sure that the following uploaded file is stored in the supabase bucket that named the following:
   
   adoption-waivers for AdoptionWaiver from ADOPTION table(the file name when it gets inside the bucket should be changes from its original file name to the Adopter's User's username + upload file name), and
   pet-images for petImg attribute from PET table the file(the file name when it gets inside the bucket should be changes from its original file name to the User's username + uploded file name)
+
+  5. make sure the name of the logged in user is displayed in the navigation bar between notification and logout button.
+
+  6. the user who owned the pet shouldn't be allowed to adopt its own. it should display "you owned this pet" or something instead of message owner or request adoption. it should only be displayed when it was owne by other user
+
+  7. when the user edit the pet, it should not reset the information that has ben already place. make sure the birthday is still there when the user hit edit. instead of asking the user to input birthday again.
+
+8. now connect the user/AdoptionRequest.jsx to the supabase based on the schema given in the backend/petease.sql. make sure it connect correctly use the same logic as the UI have(read the like 29 to 35 of this file for the reference), you just have to change the reference of that data
+
+
+  UserID is always the adopter who sent request and
+  UserPetsID is always the owner of pet who receive the request.
+  since there is sent and recieved part (read the like 29 to 35 of this file for the reference), it should be logically sorted.
+
+  you can get the data through logically reading the backend/petease.sql
+ 
+
+  9. now connect the supabase to the user/Appointment.jsx based on the appointment table and any related table on the backend/petease.sql schema

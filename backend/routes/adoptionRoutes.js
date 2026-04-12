@@ -34,7 +34,29 @@ router.post('/', authenticateToken, upload.single('waiver'), async (req, res) =>
   const { userPetId, message } = req.body;
   
   try {
+    console.log('Adoption request body:', req.body);
+    console.log('User from token:', req.user);
+    
     const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    console.log('Adopter UserID:', userResult.rows[0].UserID);
+    
+    // Get the UserPetID from USERPETS table based on the PetID
+    const userPetResult = await pool.query(
+      'SELECT "UserPetID" FROM "USERPETS" WHERE "PetID" = $1',
+      [userPetId]
+    );
+    
+    if (userPetResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Pet not found in USERPETS table' });
+    }
+    
+    const userPetID = userPetResult.rows[0].UserPetID;
+    console.log('UserPetID:', userPetID);
     
     let waiverUrl = null;
     if (req.file) {
@@ -43,11 +65,14 @@ router.post('/', authenticateToken, upload.single('waiver'), async (req, res) =>
     
     const result = await pool.query(
       'INSERT INTO "ADOPTION" ("UserID", "UserPetsID", "AdoptionWaiver") VALUES ($1, $2, $3) RETURNING *',
-      [userResult.rows[0].UserID, userPetId, waiverUrl]
+      [userResult.rows[0].UserID, userPetID, waiverUrl]
     );
+    
+    console.log('Adoption created:', result.rows[0]);
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
+    console.error('Adoption creation error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -82,7 +107,11 @@ router.get('/my-requests', authenticateToken, async (req, res) => {
     const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
     
     const result = await pool.query(
-      `SELECT a.*, p."PetName", p."PetImg", p."PetBreed", owner."UserName" as owner_name 
+      `SELECT a.*, 
+              p."PetName", p."PetImg", p."PetBreed",
+              up."PetID",
+              owner."UserID" as "OwnerUserID",
+              owner."UserName" as owner_name 
        FROM "ADOPTION" a 
        JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID" 
        JOIN "PET" p ON up."PetID" = p."PetID" 
@@ -104,7 +133,13 @@ router.get('/incoming', authenticateToken, async (req, res) => {
     const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
     
     const result = await pool.query(
-      `SELECT a.*, p."PetName", p."PetImg", p."PetBreed", adopter."UserName" as adopter_name, acc."AccEmail" as adopter_email, acc."AccPhoneNum" as adopter_phone
+      `SELECT a.*, 
+              p."PetName", p."PetImg", p."PetBreed",
+              up."PetID",
+              adopter."UserID" as "AdopterUserID",
+              adopter."UserName" as adopter_name, 
+              acc."AccEmail" as adopter_email, 
+              acc."AccPhoneNum" as adopter_phone
        FROM "ADOPTION" a 
        JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID" 
        JOIN "PET" p ON up."PetID" = p."PetID" 

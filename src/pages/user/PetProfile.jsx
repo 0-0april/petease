@@ -26,6 +26,18 @@ const PetProfile = () => {
     fetchMedicalHistory();
   }, [id]);
 
+  useEffect(() => {
+    if (pet) {
+      console.log('PetProfile - User object:', user);
+      console.log('PetProfile - Pet object:', pet);
+      console.log('PetProfile - Pet ownerId:', pet.ownerId, 'Type:', typeof pet.ownerId);
+      console.log('PetProfile - user.UserID:', user?.UserID, 'Type:', typeof user?.UserID);
+      console.log('PetProfile - Strict comparison (===):', pet.ownerId === user?.UserID);
+      console.log('PetProfile - Loose comparison (==):', pet.ownerId == user?.UserID);
+      console.log('PetProfile - String comparison:', String(pet.ownerId) === String(user?.UserID));
+    }
+  }, [pet, user]);
+
   const fetchPetDetails = async () => {
     try {
       const data = await petService.getPetById(id);
@@ -91,21 +103,27 @@ const PetProfile = () => {
             </div>
             <p className="text-gray-700 mt-4">{pet.description}</p>
             <div className="mt-6 flex space-x-4">
-              {pet.ownerId !== user.id && pet.status === 'available' && (
-                <button
-                  onClick={() => { setAdoptDone(false); setAdoptMessage(''); setShowAdoptModal(true); }}
-                  className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark font-medium"
-                >
-                  Request Adoption
-                </button>
-              )}
-              {pet.ownerId !== user.id && (
-                <button
-                  onClick={() => setShowMessageModal(true)}
-                  className="border border-primary text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white font-medium"
-                >
-                  Message Owner
-                </button>
+              {String(pet.ownerId) === String(user?.UserID) ? (
+                <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-2 rounded-lg font-medium">
+                  You own this pet
+                </div>
+              ) : (
+                <>
+                  {pet.status === 'available' && (
+                    <button
+                      onClick={() => { setAdoptDone(false); setAdoptMessage(''); setShowAdoptModal(true); }}
+                      className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark font-medium"
+                    >
+                      Request Adoption
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowMessageModal(true)}
+                    className="border border-primary text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white font-medium"
+                  >
+                    Message Owner
+                  </button>
+                </>
               )}
             </div>
           </div>

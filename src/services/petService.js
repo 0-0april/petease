@@ -42,7 +42,7 @@ export const petService = {
       description: pet.PetDetails,
       image: getStorageUrl(pet.PetImg, pet.owner_username),
       status: pet.PetAvailable ? 'available' : 'adopted',
-      ownerId: pet.UserID,
+      ownerId: pet.ownerId, // Now using the aliased field from backend
       ownerName: pet.owner_name,
       ownerUsername: pet.owner_username
     }));
@@ -64,7 +64,7 @@ export const petService = {
       description: pet.PetDetails,
       image: getStorageUrl(pet.PetImg, pet.owner_username),
       status: pet.PetAvailable ? 'available' : 'adopted',
-      ownerId: pet.UserID,
+      ownerId: pet.ownerId, // Now using the aliased field from backend
       ownerName: pet.owner_name,
       ownerUsername: pet.owner_username
     };

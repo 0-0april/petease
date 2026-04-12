@@ -19,7 +19,14 @@ const getAgeInMonths = (birthday) => {
 const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isOwner = user?.id === pet.ownerId;
+  
+  console.log('PetProfilePanel - FULL User object:', user);
+  console.log('PetProfilePanel - User keys:', user ? Object.keys(user) : 'no user');
+  console.log('PetProfilePanel - Pet ownerId:', pet.ownerId);
+  console.log('PetProfilePanel - user.UserID:', user?.UserID);
+  console.log('PetProfilePanel - Comparison:', String(user?.UserID) === String(pet.ownerId));
+  
+  const isOwner = String(user?.UserID) === String(pet.ownerId);
 
   const [adoptStep, setAdoptStep] = useState(null); // null | 'form' | 'done'
   const [adoptMsg, setAdoptMsg] = useState('');
@@ -106,41 +113,49 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
           )}
 
           {/* Actions */}
-          {!isOwner && pet.status === 'available' && (
+          {isOwner ? (
+            <div className="mt-5 bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+              <p className="text-sm font-medium text-blue-700">You own this pet</p>
+            </div>
+          ) : (
             <div className="mt-5 space-y-3">
               {/* Adoption section */}
-              {adoptStep === null && (
-                <button onClick={() => setAdoptStep('form')}
-                  className="w-full bg-primary text-white py-2.5 rounded-lg hover:bg-primary-dark font-medium text-sm">
-                  Request Adoption
-                </button>
-              )}
-              {adoptStep === 'form' && (
-                <div className="border border-gray-200 rounded-xl p-4 space-y-3">
-                  <p className="text-sm font-medium text-gray-700">Message to owner <span className="text-gray-400 font-normal">(optional)</span></p>
-                  <textarea value={adoptMsg} onChange={e => setAdoptMsg(e.target.value)} rows={3}
-                    placeholder="Introduce yourself and explain why you'd be a great fit..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
-                  <div className="flex space-x-2">
-                    <button onClick={() => setAdoptStep(null)} disabled={adoptLoading}
-                      className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                      Cancel
+              {pet.status === 'available' && (
+                <>
+                  {adoptStep === null && (
+                    <button onClick={() => setAdoptStep('form')}
+                      className="w-full bg-primary text-white py-2.5 rounded-lg hover:bg-primary-dark font-medium text-sm">
+                      Request Adoption
                     </button>
-                    <button onClick={handleAdopt} disabled={adoptLoading}
-                      className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-60 text-sm font-medium">
-                      {adoptLoading ? 'Sending...' : 'Send Request'}
-                    </button>
-                  </div>
-                </div>
-              )}
-              {adoptStep === 'done' && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                  <svg className="w-8 h-8 text-primary mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <p className="text-sm font-semibold text-green-800">Adoption request sent!</p>
-                  <p className="text-xs text-green-600 mt-1">The owner will review your request.</p>
-                </div>
+                  )}
+                  {adoptStep === 'form' && (
+                    <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                      <p className="text-sm font-medium text-gray-700">Message to owner <span className="text-gray-400 font-normal">(optional)</span></p>
+                      <textarea value={adoptMsg} onChange={e => setAdoptMsg(e.target.value)} rows={3}
+                        placeholder="Introduce yourself and explain why you'd be a great fit..."
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+                      <div className="flex space-x-2">
+                        <button onClick={() => setAdoptStep(null)} disabled={adoptLoading}
+                          className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+                          Cancel
+                        </button>
+                        <button onClick={handleAdopt} disabled={adoptLoading}
+                          className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-60 text-sm font-medium">
+                          {adoptLoading ? 'Sending...' : 'Send Request'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {adoptStep === 'done' && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                      <svg className="w-8 h-8 text-primary mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <p className="text-sm font-semibold text-green-800">Adoption request sent!</p>
+                      <p className="text-xs text-green-600 mt-1">The owner will review your request.</p>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Message section */}
@@ -175,12 +190,6 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
                     className="text-xs text-blue-600 underline mt-1">View in Messages</button>
                 </div>
               )}
-            </div>
-          )}
-
-          {isOwner && (
-            <div className="mt-5 bg-gray-50 rounded-lg p-3 text-center text-sm text-gray-500">
-              This is your pet.
             </div>
           )}
         </div>

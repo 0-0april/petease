@@ -10,9 +10,17 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
+  // Try to get token from separate storage first, then fall back to old format
+  let token = localStorage.getItem('token');
+  
+  if (!token) {
+    // Fallback: check if token is stored in user object (old format)
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    token = user.token;
+  }
+  
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
