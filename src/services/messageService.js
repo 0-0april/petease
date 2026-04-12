@@ -1,39 +1,61 @@
-import { mockMessages, mockConversations } from '../data/mockData';
-
-let messages = [...mockMessages];
+import api from './api';
 
 export const messageService = {
   sendMessage: async (receiverId, content) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const newMessage = {
-      id: messages.length + 1,
-      senderId: user.id,
-      receiverId,
-      content,
-      isSent: true,
-      createdAt: new Date().toISOString()
-    };
-    messages.push(newMessage);
-    return newMessage;
+    console.log('Sending message to:', receiverId, 'content:', content);
+    const response = await api.post('/messages', {
+      messTo: receiverId,
+      messContent: content
+    });
+    console.log('Send message response:', response.data);
+    return response.data;
   },
 
   getConversations: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockConversations;
+    console.log('Getting conversations...');
+    const response = await api.get('/messages/conversations');
+    console.log('Conversations API response:', response.data);
+    
+    // Map backend fields to frontend format
+    const mapped = response.data.map(conv => ({
+      id: conv.other_user_id,
+      user: {
+        id: conv.other_user_id,
+        name: conv.other_user_name
+      },
+      lastMessage: conv.last_message,
+      lastMessageTime: conv.last_message_time
+    }));
+    
+    console.log('Mapped conversations:', mapped);
+    return mapped;
   },
 
   getMessages: async (userId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log('Getting messages with userId:', userId);
+    const response = await api.get(`/messages/with/${userId}`);
+    console.log('Messages API response:', response.data);
+    
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return messages
-      .filter(m => 
-        (m.senderId === user.id && m.receiverId === parseInt(userId)) ||
-        (m.receiverId === user.id && m.senderId === parseInt(userId))
-      )
-      .map(m => ({
-        ...m,
-        isSent: m.senderId === user.id
-      }));
+    console.log('Current user from localStorage:', user);
+    console.log('Current user UserID:', user.UserID);
+    
+    // Map backend fields to frontend format
+    const mapped = response.data.map(msg => {
+      const isSent = msg.MessFrom === user.UserID;
+      console.log(`Message ${msg.MessID}: MessFrom=${msg.MessFrom}, user.UserID=${user.UserID}, isSent=${isSent}`);
+      
+      return {
+        id: msg.MessID,
+        senderId: msg.MessFrom,
+        receiverId: msg.MessTo,
+        content: msg.MessContent,
+        createdAt: msg.MessTimeStamp,
+        isSent: isSent
+      };
+    });
+    
+    console.log('Mapped messages:', mapped);
+    return mapped;
   }
 };

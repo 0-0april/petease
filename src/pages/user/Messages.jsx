@@ -15,6 +15,25 @@ const Messages = () => {
 
   useEffect(() => { fetchConversations(); }, []);
 
+  // Poll for new conversations every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchConversations();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Poll for new messages every 3 seconds when a user is selected
+  useEffect(() => {
+    if (!selectedUser) return;
+    
+    const interval = setInterval(() => {
+      fetchMessages(selectedUser.id);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [selectedUser]);
+
   useEffect(() => {
     // Auto-select user if passed via navigation state
     if (location.state?.userId && conversations.length > 0) {
@@ -35,7 +54,9 @@ const Messages = () => {
 
   const fetchConversations = async () => {
     try {
+      console.log('Fetching conversations...');
       const data = await messageService.getConversations();
+      console.log('Conversations data:', data);
       setConversations(data);
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -44,7 +65,9 @@ const Messages = () => {
 
   const fetchMessages = async (userId) => {
     try {
+      console.log('Fetching messages for userId:', userId);
       const data = await messageService.getMessages(userId);
+      console.log('Messages data:', data);
       setMessages(data);
     } catch (error) {
       console.error('Error fetching messages:', error);
