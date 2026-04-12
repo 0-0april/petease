@@ -28,6 +28,22 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/vet', vetRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Debug: Log all registered routes
+console.log('\n=== Registered Routes ===');
+app._router.stack.forEach((middleware) => {
+  if (middleware.route) {
+    console.log(`${Object.keys(middleware.route.methods)[0].toUpperCase()} ${middleware.route.path}`);
+  } else if (middleware.name === 'router') {
+    middleware.handle.stack.forEach((handler) => {
+      if (handler.route) {
+        const path = middleware.regexp.source.replace('\\/?(?=\\/|$)', '').replace(/\\\//g, '/').replace('^', '');
+        console.log(`${Object.keys(handler.route.methods)[0].toUpperCase()} ${path}${handler.route.path}`);
+      }
+    });
+  }
+});
+console.log('========================\n');
+
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -161,5 +161,12 @@ follow the following references, don't change the ui, just change the reference 
 
   you can get the data through logically reading the backend/petease.sql
  
+11. connect the supabase to the messages, maintain the ui's logic, but just change the reference fro the database based on the backend/petease.sql schema from the MESSAGE Table. 
 
-  9. now connect the supabase to the user/Appointment.jsx based on the appointment table and any related table on the backend/petease.sql schema
+  MessFrom uuid is from userID that sent the message
+  MessTo uuid is from the userID who is going to receive the message. 
+  MessContent is for the message content
+  
+  read the backend/petease.sql for the reference. the sender's message that is logged in to the current account should be on the right and the user's message that the logged in user that is talking/chatting to is on the . make sure it is well arranged based on the timestamp. i will leave the rest to you to implement and please do it right.
+
+  10. now connect the supabase to the user/Appointment.jsx based on the appointment table and any related table on the backend/petease.sql schema
