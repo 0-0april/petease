@@ -44,26 +44,41 @@ export const adoptionService = {
     return response.data;
   },
 
-  // Called by vet to finalize adoption
-  completeAdoption: async (adoptionId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = adoptionRequests.findIndex(r => r.id === parseInt(adoptionId));
-    if (index !== -1) {
-      adoptionRequests[index].status = 'completed';
-      adoptionRequests[index].completedAt = new Date().toISOString();
-      return adoptionRequests[index];
-    }
-    throw new Error('Request not found');
-  },
-
-  // Requests sent by the current user (as adopter)
   getMyAdoptionRequests: async () => {
     const response = await api.get('/adoptions/my-requests');
-    return response.data;
+    // Map backend fields to frontend format for SENT requests
+    return response.data.map(req => ({
+      id: req.AdoptID,
+      petId: req.PetID, // The actual PetID from the PET table
+      petName: req.PetName,
+      petImage: req.PetImg,
+      petBreed: req.PetBreed,
+      ownerId: req.OwnerUserID, // The owner's UserID
+      ownerName: req.owner_name,
+      status: req.AdoptStatus?.toLowerCase() || 'pending',
+      message: req.AdoptionWaiver,
+      rejectionReason: req.RejectionReason,
+      createdAt: req.AdoptReqDate
+    }));
   },
 
   getIncomingRequests: async () => {
     const response = await api.get('/adoptions/incoming');
-    return response.data;
+    // Map backend fields to frontend format for RECEIVED requests
+    return response.data.map(req => ({
+      id: req.AdoptID,
+      petId: req.PetID, // The actual PetID from the PET table
+      petName: req.PetName,
+      petImage: req.PetImg,
+      petBreed: req.PetBreed,
+      adopterId: req.AdopterUserID, // The adopter's UserID
+      adopterName: req.adopter_name,
+      adopterEmail: req.adopter_email,
+      adopterPhone: req.adopter_phone,
+      status: req.AdoptStatus?.toLowerCase() || 'pending',
+      message: req.AdoptionWaiver,
+      rejectionReason: req.RejectionReason,
+      createdAt: req.AdoptReqDate
+    }));
   }
 };

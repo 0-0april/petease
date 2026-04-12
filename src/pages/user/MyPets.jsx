@@ -87,13 +87,20 @@ const MyPets = () => {
 
   const handleEdit = (pet) => {
     setEditingPet(pet);
+    // Format birthday to YYYY-MM-DD for date input
+    let formattedBirthday = '';
+    if (pet.birthday) {
+      const date = new Date(pet.birthday);
+      formattedBirthday = date.toISOString().split('T')[0];
+    }
+    
     setFormData({
       name: pet.name || '',
       species: pet.species || pet.type || 'dog',
       breed: pet.breed || '',
       color: pet.color || '',
       gender: pet.gender || 'Male',
-      birthday: pet.birthday || '',
+      birthday: formattedBirthday,
       description: pet.description || '',
       medicalHistory: pet.medicalHistory || '',
       registrationType: pet.registrationType || 'adoption',

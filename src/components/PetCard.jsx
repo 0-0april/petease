@@ -10,10 +10,18 @@ const PetCard = ({ pet }) => {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const isOwner = user?.id === pet.ownerId;
+  console.log('PetCard - User object:', user);
+  console.log('PetCard - Pet ownerId:', pet.ownerId, 'Type:', typeof pet.ownerId);
+  console.log('PetCard - user.UserID:', user?.UserID, 'Type:', typeof user?.UserID);
+  console.log('PetCard - Strict comparison (===):', user?.UserID === pet.ownerId);
+  console.log('PetCard - Loose comparison (==):', user?.UserID == pet.ownerId);
+  console.log('PetCard - String comparison:', String(user?.UserID) === String(pet.ownerId));
+
+  const isOwner = String(user?.UserID) === String(pet.ownerId);
 
   const openModal = (e) => {
     e.preventDefault();
+    if (isOwner) return; // Prevent opening modal for own pets
     setDone(false);
     setMessage('');
     setShowModal(true);
@@ -53,20 +61,24 @@ const PetCard = ({ pet }) => {
             }`}>
               {pet.status}
             </span>
-            {!isOwner && pet.status === 'available' && (
-              <button
-                onClick={openModal}
-                className="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark font-medium"
-              >
-                Request Adoption
-              </button>
+            {isOwner ? (
+              <span className="text-xs text-blue-600 font-medium px-3 py-1.5">Your pet</span>
+            ) : (
+              pet.status === 'available' && (
+                <button
+                  onClick={openModal}
+                  className="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark font-medium"
+                >
+                  Request Adoption
+                </button>
+              )
             )}
           </div>
         </div>
       </div>
 
       {/* Adoption Modal */}
-      {showModal && (
+      {showModal && !isOwner && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             {done ? (

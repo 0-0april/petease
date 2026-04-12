@@ -30,7 +30,7 @@ const uploadToSupabase = async (file, bucket, username) => {
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, up."UserID", acc."AccUserName" as owner_username 
+      `SELECT p.*, up."UserID" as "ownerId", u."UserID", acc."AccUserName" as owner_username 
        FROM "PET" p 
        LEFT JOIN "USERPETS" up ON p."PetID" = up."PetID" 
        LEFT JOIN "USER" u ON up."UserID" = u."UserID"
@@ -77,7 +77,7 @@ router.get('/my-pets', authenticateToken, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, up."UserID", u."UserName" as owner_name, acc."AccUserName" as owner_username 
+      `SELECT p.*, up."UserID" as "ownerId", u."UserName" as owner_name, acc."AccUserName" as owner_username 
        FROM "PET" p 
        LEFT JOIN "USERPETS" up ON p."PetID" = up."PetID" 
        LEFT JOIN "USER" u ON up."UserID" = u."UserID"
