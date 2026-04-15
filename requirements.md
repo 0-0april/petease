@@ -170,3 +170,25 @@ follow the following references, don't change the ui, just change the reference 
   read the backend/petease.sql for the reference. the sender's message that is logged in to the current account should be on the right and the user's message that the logged in user that is talking/chatting to is on the . make sure it is well arranged based on the timestamp. i will leave the rest to you to implement and please do it right.
 
   10. now connect the supabase to the user/Appointment.jsx based on the appointment table and any related table on the backend/petease.sql schema
+
+  11. In the user/Appointment.jsx page, do not change the ui's default backend, i want it to work as it used to be but just change the references of the data that it was coming from. it should automatically displays the appointment booked by the currently logged user. this is from Appointment table (check schema given if it confuses you).
+  
+  you can compare whether the pet's owner from UserPets table's userID through the Appointment's table FK which is UserPetID, if is equal then display the pets that is owned by the user logged in.
+
+  12. Step ServID, list the name of the services from thet FK, and so on.
+
+  13. it should also be connected to the veterinary appointment page as well. once the appointment was booked and again do not change the Ui's logic, just change the reference of the date that was being displayed and manipulated there.
+
+
+
+  14. the accountID linked in VETSTAFF table should be directed to Vet Staff panel instead of user panel
+
+  15.  the accountID linked in the ADMIN table should be directed to Admin panel instead of user panel
+
+  16. in the vetAdoption page, it should display all the user-approved adoption request and do the same logic as the ui had. don't change ui, just change the content or data displayed and connect it the supabase db. 
+  
+  it should display the adoption that is marked as approve and when the vet staff upload the waiver, it should upload and stored to the adoption-waivers bucket once it was marked as completed. then change the status from Approved to Completed
+
+  use the backend/petease.sql for reference for your task
+
+  17. allow vet staffs to add, edit and modify existing services
