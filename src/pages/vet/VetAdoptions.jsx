@@ -9,16 +9,34 @@ const STATUS_STYLES = {
 };
 
 const CompleteModal = ({ adoption, onConfirm, onClose }) => {
-  const [waiver, setWaiver] = useState('');
+  const [waiverFile, setWaiverFile] = useState(null);
   const [service, setService] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type (PDF, images)
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload a PDF or image file');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      setWaiverFile(file);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!waiver.trim()) return;
+    if (!waiverFile) return;
     setLoading(true);
     try {
-      await onConfirm({ waiver, service, notes });
+      await onConfirm({ waiverFile, service, notes });
     } finally {
       setLoading(false);
     }
@@ -54,17 +72,22 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
             Waiver Document <span className="text-red-500">*</span>
           </label>
           <input
-            type="text"
-            value={waiver}
-            onChange={e => setWaiver(e.target.value)}
-            placeholder="e.g. waiver-adoption-001.pdf"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            onChange={handleFileChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
           />
+          {waiverFile && (
+            <p className="mt-2 text-sm text-green-600">
+              ✓ Selected: {waiverFile.name} ({(waiverFile.size / 1024).toFixed(2)} KB)
+            </p>
+          )}
           <div className="mt-2 bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-800 space-y-0.5">
             <p className="font-medium">Waiver Requirements:</p>
             <p>✓ Owner signature</p>
             <p>✓ Adopter signature</p>
             <p>✓ Vet staff witness signature</p>
+            <p className="text-gray-600 mt-1">Accepted: PDF, JPG, PNG (max 5MB)</p>
           </div>
         </div>
 
@@ -104,10 +127,10 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!waiver.trim() || loading}
+            disabled={!waiverFile || loading}
             className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
           >
-            {loading ? 'Completing...' : 'Mark as Completed'}
+            {loading ? 'Uploading...' : 'Mark as Completed'}
           </button>
         </div>
       </div>
@@ -140,12 +163,14 @@ const VetAdoptions = () => {
     }
   };
 
-  const handleComplete = async ({ waiver, service, notes }) => {
-    await vetService.completeAdoption(
-      selectedAdoption.id,
-      { waiverDocument: waiver },
-      { petId: selectedAdoption.petId, service, notes }
-    );
+  const handleComplete = async ({ waiverFile, service, notes }) => {
+    const formData = new FormData();
+    formData.append('waiver', waiverFile);
+    formData.append('service', service || '');
+    formData.append('notes', notes || '');
+    formData.append('petId', selectedAdoption.petId);
+
+    await vetService.completeAdoption(selectedAdoption.id, formData);
     setSuccessId(selectedAdoption.id);
     setSelectedAdoption(null);
     fetchAdoptions();

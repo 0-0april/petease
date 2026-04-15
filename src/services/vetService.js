@@ -1,96 +1,39 @@
-import { mockAppointments, mockAppointmentLogs, mockAnnouncements, mockAdoptionWaivers, mockMedicalHistory } from '../data/mockData';
+import { mockAnnouncements, mockAdoptionWaivers, mockMedicalHistory } from '../data/mockData';
 import api from './api';
 
-let appointments = [...mockAppointments];
-let appointmentLogs = [...mockAppointmentLogs];
 let announcements = [...mockAnnouncements];
 let medicalHistory = [...mockMedicalHistory];
 let adoptionWaivers = [...mockAdoptionWaivers];
 
 export const vetService = {
   getAllAppointments: async (page = 1, limit = 10) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const sortedAppointments = [...appointments].sort((a, b) => 
-      new Date(b.createdAt) - new Date(a.createdAt)
-    );
-    return {
-      appointments: sortedAppointments.slice(startIndex, endIndex),
-      total: appointments.length,
-      page,
-      totalPages: Math.ceil(appointments.length / limit)
-    };
+    const response = await api.get('/vet/appointments', { params: { page, limit } });
+    return response.data;
   },
 
   getAppointmentById: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return appointments.find(a => a.id === parseInt(id));
+    const response = await api.get(`/vet/appointments/${id}`);
+    return response.data;
   },
 
   confirmAppointment: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = appointments.findIndex(a => a.id === parseInt(id));
-    if (index !== -1) {
-      appointments[index].status = 'confirmed';
-      const log = {
-        id: appointmentLogs.length + 1,
-        appointmentId: parseInt(id),
-        action: 'confirmed',
-        performedBy: 'Dr. Sarah Wilson',
-        notes: 'Appointment confirmed by vet staff',
-        timestamp: new Date().toISOString()
-      };
-      appointmentLogs.push(log);
-      return appointments[index];
-    }
-    throw new Error('Appointment not found');
+    const response = await api.patch(`/vet/appointments/${id}/confirm`);
+    return response.data;
   },
 
   cancelAppointment: async (id, reason) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = appointments.findIndex(a => a.id === parseInt(id));
-    if (index !== -1) {
-      appointments[index].status = 'cancelled';
-      const log = {
-        id: appointmentLogs.length + 1,
-        appointmentId: parseInt(id),
-        action: 'cancelled',
-        performedBy: 'Dr. Sarah Wilson',
-        notes: reason || 'Cancelled by vet staff',
-        timestamp: new Date().toISOString()
-      };
-      appointmentLogs.push(log);
-      return appointments[index];
-    }
-    throw new Error('Appointment not found');
+    const response = await api.patch(`/vet/appointments/${id}/cancel`, { reason });
+    return response.data;
   },
 
   markAttendance: async (id, attended) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = appointments.findIndex(a => a.id === parseInt(id));
-    if (index !== -1) {
-      appointments[index].attended = attended;
-      if (attended) {
-        appointments[index].status = 'completed';
-      }
-      const log = {
-        id: appointmentLogs.length + 1,
-        appointmentId: parseInt(id),
-        action: attended ? 'attended' : 'no-show',
-        performedBy: 'Dr. Sarah Wilson',
-        notes: attended ? 'Patient attended appointment' : 'Patient did not show up',
-        timestamp: new Date().toISOString()
-      };
-      appointmentLogs.push(log);
-      return appointments[index];
-    }
-    throw new Error('Appointment not found');
+    const response = await api.patch(`/vet/appointments/${id}/attendance`, { attended });
+    return response.data;
   },
 
   getAppointmentLogs: async (appointmentId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return appointmentLogs.filter(log => log.appointmentId === parseInt(appointmentId));
+    const response = await api.get(`/vet/appointments/${appointmentId}/logs`);
+    return response.data;
   },
 
   getAllAppointmentLogs: async (page = 1, limit = 10) => {
@@ -150,15 +93,7 @@ export const vetService = {
   },
 
   // Complete adoption: upload waiver + add medical record + mark completed
-  completeAdoption: async (adoptionId, waiverData, medicalData) => {
-    const formData = new FormData();
-    if (waiverData.waiverFile) {
-      formData.append('waiver', waiverData.waiverFile);
-    }
-    if (medicalData) {
-      formData.append('medicalData', JSON.stringify(medicalData));
-    }
-
+  completeAdoption: async (adoptionId, formData) => {
     const response = await api.post(`/vet/adoptions/${adoptionId}/complete`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
@@ -190,56 +125,22 @@ export const vetService = {
 
   // Services Management
   getServices: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const services = [
-      {
-        id: 1,
-        name: 'Spay/Neuter',
-        description: 'Surgical sterilization procedure for pets',
-        availabilityType: 'recurring',
-        createdAt: '2024-01-15T10:00:00Z',
-      },
-      {
-        id: 2,
-        name: 'Consultation',
-        description: 'General health check and consultation',
-        availabilityType: 'recurring',
-        createdAt: '2024-01-15T10:00:00Z',
-      },
-      {
-        id: 3,
-        name: 'Anti-Rabies Vaccination',
-        description: 'Rabies vaccination for dogs and cats',
-        availabilityType: 'specific',
-        specificDate: '2024-04-15',
-        createdAt: '2024-01-15T10:00:00Z',
-      },
-    ];
-    return services;
+    const response = await api.get('/vet/services');
+    return response.data;
   },
 
   createService: async (serviceData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newService = {
-      id: Date.now(),
-      ...serviceData,
-      createdAt: new Date().toISOString(),
-    };
-    return newService;
+    const response = await api.post('/vet/services', serviceData);
+    return response.data;
   },
 
   updateService: async (id, serviceData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    // In a real app, this would update the service and notify users
-    if (serviceData.notifyUsers) {
-      // Simulate notification to all users
-      console.log(`Notifying all users about service update: ${serviceData.name}`);
-    }
-    return { id, ...serviceData, updatedAt: new Date().toISOString() };
+    const response = await api.put(`/vet/services/${id}`, serviceData);
+    return response.data;
   },
 
   deleteService: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { success: true };
+    const response = await api.delete(`/vet/services/${id}`);
+    return response.data;
   },
 };
