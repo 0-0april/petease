@@ -54,11 +54,16 @@ const VetAppointments = () => {
   };
 
   const handleViewDetails = async (appointment) => {
-    setSelectedAppointment(appointment);
     try {
+      // Fetch full appointment details with all information
+      const fullDetails = await vetService.getAppointmentById(appointment.id);
+      setSelectedAppointment(fullDetails);
+      
+      // Fetch appointment logs
       const appointmentLogs = await vetService.getAppointmentLogs(appointment.id);
       setLogs(appointmentLogs);
-    } catch {
+    } catch (error) {
+      console.error('Error fetching appointment details:', error);
       setLogs([]);
     }
     setShowDetailModal(true);
@@ -231,7 +236,6 @@ const VetAppointments = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
@@ -250,7 +254,6 @@ const VetAppointments = () => {
                 <tr key={apt.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-500">#{apt.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{apt.time}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {SERVICE_LABELS[apt.type] || apt.type}
                   </td>
@@ -312,26 +315,20 @@ const VetAppointments = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500">Patient</p>
+                <p className="text-xs text-gray-500">Owner Name</p>
                 <p className="font-semibold">{selectedAppointment.userName}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Phone</p>
+                <p className="text-xs text-gray-500">Owner Phone</p>
                 <p className="font-semibold">{selectedAppointment.userPhone}</p>
               </div>
+              <div className="col-span-2">
+                <p className="text-xs text-gray-500">Owner Address</p>
+                <p className="font-semibold">{selectedAppointment.userAddress || 'N/A'}</p>
+              </div>
               <div>
-                <p className="text-xs text-gray-500">Date</p>
+                <p className="text-xs text-gray-500">Scheduled Date</p>
                 <p className="font-semibold">{selectedAppointment.date}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Time</p>
-                <p className="font-semibold">{selectedAppointment.time}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Service</p>
-                <p className="font-semibold capitalize">
-                  {SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
-                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Status</p>
@@ -339,19 +336,67 @@ const VetAppointments = () => {
                   {selectedAppointment.status}
                 </span>
               </div>
+              <div className="col-span-2">
+                <p className="text-xs text-gray-500">Service</p>
+                <p className="font-semibold capitalize">
+                  {SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Pet(s)</p>
+            
+            <div className="border-t pt-4">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Pet Information</p>
               {selectedAppointment.pets.map(pet => (
-                <p key={pet.id} className="font-semibold">{pet.name} — {pet.breed}</p>
+                <div key={pet.id} className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Pet Name</p>
+                      <p className="font-semibold">{pet.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Species</p>
+                      <p className="font-semibold">{pet.species || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Breed</p>
+                      <p className="font-semibold">{pet.breed}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Gender</p>
+                      <p className="font-semibold">{pet.gender || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Age</p>
+                      <p className="font-semibold">{pet.age || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Markings</p>
+                      <p className="font-semibold">{pet.markings || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-            {selectedAppointment.notes && (
-              <div>
-                <p className="text-xs text-gray-500">Notes</p>
-                <p className="text-sm text-gray-800">{selectedAppointment.notes}</p>
-              </div>
-            )}
+
+            <div className="border-t pt-4">
+              <p className="text-sm font-semibold text-gray-700 mb-2">Medical Records</p>
+              {selectedAppointment.medicalRecords && selectedAppointment.medicalRecords.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedAppointment.medicalRecords.map((record, idx) => (
+                    <div key={idx} className="text-sm border-l-2 border-primary pl-3 bg-gray-50 p-2 rounded">
+                      <p className="font-medium">{record.medicine}</p>
+                      <p className="text-gray-600 text-xs">{record.description}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">No medical records available.</p>
+              )}
+            </div>
+
             <div className="border-t pt-4">
               <p className="text-sm font-semibold text-gray-700 mb-2">Activity Log</p>
               {logs.length === 0 ? (

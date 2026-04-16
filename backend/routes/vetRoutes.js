@@ -105,11 +105,13 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
         AppointDateCreated,
         AppointSchedDate,
         AppointStatus,
+        ServID,
         USERPETS!APPOINTMENT_UserPetID_fkey (
           UserPetID,
           USER (
             UserID,
             UserName,
+            UserAddress,
             ACCOUNT (
               AccPhoneNum
             )
@@ -117,7 +119,11 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
           PET (
             PetID,
             PetName,
-            PetBreed
+            PetBreed,
+            PetSpecie,
+            PetGender,
+            PetMarkings,
+            PetBDay
           )
         ),
         SERVICES!APPOINTMENT_ServID_fkey (
@@ -130,21 +136,51 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
 
     if (error) throw error;
 
+    // Calculate pet age from birthday
+    const calculateAge = (birthday) => {
+      if (!birthday) return null;
+      const today = new Date();
+      const birthDate = new Date(birthday);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age > 0 ? `${age} years` : 'Less than 1 year';
+    };
+
+    // Get medical records for this service
+    const { data: medicalRecords } = await supabase
+      .from('MEDICALHISTORY')
+      .select('MedID, Medicine, Description, created_at')
+      .eq('ServID', data.ServID)
+      .order('created_at', { ascending: false });
+
     const schedDate = new Date(data.AppointSchedDate);
     const appointment = {
       id: data.AppointID,
       userId: data.USERPETS.USER.UserID,
       userName: data.USERPETS.USER.UserName,
       userPhone: data.USERPETS.USER.ACCOUNT.AccPhoneNum || 'N/A',
+      userAddress: data.USERPETS.USER.UserAddress || 'N/A',
       date: schedDate.toISOString().split('T')[0],
-      time: schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       type: data.SERVICES.ServType.toLowerCase().replace(/\s+/g, '-'),
       status: data.AppointStatus.toLowerCase(),
       pets: [{
         id: data.USERPETS.PET.PetID,
         name: data.USERPETS.PET.PetName,
-        breed: data.USERPETS.PET.PetBreed
+        breed: data.USERPETS.PET.PetBreed,
+        species: data.USERPETS.PET.PetSpecie,
+        gender: data.USERPETS.PET.PetGender,
+        markings: data.USERPETS.PET.PetMarkings,
+        age: calculateAge(data.USERPETS.PET.PetBDay)
       }],
+      medicalRecords: medicalRecords?.map(record => ({
+        id: record.MedID,
+        medicine: record.Medicine,
+        description: record.Description,
+        date: record.created_at
+      })) || [],
       createdAt: data.AppointDateCreated
     };
 

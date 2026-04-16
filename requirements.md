@@ -192,3 +192,17 @@ follow the following references, don't change the ui, just change the reference 
   use the backend/petease.sql for reference for your task
 
   17. allow vet staffs to add, edit and modify existing services
+
+  18. remove the time column in the vet staff panel, appointments page. 
+  
+  19. after that maintain now the use and just use the data from supabase instead of from mock data. when vet staff clicks the view button, it should display the following information:
+
+  owner name, owner phone number, address, pet name, pet specie, pet gender, pet markings, pet breed, pet age,  scheduled date, status, pet medical record
+
+  scan backend/petease.sql schema as reference
+
+
+20. allow multiples select in the pending appointment and give the vet staff option to either confirm or cancel appointment, cancelled appointment shoul change the status to cancel and confirm should be confirmed and move it to the confirmed part of the appointment.
+
+21. when the vet staff marked the attendance, it should be inputed to the App
+
