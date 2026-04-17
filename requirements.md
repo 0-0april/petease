@@ -202,7 +202,18 @@ follow the following references, don't change the ui, just change the reference 
   scan backend/petease.sql schema as reference
 
 
-20. allow multiples select in the pending appointment and give the vet staff option to either confirm or cancel appointment, cancelled appointment shoul change the status to cancel and confirm should be confirmed and move it to the confirmed part of the appointment.
+20. allow multiple select in all the appointment sub parts and give the vet staff option to either confirm or cancel appointment
 
-21. when the vet staff marked the attendance, it should be inputed to the App
+
+21. scan backend/petease.sql schema as reference for this task
+
+- when vet staff cancelled appointment from pending, it should change the Appointment Table status to Cancelled, and confirmed should be changed to Confirmed.
+
+- confirmed Appointment should be removed from Vet panel's Appointment page's Pending Appointment tab and appear to the Confirmed Appointment Tab.
+
+22. when the vet staff marked the attendance (show/ no-show), the record should be moved to the  AppointmentLogs Table. 
+
+if the customer's attendande showed up, the LogAttendance should be true, if not it's false. the LogStaffAssigned should be the one who marker it, and logNote too if there is. and the created_at time stamp to which id default now.
+
+23. the appointment that has status of Pending should be listed/ displayed in the Pending Tab of Vet's Appointment Page, the appointment that has status of confirmed should be in the Confirmed Appointment tab, and the appointment's attendance that is marked as 'Show' should be displayed in the Completed Appointment tab
 

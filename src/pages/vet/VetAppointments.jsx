@@ -33,14 +33,22 @@ const VetAppointments = () => {
   const [attendanceModal, setAttendanceModal] = useState(null);
   const [logs, setLogs] = useState([]);
   const [toast, setToast] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     fetchAppointments();
   }, [currentPage, activeTab]);
 
+  useEffect(() => {
+    // Clear selections when changing tabs
+    setSelectedIds([]);
+  }, [activeTab]);
+
   const fetchAppointments = async () => {
     try {
       const data = await vetService.getAllAppointments(currentPage, 10);
+      console.log('📅 Fetched appointments:', data.appointments.length);
+      console.log('📊 Sample appointment:', data.appointments[0]);
       setAppointments(data.appointments);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -79,14 +87,54 @@ const VetAppointments = () => {
     }
   };
 
+  const handleBulkConfirm = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(selectedIds.map(id => vetService.confirmAppointment(id)));
+      setSelectedIds([]);
+      fetchAppointments();
+      showToast(`${selectedIds.length} appointment(s) confirmed.`);
+    } catch {
+      showToast('Failed to confirm appointments.', 'error');
+    }
+  };
+
+  const handleBulkCancel = () => {
+    if (selectedIds.length === 0) return;
+    setCancelModal({ id: 'bulk', ids: selectedIds });
+    setCancelReason('');
+  };
+
+  const toggleSelection = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === displayed.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(displayed.map(apt => apt.id));
+    }
+  };
+
   const handleCancelSubmit = async () => {
     if (!cancelReason.trim()) return;
     try {
-      await vetService.cancelAppointment(cancelModal.id, cancelReason);
+      if (cancelModal.id === 'bulk') {
+        // Bulk cancel
+        await Promise.all(cancelModal.ids.map(id => vetService.cancelAppointment(id, cancelReason)));
+        setSelectedIds([]);
+        showToast(`${cancelModal.ids.length} appointment(s) cancelled.`);
+      } else {
+        // Single cancel
+        await vetService.cancelAppointment(cancelModal.id, cancelReason);
+        showToast('Appointment cancelled.');
+      }
       setCancelModal(null);
       setCancelReason('');
       fetchAppointments();
-      showToast('Appointment cancelled.');
     } catch {
       showToast('Failed to cancel appointment.', 'error');
     }
@@ -97,10 +145,11 @@ const VetAppointments = () => {
     try {
       await vetService.markAttendance(attendanceModal.id, attended);
       if (attended) {
+        // Only create medical history if patient showed up
         await vetService.addMedicalHistory(attendanceModal.pets[0]?.id, {
           medication: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
           date: attendanceModal.date,
-          notes: `Service performed: ${SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date} at ${attendanceModal.time}.`,
+          notes: `Service performed: ${SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date}.`,
           diagnosis: '',
           treatment: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
           followUp: ''
@@ -109,7 +158,8 @@ const VetAppointments = () => {
       setAttendanceModal(null);
       fetchAppointments();
       showToast(attended ? 'Marked as Show. Medical record updated.' : 'Marked as No Show.');
-    } catch {
+    } catch (error) {
+      console.error('Error marking attendance:', error);
       showToast('Failed to update attendance.', 'error');
     }
   };
@@ -133,10 +183,14 @@ const VetAppointments = () => {
 
   const displayed = appointments
     .filter(a => {
-      // Filter by tab
+      // Filter by tab (requirement 23)
       if (activeTab === 'pending' && a.status !== 'pending') return false;
       if (activeTab === 'confirmed' && a.status !== 'confirmed') return false;
-      if (activeTab === 'completed' && (a.status !== 'completed' || a.attended !== true)) return false;
+      // Completed tab: show appointments where LogAttendance = true (marked as "Show")
+      if (activeTab === 'completed') {
+        console.log(`🔍 Checking appointment ${a.id}: attended=${a.attended}, status=${a.status}`);
+        if (a.attended !== true) return false;
+      }
 
       // Filter by date
       if (filterDate && a.date !== filterDate) return false;
@@ -150,6 +204,8 @@ const VetAppointments = () => {
       const diff = new Date(a.date) - new Date(b.date);
       return sortOrder === 'asc' ? diff : -diff;
     });
+
+  console.log(`📋 Active tab: ${activeTab}, Total appointments: ${appointments.length}, Displayed: ${displayed.length}`);
 
   return (
     <VetLayout>
@@ -188,7 +244,30 @@ const VetAppointments = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 items-center">
+          {activeTab === 'pending' && selectedIds.length > 0 && (
+            <div className="flex gap-2 items-center bg-blue-50 px-4 py-2 rounded-lg">
+              <span className="text-sm font-medium text-blue-900">{selectedIds.length} selected</span>
+              <button
+                onClick={handleBulkConfirm}
+                className="px-3 py-1 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+              >
+                Confirm All
+              </button>
+              <button
+                onClick={handleBulkCancel}
+                className="px-3 py-1 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+              >
+                Cancel All
+              </button>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="px-3 py-1 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50"
+              >
+                Clear
+              </button>
+            </div>
+          )}
           <input
             type="date"
             value={filterDate}
@@ -234,6 +313,16 @@ const VetAppointments = () => {
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
+                {activeTab === 'pending' && (
+                  <th className="px-6 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={displayed.length > 0 && selectedIds.length === displayed.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
@@ -246,12 +335,22 @@ const VetAppointments = () => {
             <tbody className="divide-y divide-gray-100">
               {displayed.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-gray-400 text-sm">
+                  <td colSpan={activeTab === 'pending' ? 8 : 7} className="px-6 py-10 text-center text-gray-400 text-sm">
                     No appointments found.
                   </td>
                 </tr>
               ) : displayed.map(apt => (
                 <tr key={apt.id} className="hover:bg-gray-50">
+                  {activeTab === 'pending' && (
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(apt.id)}
+                        onChange={() => toggleSelection(apt.id)}
+                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                      />
+                    </td>
+                  )}
                   <td className="px-6 py-4 text-sm text-gray-500">#{apt.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -464,8 +563,7 @@ const VetAppointments = () => {
           <div className="space-y-4">
             <p className="text-gray-700">
               Mark attendance for <span className="font-semibold">{attendanceModal.userName}</span>'s appointment on{' '}
-              <span className="font-semibold">{attendanceModal.date}</span> at{' '}
-              <span className="font-semibold">{attendanceModal.time}</span>
+              <span className="font-semibold">{attendanceModal.date}</span>
             </p>
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-800">
               If marked as "Show", a medical record will be automatically created for{' '}

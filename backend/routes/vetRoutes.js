@@ -48,7 +48,9 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
           ServType
         ),
         APPOINTMENTLOGS (
-          LogAttendance
+          LogID,
+          LogAttendance,
+          created_at
         )
       `, { count: 'exact' })
       .order('AppointDateCreated', { ascending: false })
@@ -63,13 +65,19 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
     // Transform data
     const appointments = data.map(apt => {
       const schedDate = new Date(apt.AppointSchedDate);
+      
+      // Find the most recent attendance log (where LogAttendance is true)
+      const attendanceLogs = apt.APPOINTMENTLOGS || [];
+      const attendedLog = attendanceLogs.find(log => log.LogAttendance === true);
+      
+      console.log(`📋 Appointment ${apt.AppointID}: status=${apt.AppointStatus}, logs=${attendanceLogs.length}, attended=${!!attendedLog}`);
+      
       return {
         id: apt.AppointID,
         userId: apt.USERPETS.USER.UserID,
         userName: apt.USERPETS.USER.UserName,
         userPhone: apt.USERPETS.USER.ACCOUNT.AccPhoneNum || 'N/A',
         date: schedDate.toISOString().split('T')[0],
-        time: schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         type: apt.SERVICES.ServType.toLowerCase().replace(/\s+/g, '-'),
         status: apt.AppointStatus.toLowerCase(),
         pets: [{
@@ -77,7 +85,7 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
           name: apt.USERPETS.PET.PetName,
           breed: apt.USERPETS.PET.PetBreed
         }],
-        attended: apt.APPOINTMENTLOGS?.[0]?.LogAttendance || null,
+        attended: attendedLog ? true : (attendanceLogs.length > 0 ? false : null),
         createdAt: apt.AppointDateCreated,
         notes: ''
       };
@@ -256,36 +264,41 @@ router.patch('/appointments/:id/cancel', authenticateToken, authorizeRole('vet')
 // Mark attendance
 router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {
-    const { attended } = req.body;
+    const { attended, note } = req.body;
 
-    const updates = {
-      AppointStatus: attended ? 'Completed' : 'Confirmed'
-    };
+    console.log('📋 Marking attendance:', { appointmentId: req.params.id, attended, staffId: req.user.accId });
 
-    const { data, error } = await supabase
-      .from('APPOINTMENT')
-      .update(updates)
-      .eq('AppointID', req.params.id)
+    // Insert into APPOINTMENTLOGS table (requirement 22)
+    const { data: logData, error: logError } = await supabase
+      .from('APPOINTMENTLOGS')
+      .insert({
+        AppointID: req.params.id,
+        LogAttendance: attended,
+        LogStaffAssigned: req.user.accId,
+        LogNote: note || (attended ? 'Patient attended appointment' : 'Patient did not show up')
+      })
       .select()
       .single();
 
-    if (error) throw error;
+    if (logError) {
+      console.error('❌ Error creating attendance log:', logError);
+      throw logError;
+    }
 
-    // Add or update log entry
-    const { error: logError } = await supabase
-      .from('APPOINTMENTLOGS')
-      .upsert({
-        AppointID: req.params.id,
-        LogAttendance: attended,
-        LogNote: attended ? 'Patient attended appointment' : 'Patient did not show up',
-        LogStaffAssigned: req.user.accId
-      });
+    console.log('✅ Attendance log created:', logData);
 
-    if (logError) console.error('Error creating log:', logError);
+    // Return the appointment data (status remains unchanged)
+    const { data: appointment, error: appointError } = await supabase
+      .from('APPOINTMENT')
+      .select('*')
+      .eq('AppointID', req.params.id)
+      .single();
 
-    res.json(data);
+    if (appointError) throw appointError;
+
+    res.json({ success: true, appointment, log: logData });
   } catch (error) {
-    console.error('Mark attendance error:', error);
+    console.error('❌ Mark attendance error:', error);
     res.status(500).json({ error: error.message });
   }
 });
