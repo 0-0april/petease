@@ -1,12 +1,12 @@
 export default {
   content: [
-    "./frontend/index.html",
-    "./frontend/**/*.html",
-    "./frontend/**/*.js",
-    "./frontend/**/*.jsx",
-    "./frontend/**/*.ts",
-    "./frontend/**/*.tsx",
-    "./frontend/**/*.css"
+    './index.html',
+    './**/*.html',
+    './**/*.js',
+    './**/*.jsx',
+    './**/*.ts',
+    './**/*.tsx',
+    './**/*.css'
   ],
   theme: {
     extend: {
