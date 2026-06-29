@@ -5,16 +5,7 @@ export default defineConfig({
   root: 'frontend',
   plugins: [react()],
   server: {
-    port: 5173,
-    strictPort: false,
-    open: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5001',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path
-      }
-    }
+    port: 3000,
+    open: true
   }
 });
