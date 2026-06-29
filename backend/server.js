@@ -7,16 +7,25 @@ import petRoutes from './routes/petRoutes.js';
 import adoptionRoutes from './routes/adoptionRoutes.js';
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import vetRoutes from './routes/vetRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT) || 5001;
 
 app.use(cors());
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.json({ message: 'PETEASE API is running', status: 'ok' });
+});
+
+app.get('/api', (req, res) => {
+  res.json({ message: 'PETEASE API is running', status: 'ok' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -25,6 +34,7 @@ app.use('/api/pets', petRoutes);
 app.use('/api/adoptions', adoptionRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/vet', vetRoutes);
 app.use('/api/admin', adminRoutes);
 
@@ -44,17 +54,21 @@ app._router.stack.forEach((middleware) => {
 });
 console.log('========================\n');
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`Port ${PORT} is busy, trying ${PORT + 1}...`);
-    app.listen(PORT + 1, () => {
-      console.log(`Server running on port ${PORT + 1}`);
-    });
-  } else {
-    console.error('Server error:', err);
-  }
-});
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      const nextPort = port + 1;
+      console.log(`Port ${port} is busy, trying ${nextPort}...`);
+      server.close(() => startServer(nextPort));
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+};
+
+startServer(PORT);

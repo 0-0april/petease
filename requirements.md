@@ -171,7 +171,7 @@ follow the following references, don't change the ui, just change the reference 
 
   10. now connect the supabase to the user/Appointment.jsx based on the appointment table and any related table on the backend/petease.sql schema
 
-  11. In the user/Appointment.jsx page, do not change the ui's default backend, i want it to work as it used to be but just change the references of the data that it was coming from. it should automatically displays the appointment booked by the currently logged user. this is from Appointment table (check schema given if it confuses you).
+  11. In the user/Appointment.jsx page, do not change the ui's default backend, i want it to work as it used to be but just change the references of the data that it was coming from. it should automatically displays the appointment booked by the currently logged user. this is from Appointment table (check schema backend/petease.sql if it confuses you).
   
   you can compare whether the pet's owner from UserPets table's userID through the Appointment's table FK which is UserPetID, if is equal then display the pets that is owned by the user logged in.
 
@@ -217,3 +217,90 @@ if the customer's attendande showed up, the LogAttendance should be true, if not
 
 23. the appointment that has status of Pending should be listed/ displayed in the Pending Tab of Vet's Appointment Page, the appointment that has status of confirmed should be in the Confirmed Appointment tab, and the appointment's attendance that is marked as 'Show' should be displayed in the Completed Appointment tab
 
+24. In the user/pages/Notifications.jsx, once there is changes or updates in the pages like new message received, appointment cancelled by vet staff, new adoption received, and announcement by vet staff/admin, it should all be displayed here. like the modern notification in other systems. 
+
+25. the details  of the changes or updates should be added in the database and should be displayed accordingly in the page. once the notification card is being clicked by the currently logged in user it should direct the respected page of where the notification coming from. check the backend/petease.sql as your reference for you database connection.
+
+
+
+FRONT END REQUIREMENTS UPDATE
+
+I need to improve the UI/UX of my existing project while maintaining all backend functionality, database connections, and existing dependencies. Here are my specific requirements:
+
+**Project Context:**
+- I have an existing full-stack project with Supabase backend connection
+- All backend logic, API routes, and database operations must remain untouched
+- Dependencies and their versions must stay exactly as they are
+
+**UI/UX Requirements:**
+1. **Icon System:** Keep using the same icon source/library that's currently implemented. Don't change the icon provider or import method - just enhance how icons are displayed and integrated into the new UI.
+
+2. **Color Theme:** Maintain the exact same color palette currently in use. Don't change hex codes, brand colors, or any established color system. Only enhance how these colors are applied (better contrast, spacing, hierarchy, etc.)
+
+3. **Responsive Design:** Make the entire interface fully responsive for mobile devices (320px+), tablets (768px+), and desktop (1024px+). Use mobile-first approach.
+
+4. **UI Improvements (without changing functionality):**
+   - Better visual hierarchy and spacing
+   - Improved typography (font sizes, weights, line heights)
+   - Enhanced card/container designs with subtle shadows and borders
+   - Better form inputs with focus states and validation styling
+   - Smooth transitions and micro-interactions
+   - Improved loading states and feedback
+   - Better use of whitespace
+   - More polished buttons and interactive elements
+   - Improved data tables/list views
+   - Better navigation/menu experience
+   - Enhanced modals/dialogs
+
+5. **Technical Constraints:**
+   - Only modify components, styles, and layout files in the frontend folder
+   - No changes to package.json, dependencies, or versions
+   - No changes to Supabase client configuration or connection
+   - No changes to API routes or backend logic
+   - Keep all event handlers, form submissions, and data fetching logic intact
+   - Use existing CSS framework if present, or add minimal additional CSS/Tailwind classes
+   - Preserve all existing component props and state management
+
+**Deliverables:**
+- Clean, modern UI that looks professionally designed
+- All existing functionality works exactly as before
+- Fully responsive across all devices
+- Consistent with the current brand colors and icon system
+- Performance not degraded (no unnecessary re-renders)
+
+**Current Tech Stack (please ask me if you need specifics):**
+- Frontend Framework: React with Vite
+- Styling:  Tailwind CSS
+- UI Library: Custom React components
+- Backend:Supabase with Express.js API routes
+- Icon Library: Inline SVG icons
+
+26. in the vet staff panel, in the vet/VetServices page: When the vet staff adds new service or edit existing service and selects the availability you should ask the days(Monday, Tuesday, Wenesday, Thursday to Sunday) it is going to be available. 
+
+27. aside from the weekdays, the availability slection could be customized as well through a Specific date
+
+The service availability choices should display:
+- Monday
+- Tuesday
+- Wednesday
+- thursday
+- friday
+- saturday
+- specific date (with input through calendar)
+
+29.  vet staffs can select multiple if it is selecting Days but if the specific date it click it should be the only one selected so disable the specific date if there is day above selected and disable the day if there is date selected.
+
+30. after implementing that, update the database connection that is invovled in that function. check the petease.sql as reference for you modification. 
+
+do not explain too much, execute what i said and save credits.
+
+31. make sure the availability is accurately visible in the user/BookAppointment. as what i have seen the consultation i selected is on mondays but the available day that is seen in the user panel is on tuesdays. there is somthing wrong with the calendar rendering fix it
+
+32. In the vet/VetNotifications.jsx, once there is changes or updates in the pages like new appointment, new adoption and announcement by vet staff/admin, it should all be displayed here. like the modern notification in other systems. YOU CAN USE THE TEMPLATE that is being used in the user/Notifications page
+
+33. the details  of the changes or updates should be added in the database and should be displayed accordingly in the page. once the notification card is being clicked by the currently logged in user it should direct the respected page of where the notification coming from. check the backend/petease.sql as your reference for you database connection.
+
+
+34. In the use/Messages add a  card there named "Announcements" that in the conversations sidebar that behaves just like how the user messages displayed behave but only sends announcement from the vet staff and admin. user cannot reply to this but it sends the necessary information of the annoucement from the Annoucement table.
+
+35. connect the announcements from admin/vet staff in the Announcements messages. the announcement should behave like chats but with complete necessary details about the announcement. check backend/petease.sql as your reference

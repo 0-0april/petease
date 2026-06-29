@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js';
+import { createNotificationsForUsers, createNotificationsForVets } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
@@ -36,6 +37,18 @@ router.post('/announcements', authenticateToken, authorizeRole('admin'), async (
       'INSERT INTO "ANNOUNCEMENT" ("AnnounceTitle", "AnnounceContent", "AnnounceType", "AnnouncedBy") VALUES ($1, $2, $3, $4) RETURNING *',
       [title, content, type, adminResult.rows[0].AdminID]
     );
+
+    await createNotificationsForUsers({
+      title: title || 'New announcement',
+      message: content,
+      type: 'announcement'
+    });
+
+    await createNotificationsForVets({
+      title: title || 'New system announcement',
+      message: content,
+      type: 'announcement'
+    });
     
     res.status(201).json(result.rows[0]);
   } catch (error) {

@@ -39,7 +39,11 @@ router.get('/', async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('GET /api/pets error:', error);
+    res.status(503).json({
+      error: 'Pets service is temporarily unavailable',
+      details: error.message
+    });
   }
 });
 

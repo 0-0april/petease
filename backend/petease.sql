@@ -20,6 +20,68 @@ CREATE TABLE public.ADMIN (
   CONSTRAINT ADMIN_pkey PRIMARY KEY (AdminID),
   CONSTRAINT ADMIN_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
 );
+CREATE TABLE public.VETSTAFF (
+  StaffID uuid NOT NULL DEFAULT gen_random_uuid(),
+  StaffName character varying NOT NULL,
+  StaffBDay date,
+  StaffAddress text,
+  AccID uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT VETSTAFF_pkey PRIMARY KEY (StaffID),
+  CONSTRAINT VETSTAFF_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
+);
+CREATE TABLE public.USER (
+  UserID uuid NOT NULL DEFAULT gen_random_uuid(),
+  UserName character varying NOT NULL,
+  AccID uuid NOT NULL,
+  UserAddress text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT USER_pkey PRIMARY KEY (UserID),
+  CONSTRAINT USER_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
+);
+CREATE TABLE public.SERVICES (
+  ServID uuid NOT NULL DEFAULT gen_random_uuid(),
+  ServType character varying NOT NULL,
+  ServDayAvailable ARRAY NOT NULL DEFAULT '{}'::days_of_week[],
+  ServSlot integer NOT NULL DEFAULT 1,
+  ServStatus USER-DEFINED NOT NULL DEFAULT 'Active'::serv_status,
+  ServEndDate date,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT SERVICES_pkey PRIMARY KEY (ServID)
+);
+CREATE TABLE public.MEDICALHISTORY (
+  MedID uuid NOT NULL DEFAULT gen_random_uuid(),
+  Medicine character varying NOT NULL,
+  Description text,
+  ServID uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT MEDICALHISTORY_pkey PRIMARY KEY (MedID),
+  CONSTRAINT MEDICALHISTORY_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID)
+);
+CREATE TABLE public.PET (
+  PetID uuid NOT NULL DEFAULT gen_random_uuid(),
+  PetName character varying NOT NULL,
+  PetBDay date,
+  PetSpecie character varying,
+  PetBreed character varying,
+  PetMarkings text,
+  PetGender USER-DEFINED,
+  PetDetails text,
+  PetImg text,
+  PetAvailable boolean NOT NULL DEFAULT true,
+  PetRegType text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT PET_pkey PRIMARY KEY (PetID)
+);
+CREATE TABLE public.USERPETS (
+  UserPetID uuid NOT NULL DEFAULT gen_random_uuid(),
+  UserID uuid NOT NULL,
+  PetID uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT USERPETS_pkey PRIMARY KEY (UserPetID),
+  CONSTRAINT USERPETS_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID),
+  CONSTRAINT USERPETS_PetID_fkey FOREIGN KEY (PetID) REFERENCES public.PET(PetID)
+);
 CREATE TABLE public.ADOPTION (
   AdoptID uuid NOT NULL DEFAULT gen_random_uuid(),
   UserID uuid NOT NULL,
@@ -31,17 +93,6 @@ CREATE TABLE public.ADOPTION (
   CONSTRAINT ADOPTION_pkey PRIMARY KEY (AdoptID),
   CONSTRAINT ADOPTION_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID),
   CONSTRAINT ADOPTION_UserPetsID_fkey FOREIGN KEY (UserPetsID) REFERENCES public.USERPETS(UserPetID)
-);
-CREATE TABLE public.ANNOUNCEMENT (
-  AnnounceID uuid NOT NULL DEFAULT gen_random_uuid(),
-  AnnounceTitle character varying NOT NULL,
-  AnnounceContent text NOT NULL,
-  AnnounceType USER-DEFINED NOT NULL DEFAULT 'General'::announce_type,
-  AnnounceDateUpdated timestamp with time zone NOT NULL DEFAULT now(),
-  AnnouncedBy uuid,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT ANNOUNCEMENT_pkey PRIMARY KEY (AnnounceID),
-  CONSTRAINT ANNOUNCEMENT_AnnouncedBy_fkey FOREIGN KEY (AnnouncedBy) REFERENCES public.ADMIN(AdminID)
 );
 CREATE TABLE public.APPOINTMENT (
   AppointID uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -66,15 +117,6 @@ CREATE TABLE public.APPOINTMENTLOGS (
   CONSTRAINT APPOINTMENTLOGS_AppointID_fkey FOREIGN KEY (AppointID) REFERENCES public.APPOINTMENT(AppointID),
   CONSTRAINT APPOINTMENTLOGS_LogStaffAssigned_fkey FOREIGN KEY (LogStaffAssigned) REFERENCES public.ACCOUNT(AccID)
 );
-CREATE TABLE public.MEDICALHISTORY (
-  MedID uuid NOT NULL DEFAULT gen_random_uuid(),
-  Medicine character varying NOT NULL,
-  Description text,
-  ServID uuid,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT MEDICALHISTORY_pkey PRIMARY KEY (MedID),
-  CONSTRAINT MEDICALHISTORY_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID)
-);
 CREATE TABLE public.MESSAGES (
   MessID uuid NOT NULL DEFAULT gen_random_uuid(),
   MessFrom uuid NOT NULL,
@@ -86,20 +128,16 @@ CREATE TABLE public.MESSAGES (
   CONSTRAINT MESSAGES_MessFrom_fkey FOREIGN KEY (MessFrom) REFERENCES public.USER(UserID),
   CONSTRAINT MESSAGES_MessTo_fkey FOREIGN KEY (MessTo) REFERENCES public.USER(UserID)
 );
-CREATE TABLE public.PET (
-  PetID uuid NOT NULL DEFAULT gen_random_uuid(),
-  PetName character varying NOT NULL,
-  PetBDay date,
-  PetSpecie character varying,
-  PetBreed character varying,
-  PetMarkings text,
-  PetGender USER-DEFINED,
-  PetDetails text,
-  PetImg text,
-  PetAvailable boolean NOT NULL DEFAULT true,
-  PetRegType USER-DEFINED NOT NULL,
+CREATE TABLE public.ANNOUNCEMENT (
+  AnnounceID uuid NOT NULL DEFAULT gen_random_uuid(),
+  AnnounceTitle character varying NOT NULL,
+  AnnounceContent text NOT NULL,
+  AnnounceType USER-DEFINED NOT NULL DEFAULT 'General'::announce_type,
+  AnnounceDateUpdated timestamp with time zone NOT NULL DEFAULT now(),
+  AnnouncedBy uuid,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT PET_pkey PRIMARY KEY (PetID)
+  CONSTRAINT ANNOUNCEMENT_pkey PRIMARY KEY (AnnounceID),
+  CONSTRAINT ANNOUNCEMENT_AnnouncedBy_fkey FOREIGN KEY (AnnouncedBy) REFERENCES public.ADMIN(AdminID)
 );
 CREATE TABLE public.REPORTS (
   ReportID uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -114,41 +152,14 @@ CREATE TABLE public.REPORTS (
   CONSTRAINT REPORTS_ReportedUser_fkey FOREIGN KEY (ReportedUser) REFERENCES public.USER(UserID),
   CONSTRAINT REPORTS_ReportedBy_fkey FOREIGN KEY (ReportedBy) REFERENCES public.USER(UserID)
 );
-CREATE TABLE public.SERVICES (
-  ServID uuid NOT NULL DEFAULT gen_random_uuid(),
-  ServType character varying NOT NULL,
-  ServDayAvailable ARRAY NOT NULL DEFAULT '{}'::days_of_week[],
-  ServSlot integer NOT NULL DEFAULT 1,
-  ServStatus USER-DEFINED NOT NULL DEFAULT 'Active'::serv_status,
-  ServEndDate date,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT SERVICES_pkey PRIMARY KEY (ServID)
-);
-CREATE TABLE public.USER (
-  UserID uuid NOT NULL DEFAULT gen_random_uuid(),
-  UserName character varying NOT NULL,
+CREATE TABLE public.NOTIFICATION (
+  NotifID uuid NOT NULL DEFAULT gen_random_uuid(),
   AccID uuid NOT NULL,
-  UserAddress text,
+  NotifTitle character varying NOT NULL,
+  NotifMessage text NOT NULL,
+  NotifType character varying,
+  NotifRead boolean NOT NULL DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT USER_pkey PRIMARY KEY (UserID),
-  CONSTRAINT USER_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
-);
-CREATE TABLE public.USERPETS (
-  UserPetID uuid NOT NULL DEFAULT gen_random_uuid(),
-  UserID uuid NOT NULL,
-  PetID uuid NOT NULL,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT USERPETS_pkey PRIMARY KEY (UserPetID),
-  CONSTRAINT USERPETS_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID),
-  CONSTRAINT USERPETS_PetID_fkey FOREIGN KEY (PetID) REFERENCES public.PET(PetID)
-);
-CREATE TABLE public.VETSTAFF (
-  StaffID uuid NOT NULL DEFAULT gen_random_uuid(),
-  StaffName character varying NOT NULL,
-  StaffBDay date,
-  StaffAddress text,
-  AccID uuid NOT NULL,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT VETSTAFF_pkey PRIMARY KEY (StaffID),
-  CONSTRAINT VETSTAFF_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
+  CONSTRAINT NOTIFICATION_pkey PRIMARY KEY (NotifID),
+  CONSTRAINT NOTIFICATION_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
 );

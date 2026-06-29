@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { supabase } from '../config/supabase.js';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js';
+import { createNotification, createNotificationsForVets, createNotificationsForUsers } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
@@ -234,6 +235,22 @@ router.patch('/appointments/:id/cancel', authenticateToken, authorizeRole('vet')
   try {
     const { reason } = req.body;
 
+    const { data: appointmentDetails } = await supabase
+      .from('APPOINTMENT')
+      .select(`
+        AppointSchedDate,
+        USERPETS (
+          USER (
+            AccID
+          ),
+          PET (
+            PetName
+          )
+        )
+      `)
+      .eq('AppointID', req.params.id)
+      .single();
+
     const { data, error } = await supabase
       .from('APPOINTMENT')
       .update({ AppointStatus: 'Cancelled' })
@@ -253,6 +270,18 @@ router.patch('/appointments/:id/cancel', authenticateToken, authorizeRole('vet')
       });
 
     if (logError) console.error('Error creating log:', logError);
+
+    if (appointmentDetails?.USERPETS?.USER?.AccID) {
+      const petName = appointmentDetails.USERPETS.PET?.PetName || 'your pet';
+      const date = appointmentDetails.AppointSchedDate?.split('T')[0] || 'the scheduled date';
+
+      await createNotification({
+        accId: appointmentDetails.USERPETS.USER.AccID,
+        title: 'Appointment cancelled',
+        message: `Your appointment for ${petName} on ${date} was cancelled by vet staff.${reason ? ` Reason: ${reason}` : ''}`,
+        type: 'appointment'
+      });
+    }
 
     res.json(data);
   } catch (error) {
@@ -373,22 +402,17 @@ router.post('/services', authenticateToken, authorizeRole('vet'), async (req, re
   try {
     console.log('📝 Create service:', req.body);
     
-    const { name, description, availabilityType, specificDate, notifyUsers } = req.body;
+    const { name, description, availabilityType, selectedDays, specificDate, notifyUsers } = req.body;
 
-    // Determine days available based on availability type
+    // Build availability from new UI fields
     let daysAvailable = [];
     let endDate = null;
 
-    if (availabilityType === 'recurring') {
-      // Default to weekdays for recurring services
-      daysAvailable = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    } else if (availabilityType === 'specific' && specificDate) {
-      // For specific date, set end date
+    if (availabilityType === 'specific' && specificDate) {
       endDate = specificDate;
-      // Get the day of week for the specific date
-      const date = new Date(specificDate);
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-      daysAvailable = [dayName];
+      daysAvailable = [];
+    } else if (selectedDays && selectedDays.length > 0) {
+      daysAvailable = selectedDays;
     }
 
     const { data, error } = await supabase
@@ -397,7 +421,7 @@ router.post('/services', authenticateToken, authorizeRole('vet'), async (req, re
         ServType: name,
         ServDayAvailable: daysAvailable,
         ServEndDate: endDate,
-        ServSlot: 5, // Default slot count
+        ServSlot: 5,
         ServStatus: 'Active'
       })
       .select()
@@ -409,6 +433,14 @@ router.post('/services', authenticateToken, authorizeRole('vet'), async (req, re
     }
 
     console.log('✅ Service created:', data);
+    if (notifyUsers) {
+      await createNotificationsForUsers({
+        title: 'New service announcement',
+        message: `${name} is now available.${description ? ` ${description}` : ''}`,
+        type: 'announcement'
+      });
+    }
+
     res.status(201).json({
       id: data.ServID,
       name: data.ServType,
@@ -428,19 +460,17 @@ router.put('/services/:id', authenticateToken, authorizeRole('vet'), async (req,
   try {
     console.log('✏️ Update service:', req.params.id, req.body);
     
-    const { name, description, availabilityType, specificDate, notifyUsers } = req.body;
+    const { name, description, availabilityType, selectedDays, specificDate, notifyUsers } = req.body;
 
-    // Determine days available based on availability type
+    // Build availability from new UI fields
     let daysAvailable = [];
     let endDate = null;
 
-    if (availabilityType === 'recurring') {
-      daysAvailable = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    } else if (availabilityType === 'specific' && specificDate) {
+    if (availabilityType === 'specific' && specificDate) {
       endDate = specificDate;
-      const date = new Date(specificDate);
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-      daysAvailable = [dayName];
+      daysAvailable = [];
+    } else if (selectedDays && selectedDays.length > 0) {
+      daysAvailable = selectedDays;
     }
 
     const { data, error } = await supabase
@@ -466,6 +496,14 @@ router.put('/services/:id', authenticateToken, authorizeRole('vet'), async (req,
     }
 
     console.log('✅ Service updated:', data);
+    if (notifyUsers) {
+      await createNotificationsForUsers({
+        title: 'Service announcement updated',
+        message: `${name} has been updated.${description ? ` ${description}` : ''}`,
+        type: 'announcement'
+      });
+    }
+
     res.json({
       id: data.ServID,
       name: data.ServType,
@@ -664,10 +702,86 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
     }
 
     console.log('✅ Adoption completed successfully');
+    const { data: adopter } = await supabase
+      .from('ADOPTION')
+      .select(`
+        USER (
+          AccID
+        ),
+        USERPETS (
+          PET (
+            PetName
+          )
+        )
+      `)
+      .eq('AdoptID', req.params.id)
+      .single();
+
+    if (adopter?.USER?.AccID) {
+      await createNotification({
+        accId: adopter.USER.AccID,
+        title: 'Adoption completed',
+        message: `The adoption process for ${adopter.USERPETS?.PET?.PetName || 'your pet'} was completed by vet staff.`,
+        type: 'adoption'
+      });
+    }
+
     res.json({ success: true, adoption, waiverUrl });
   } catch (error) {
     console.error('❌ Complete adoption error:', error);
     res.status(500).json({ error: error.message, details: error });
+  }
+});
+
+// Get vet notifications from DB
+router.get('/notifications', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('NOTIFICATION')
+      .select('*')
+      .eq('AccID', req.user.accId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json((data || []).map(n => ({
+      id: n.NotifID,
+      title: n.NotifTitle,
+      message: n.NotifMessage,
+      type: n.NotifType || 'general',
+      isRead: n.NotifRead,
+      createdAt: n.created_at
+    })));
+  } catch (error) {
+    console.error('Get vet notifications error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mark vet notification as read
+router.patch('/notifications/:id/read', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('NOTIFICATION')
+      .update({ NotifRead: true })
+      .eq('NotifID', req.params.id)
+      .eq('AccID', req.user.accId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      id: data.NotifID,
+      title: data.NotifTitle,
+      message: data.NotifMessage,
+      type: data.NotifType || 'general',
+      isRead: data.NotifRead,
+      createdAt: data.created_at
+    });
+  } catch (error) {
+    console.error('Mark vet notification read error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

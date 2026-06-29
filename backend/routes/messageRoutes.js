@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { createNotification } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.post('/', authenticateToken, async (req, res) => {
   const { messTo, messContent } = req.body;
   
   try {
-    const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
+    const userResult = await pool.query('SELECT "UserID", "UserName" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
     
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
@@ -19,6 +20,20 @@ router.post('/', authenticateToken, async (req, res) => {
       'INSERT INTO "MESSAGES" ("MessFrom", "MessTo", "MessContent") VALUES ($1, $2, $3) RETURNING *',
       [userResult.rows[0].UserID, messTo, messContent]
     );
+
+    const receiverResult = await pool.query(
+      'SELECT "AccID" FROM "USER" WHERE "UserID" = $1',
+      [messTo]
+    );
+
+    if (receiverResult.rows.length > 0) {
+      await createNotification({
+        accId: receiverResult.rows[0].AccID,
+        title: 'New message received',
+        message: `${userResult.rows[0].UserName} sent you a message.`,
+        type: 'message'
+      });
+    }
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
