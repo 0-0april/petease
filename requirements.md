@@ -304,3 +304,47 @@ do not explain too much, execute what i said and save credits.
 34. In the use/Messages add a  card there named "Announcements" that in the conversations sidebar that behaves just like how the user messages displayed behave but only sends announcement from the vet staff and admin. user cannot reply to this but it sends the necessary information of the annoucement from the Annoucement table.
 
 35. connect the announcements from admin/vet staff in the Announcements messages. the announcement should behave like chats but with complete necessary details about the announcement. check backend/petease.sql as your reference
+
+
+
+
+
+Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-responsive checkout UI layout using Tailwind CSS based on the following precise visual specifications:
+
+### 1. Theme, Background & Core Containers
+* **Background Canvas:** A very clean, soft green-white canvas (`hsla(132, 79%, 89%, 1.00)`). To capture the image's dynamic feel, position multiple floating, deeply blurred, organic 3D spheres across the background. The spheres use a vibrant lime-to-mid-green radial gradient (`hsl(130, 100%, 30%)` to `hsl(135, 95%, 18%)`).
+* **Main UI Container (Glass Card):** The central layout must resemble the image's premium frost effect. 
+  * Use a highly translucent white fill with an aggressive frosted effect (`backdrop-blur-[25px] bg-white/40`).
+  * Add a crisp, ultra-thin 1px solid white border (`border-white/60`) to define the shape.
+  * Apply soft, heavily rounded corners (`rounded-[32px]`) and a subtle, wide-diffused shadow to give it an elegant, floating look against the background elements.
+
+### 2. Layout (Two-Column Split on Desktop, Stacked on Mobile)
+* **Left Column (Visual Credit Card Preview):**
+  * **Card Design:** A floating, smaller glassmorphic element. It utilizes a slightly more opaque frost layer so text remains sharp. 
+  * Incorporate an integrated, glowing green gradient orb (`hsl(130, 100%, 30%)`) masked into the bottom-right corner of the card itself, exactly mirroring how the green orb bleeds through the central panel in the reference image.
+  * Elements include a clean icon chip, masked card numbers, and the cardholder's name.
+* **Right Column (The Checkout Form):** Houses the navigation bar, input fields, and payment footer.
+
+### 3. UI Component Specifications
+
+* **Navigation Bar (3-Step Checkout Nav):**
+  * **Structure:** A minimalist 3-step navigation link (Main page > Shipping details > Payment method) aligned to the top of the form.
+  * **Styling:** Inactive steps use a low-opacity mid-tone green (`hsl(135, 95%, 18%, 0.5)`). The active "Payment method" step is rendered in bold mid-tone green with a sharp, vibrant green underline accent (`hsl(130, 100%, 30%)`).
+
+* **Input Fields:**
+  * **Style:** Sleek, borderless, low-profile text inputs. Instead of a box, each input uses a clean, thin solid horizontal bottom border (`border-b border-neutral-300`).
+  * **Interactions:** The background inside the field is completely transparent. On focus, the bottom border smoothly transitions to a vivid green highlight (`hsl(130, 100%, 30%)`). 
+  * **Labels & Icons:** Labels are positioned above the inputs in a muted forest-green (`hsl(140, 100%, 7%, 0.6)`). Include a subtle icon prefix for Cardholder, Card Number, and CVV fields.
+
+* **Primary CTA Button ("PAY" Button):**
+  * **Shape & Fill:** A distinct capsule/pill-shaped button (`rounded-full`) that acts as the primary action.
+  * **Aesthetic:** To match the graphic elements in the image, the button features a smooth, vibrant lime-to-mid-green linear gradient (`from-[hsl(130,100%,40%)] to-[hsl(135,95%,22%)]`).
+  * **Text:** The word "PAY" is set in crisp, stark white (`hsl(0, 0%, 100%)`), All-Caps, and Bold.
+  * **Hover Effect:** Add a subtle brightness lift and a soft green glow shadow on hover.
+
+### 4. Typography & Visual Hierarchy
+* **Font Family:** Clean, geometric Neo-Grotesque Sans-Serif (such as Inter, SF Pro, or Helvetica Neue).
+* **Color Palette for Text:** For maximum readability on this light theme, all primary headings and structural labels use a deep forest-green base (`hsl(140, 100%, 7%)`) instead of black. Secondary subtext uses a lighter, mid-tone green opacity.
+* **Styling Hierarchy:** 
+  * **Main Titles & Active States:** Set in **All-Caps, Bold/Heavy** weights with tight, compressed tracking (letter-spacing) to anchor sections.
+  * **Subtext & Descriptions:** Set in **Regular/Light** weight, using standard lowercase prose with looser tracking for an open, airy, modern aesthetic.

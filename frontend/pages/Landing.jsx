@@ -1,523 +1,240 @@
-<<<<<<< HEAD
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 const features = [
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    title: 'Pet Adoption',
-    description: 'Browse and adopt pets from loving owners. Find your perfect companion today.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-    title: 'Vet Appointments',
-    description: 'Book consultations, anti-rabies vaccines, and spay/neuter services with ease.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    title: 'Medical Records',
-    description: 'Keep track of your pet\'s complete medical history, medications, and treatments.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    ),
-    title: 'Direct Messaging',
-    description: 'Message pet owners directly to ask questions before requesting adoption.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      </svg>
-    ),
-    title: 'Real-time Notifications',
-    description: 'Stay updated on adoption requests, appointment confirmations, and more.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-    title: 'Verified Adoptions',
-    description: 'All adoptions are processed with official waivers witnessed by vet staff.'
-  }
+  { icon:'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+    title:'Pet Adoption',    desc:'Browse and adopt pets from loving owners. Find your perfect companion today.' },
+  { icon:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+    title:'Vet Appointments',desc:'Book consultations, anti-rabies vaccines, and spay/neuter services with ease.' },
+  { icon:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    title:'Medical Records',  desc:"Keep track of your pet's complete medical history, medications, and treatments." },
+  { icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+    title:'Direct Messaging', desc:'Message pet owners directly to ask questions before requesting adoption.' },
+  { icon:'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
+    title:'Notifications',    desc:'Stay updated on adoption requests, appointment confirmations, and more.' },
+  { icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+    title:'Verified Adoptions',desc:'All adoptions are processed with official waivers witnessed by vet staff.' },
+];
+
+const stats = [
+  { value:'500+',   label:'Pets Adopted' },
+  { value:'1,200+', label:'Registered Users' },
+  { value:'300+',   label:'Appointments Booked' },
+  { value:'50+',    label:'Vet Services' },
 ];
 
 const steps = [
-  { step: '01', title: 'Create an Account', description: 'Register as a pet owner or adopter in minutes.' },
-  { step: '02', title: 'Browse or List Pets', description: 'Find pets available for adoption or list your own.' },
-  { step: '03', title: 'Connect & Adopt', description: 'Message owners, request adoption, and complete the process.' },
-  { step: '04', title: 'Book Vet Services', description: 'Schedule appointments for your new or existing pets.' }
+  { n:'01', title:'Create an Account',   desc:'Register as a pet owner or adopter in minutes.' },
+  { n:'02', title:'Browse or List Pets', desc:'Find pets available for adoption or list your own.' },
+  { n:'03', title:'Connect & Adopt',     desc:'Message owners, request adoption, and complete the process.' },
+  { n:'04', title:'Book Vet Services',   desc:'Schedule appointments for your new or existing pets.' },
 ];
 
-const Landing = () => {
+export default function Landing() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="relative min-h-screen overflow-x-hidden"
+      style={{ background:'hsla(132,79%,89%,1)' }}>
 
-      {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <span className="text-2xl font-bold text-primary">PetEase</span>
-            <div className="flex items-center space-x-4">
-              <Link to="/login" className="text-gray-700 hover:text-primary px-4 py-2 rounded-md">
-                Login
-              </Link>
-              <Link to="/register" className="bg-primary text-white px-5 py-2 rounded-md hover:bg-primary-dark">
-                Get Started
-              </Link>
-            </div>
+      {/* Spheres */}
+      <div className="pe-bg" aria-hidden="true">
+        <div className="pe-sphere animate-float-slow"
+          style={{ width:'640px', height:'640px', top:'-200px', left:'-180px', opacity:0.48 }} />
+        <div className="pe-sphere animate-float-mid"
+          style={{ width:'420px', height:'420px', top:'40%', right:'-130px', opacity:0.30 }} />
+        <div className="pe-sphere"
+          style={{ width:'260px', height:'260px', bottom:'-80px', left:'30%', opacity:0.20,
+                   filter:'blur(60px)' }} />
+      </div>
+
+      {/* ── Navbar ── */}
+      <nav className="nav-glass sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+          <span className="text-2xl font-black tracking-tight" style={{ color:'hsl(140,100%,7%)' }}>
+            PetEase
+          </span>
+          <div className="flex items-center gap-3">
+            <Link to="/login"    className="btn-outline" style={{ padding:'9px 22px', fontSize:'0.75rem' }}>Login</Link>
+            <Link to="/register" className="btn-pay"     style={{ padding:'10px 22px', fontSize:'0.75rem' }}>Get Started</Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-green-50 to-white py-24 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+      {/* ── Hero ── */}
+      <section className="relative z-10 py-28 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 text-center lg:text-left">
-            <span className="inline-block bg-green-100 text-primary text-sm font-semibold px-4 py-1 rounded-full mb-4">
-              Pet Adoption & Veterinary System
+            <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
+              style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(130,100%,30%)' }}>
+              Pet Adoption &amp; Veterinary System
             </span>
-            <h1 className="text-5xl font-bold text-gray-900 leading-tight mb-6">
+            <h1 className="heading-dark text-5xl sm:text-6xl lg:text-7xl mb-6">
               Find a Friend.<br />
-              <span className="text-primary">Care for Life.</span>
+              <span style={{ color:'hsl(130,100%,30%)' }}>Care for Life.</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-xl">
-              PetEase connects pet owners, adopters, and veterinary staff in one seamless platform. Adopt, manage, and care for your pets with ease.
+            <p className="text-lg mb-10 max-w-xl mx-auto lg:mx-0 font-light"
+              style={{ color:'hsla(140,100%,7%,0.58)', lineHeight:'1.75' }}>
+              PetEase connects pet owners, adopters, and veterinary staff in one seamless platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/register" className="bg-primary text-white px-8 py-3 rounded-md hover:bg-primary-dark text-center font-semibold">
-                Start Adopting
-              </Link>
-              <Link to="/login" className="border-2 border-primary text-primary px-8 py-3 rounded-md hover:bg-green-50 text-center font-semibold">
-                Sign In
-              </Link>
+              <Link to="/register" className="btn-pay text-center" style={{ padding:'14px 36px' }}>Start Adopting</Link>
+              <Link to="/login"    className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
             </div>
           </div>
+
+          {/* Pet photo grid */}
           <div className="flex-1 grid grid-cols-2 gap-4 max-w-md w-full">
-            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300" alt="Dog" className="rounded-2xl object-cover w-full h-48 shadow-md" />
-            <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300" alt="Cat" className="rounded-2xl object-cover w-full h-48 shadow-md mt-8" />
-            <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=300" alt="Cat 2" className="rounded-2xl object-cover w-full h-48 shadow-md -mt-4" />
-            <img src="https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=300" alt="Dog 2" className="rounded-2xl object-cover w-full h-48 shadow-md mt-4" />
+            {[
+              { src:'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300', alt:'Dog',   mt:'' },
+              { src:'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300', alt:'Cat',   mt:'mt-8' },
+              { src:'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=300', alt:'Cat 2', mt:'-mt-4' },
+              { src:'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=300', alt:'Dog 2', mt:'mt-4' },
+            ].map(i => (
+              <img key={i.alt} src={i.src} alt={i.alt}
+                className={`rounded-3xl object-cover w-full h-48 shadow-glass ${i.mt}`} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="bg-primary py-12 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-          {[
-            { value: '500+', label: 'Pets Adopted' },
-            { value: '1,200+', label: 'Registered Users' },
-            { value: '300+', label: 'Appointments Booked' },
-            { value: '50+', label: 'Vet Services' }
-          ].map((stat, i) => (
-            <div key={i}>
-              <p className="text-4xl font-bold">{stat.value}</p>
-              <p className="text-green-200 mt-1">{stat.label}</p>
-            </div>
-          ))}
+      {/* ── Stats ── */}
+      <section className="relative z-10 py-10 px-4">
+        <div className="max-w-5xl mx-auto glass-card overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {stats.map((s, i) => (
+              <div key={i} className="text-center py-8 px-4"
+                style={{ borderRight: i < 3 ? '1px solid rgba(255,255,255,0.45)' : 'none' }}>
+                <p className="text-4xl font-black" style={{ color:'hsl(140,100%,7%)' }}>{s.value}</p>
+                <p className="mt-1 text-sm font-light tracking-wide"
+                  style={{ color:'hsla(140,100%,7%,0.50)' }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 px-4 bg-gray-50">
+      {/* ── Features ── */}
+      <section className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">Everything You Need</h2>
-            <p className="text-gray-600 mt-3 max-w-xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="heading-dark text-4xl mb-4">Everything You Need</h2>
+            <p className="font-light max-w-xl mx-auto"
+              style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.75' }}>
               A complete platform for pet adoption and veterinary care management.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
-              <div key={i} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="bg-green-50 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                  {feature.icon}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+              <div key={i} className="glass-inner p-6 transition-all hover:shadow-glass">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background:'hsla(130,100%,30%,0.13)' }}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style={{ color:'hsl(130,100%,30%)' }} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={f.icon} />
+                  </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
+                <h3 className="text-sm font-bold uppercase tracking-wider mb-2"
+                  style={{ color:'hsl(140,100%,7%)' }}>{f.title}</h3>
+                <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.7' }}>
+                  {f.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 px-4 bg-white">
+      {/* ── How It Works ── */}
+      <section className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
-            <p className="text-gray-600 mt-3">Get started in just a few simple steps.</p>
+          <div className="text-center mb-16">
+            <h2 className="heading-dark text-4xl mb-4">How It Works</h2>
+            <p className="font-light" style={{ color:'hsla(140,100%,7%,0.55)' }}>
+              Get started in just a few simple steps.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((item, i) => (
+            {steps.map((s, i) => (
               <div key={i} className="text-center">
-                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {item.step}
+                <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-lg mx-auto mb-4 shadow-glass"
+                  style={{ background:'linear-gradient(135deg, hsl(130,100%,40%) 0%, hsl(135,95%,22%) 100%)' }}>
+                  {s.n}
                 </div>
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute mt-8 ml-32 w-full h-0.5 bg-green-100" />
-                )}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.description}</p>
+                <h3 className="text-sm font-bold uppercase tracking-wider mb-2"
+                  style={{ color:'hsl(140,100%,7%)' }}>{s.title}</h3>
+                <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.7' }}>
+                  {s.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Appointment Types */}
-      <section className="py-20 px-4 bg-green-50">
+      {/* ── Vet Services ── */}
+      <section className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">Veterinary Services</h2>
-            <p className="text-gray-600 mt-3">Professional care for your pets, scheduled at your convenience.</p>
+          <div className="text-center mb-16">
+            <h2 className="heading-dark text-4xl mb-4">Veterinary Services</h2>
+            <p className="font-light" style={{ color:'hsla(140,100%,7%,0.55)' }}>
+              Professional care for your pets, scheduled at your convenience.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              {
-                title: 'Consultation',
-                schedule: 'Every Monday',
-                description: 'General health checkups and medical consultations with our licensed veterinarians.',
-                color: 'border-primary'
-              },
-              {
-                title: 'Anti-Rabies Vaccine',
-                schedule: 'Weekdays',
-                description: 'Keep your pets protected with our regular anti-rabies vaccination program.',
-                color: 'border-blue-500'
-              },
-              {
-                title: 'Spay / Neuter',
-                schedule: 'By Schedule',
-                description: 'Scheduled spay and neuter services announced by our veterinary staff.',
-                color: 'border-purple-500'
-              }
-            ].map((service, i) => (
-              <div key={i} className={`bg-white rounded-xl p-6 shadow-sm border-t-4 ${service.color}`}>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">{service.title}</h3>
-                <p className="text-sm text-primary font-medium mb-3">{service.schedule}</p>
-                <p className="text-gray-600 text-sm">{service.description}</p>
+              { title:'Consultation',        schedule:'Every Monday', desc:'General health checkups and medical consultations with our licensed veterinarians.' },
+              { title:'Anti-Rabies Vaccine', schedule:'Weekdays',     desc:'Keep your pets protected with our regular anti-rabies vaccination program.' },
+              { title:'Spay / Neuter',       schedule:'By Schedule',  desc:'Scheduled spay and neuter services announced by our veterinary staff.' },
+            ].map((s, i) => (
+              <div key={i} className="glass-inner p-6"
+                style={{ borderTop:'2.5px solid hsl(130,100%,30%)' }}>
+                <h3 className="text-sm font-black uppercase tracking-wider mb-1"
+                  style={{ color:'hsl(140,100%,7%)' }}>{s.title}</h3>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3"
+                  style={{ color:'hsl(130,100%,30%)' }}>{s.schedule}</p>
+                <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.7' }}>
+                  {s.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-4 bg-primary">
-        <div className="max-w-3xl mx-auto text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Find Your Pet?</h2>
-          <p className="text-green-200 text-lg mb-8">
+      {/* ── CTA ── */}
+      <section className="relative z-10 py-24 px-4">
+        <div className="max-w-3xl mx-auto glass-card text-center px-8 py-16">
+          <h2 className="heading-dark text-4xl sm:text-5xl mb-4">Ready to Find Your Pet?</h2>
+          <p className="text-lg font-light mb-10"
+            style={{ color:'hsla(140,100%,7%,0.55)' }}>
             Join hundreds of pet owners and adopters already using PetEase.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="bg-white text-primary px-8 py-3 rounded-md hover:bg-gray-100 font-semibold">
-              Create Free Account
-            </Link>
-            <Link to="/login" className="border-2 border-white text-white px-8 py-3 rounded-md hover:bg-green-700 font-semibold">
-              Sign In
-            </Link>
+            <Link to="/register" className="btn-pay text-center"  style={{ padding:'14px 36px' }}>Create Free Account</Link>
+            <Link to="/login"    className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-10 px-4">
+      {/* ── Footer ── */}
+      <footer className="relative z-10 py-10 px-4"
+        style={{ borderTop:'1px solid rgba(255,255,255,0.50)' }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <p className="text-white text-xl font-bold">PetEase</p>
-            <p className="text-sm mt-1">Pet Adoption & Veterinary Appointment System</p>
-          </div>
-          <div className="flex space-x-6 text-sm">
-            <Link to="/login" className="hover:text-white">Login</Link>
-            <Link to="/register" className="hover:text-white">Register</Link>
-          </div>
-          <p className="text-sm">© {new Date().getFullYear()} PetEase. All rights reserved.</p>
-        </div>
-      </footer>
-
-    </div>
-  );
-};
-
-export default Landing;
-=======
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const features = [
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    title: 'Pet Adoption',
-    description: 'Browse and adopt pets from loving owners. Find your perfect companion today.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-    title: 'Vet Appointments',
-    description: 'Book consultations, anti-rabies vaccines, and spay/neuter services with ease.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    title: 'Medical Records',
-    description: 'Keep track of your pet\'s complete medical history, medications, and treatments.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    ),
-    title: 'Direct Messaging',
-    description: 'Message pet owners directly to ask questions before requesting adoption.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      </svg>
-    ),
-    title: 'Real-time Notifications',
-    description: 'Stay updated on adoption requests, appointment confirmations, and more.'
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-    title: 'Verified Adoptions',
-    description: 'All adoptions are processed with official waivers witnessed by vet staff.'
-  }
-];
-
-const steps = [
-  { step: '01', title: 'Create an Account', description: 'Register as a pet owner or adopter in minutes.' },
-  { step: '02', title: 'Browse or List Pets', description: 'Find pets available for adoption or list your own.' },
-  { step: '03', title: 'Connect & Adopt', description: 'Message owners, request adoption, and complete the process.' },
-  { step: '04', title: 'Book Vet Services', description: 'Schedule appointments for your new or existing pets.' }
-];
-
-const Landing = () => {
-  return (
-    <div className="min-h-screen bg-white">
-
-      {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <span className="text-2xl font-bold text-primary">PetEase</span>
-            <div className="flex items-center space-x-4">
-              <Link to="/login" className="text-gray-700 hover:text-primary px-4 py-2 rounded-md">
-                Login
-              </Link>
-              <Link to="/register" className="bg-primary text-white px-5 py-2 rounded-md hover:bg-primary-dark">
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-green-50 to-white py-24 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 text-center lg:text-left">
-            <span className="inline-block bg-green-100 text-primary text-sm font-semibold px-4 py-1 rounded-full mb-4">
-              Pet Adoption & Veterinary System
-            </span>
-            <h1 className="text-5xl font-bold text-gray-900 leading-tight mb-6">
-              Find a Friend.<br />
-              <span className="text-primary">Care for Life.</span>
-            </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-xl">
-              PetEase connects pet owners, adopters, and veterinary staff in one seamless platform. Adopt, manage, and care for your pets with ease.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/register" className="bg-primary text-white px-8 py-3 rounded-md hover:bg-primary-dark text-center font-semibold">
-                Start Adopting
-              </Link>
-              <Link to="/login" className="border-2 border-primary text-primary px-8 py-3 rounded-md hover:bg-green-50 text-center font-semibold">
-                Sign In
-              </Link>
-            </div>
-          </div>
-          <div className="flex-1 grid grid-cols-2 gap-4 max-w-md w-full">
-            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300" alt="Dog" className="rounded-2xl object-cover w-full h-48 shadow-md" />
-            <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300" alt="Cat" className="rounded-2xl object-cover w-full h-48 shadow-md mt-8" />
-            <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=300" alt="Cat 2" className="rounded-2xl object-cover w-full h-48 shadow-md -mt-4" />
-            <img src="https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=300" alt="Dog 2" className="rounded-2xl object-cover w-full h-48 shadow-md mt-4" />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-primary py-12 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-          {[
-            { value: '500+', label: 'Pets Adopted' },
-            { value: '1,200+', label: 'Registered Users' },
-            { value: '300+', label: 'Appointments Booked' },
-            { value: '50+', label: 'Vet Services' }
-          ].map((stat, i) => (
-            <div key={i}>
-              <p className="text-4xl font-bold">{stat.value}</p>
-              <p className="text-green-200 mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">Everything You Need</h2>
-            <p className="text-gray-600 mt-3 max-w-xl mx-auto">
-              A complete platform for pet adoption and veterinary care management.
+            <p className="text-xl font-black" style={{ color:'hsl(140,100%,7%)' }}>PetEase</p>
+            <p className="text-sm font-light mt-0.5"
+              style={{ color:'hsla(140,100%,7%,0.45)' }}>
+              Pet Adoption &amp; Veterinary Appointment System
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
-              <div key={i} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="bg-green-50 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
-              </div>
-            ))}
+          <div className="flex gap-6 text-sm">
+            <Link to="/login"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Login</Link>
+            <Link to="/register" className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Register</Link>
           </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
-            <p className="text-gray-600 mt-3">Get started in just a few simple steps.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((item, i) => (
-              <div key={i} className="text-center">
-                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {item.step}
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute mt-8 ml-32 w-full h-0.5 bg-green-100" />
-                )}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Appointment Types */}
-      <section className="py-20 px-4 bg-green-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">Veterinary Services</h2>
-            <p className="text-gray-600 mt-3">Professional care for your pets, scheduled at your convenience.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Consultation',
-                schedule: 'Every Monday',
-                description: 'General health checkups and medical consultations with our licensed veterinarians.',
-                color: 'border-primary'
-              },
-              {
-                title: 'Anti-Rabies Vaccine',
-                schedule: 'Weekdays',
-                description: 'Keep your pets protected with our regular anti-rabies vaccination program.',
-                color: 'border-blue-500'
-              },
-              {
-                title: 'Spay / Neuter',
-                schedule: 'By Schedule',
-                description: 'Scheduled spay and neuter services announced by our veterinary staff.',
-                color: 'border-purple-500'
-              }
-            ].map((service, i) => (
-              <div key={i} className={`bg-white rounded-xl p-6 shadow-sm border-t-4 ${service.color}`}>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">{service.title}</h3>
-                <p className="text-sm text-primary font-medium mb-3">{service.schedule}</p>
-                <p className="text-gray-600 text-sm">{service.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 px-4 bg-primary">
-        <div className="max-w-3xl mx-auto text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Find Your Pet?</h2>
-          <p className="text-green-200 text-lg mb-8">
-            Join hundreds of pet owners and adopters already using PetEase.
+          <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.35)' }}>
+            © {new Date().getFullYear()} PetEase. All rights reserved.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="bg-white text-primary px-8 py-3 rounded-md hover:bg-gray-100 font-semibold">
-              Create Free Account
-            </Link>
-            <Link to="/login" className="border-2 border-white text-white px-8 py-3 rounded-md hover:bg-green-700 font-semibold">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-10 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <p className="text-white text-xl font-bold">PetEase</p>
-            <p className="text-sm mt-1">Pet Adoption & Veterinary Appointment System</p>
-          </div>
-          <div className="flex space-x-6 text-sm">
-            <Link to="/login" className="hover:text-white">Login</Link>
-            <Link to="/register" className="hover:text-white">Register</Link>
-          </div>
-          <p className="text-sm">© {new Date().getFullYear()} PetEase. All rights reserved.</p>
         </div>
       </footer>
-
     </div>
   );
-};
-
-export default Landing;
->>>>>>> 8555e327320ce828f5dfb4efd072c21355eac3c7
+}

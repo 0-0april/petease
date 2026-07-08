@@ -1,88 +1,104 @@
 import express from 'express';
-import pool from '../config/database.js';
+import { supabase } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { createNotification } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
+// Helper: get UserID + UserName for an account
+const getUserInfo = async (accId) => {
+  const { data, error } = await supabase
+    .from('USER')
+    .select('UserID, UserName')
+    .eq('AccID', accId)
+    .single();
+  if (error || !data) return null;
+  return data;
+};
+
 // Send a message
 router.post('/', authenticateToken, async (req, res) => {
   const { messTo, messContent } = req.body;
-  
+
   try {
-    const userResult = await pool.query('SELECT "UserID", "UserName" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    const result = await pool.query(
-      'INSERT INTO "MESSAGES" ("MessFrom", "MessTo", "MessContent") VALUES ($1, $2, $3) RETURNING *',
-      [userResult.rows[0].UserID, messTo, messContent]
-    );
+    const sender = await getUserInfo(req.user.accId);
+    if (!sender) return res.status(404).json({ error: 'User not found' });
 
-    const receiverResult = await pool.query(
-      'SELECT "AccID" FROM "USER" WHERE "UserID" = $1',
-      [messTo]
-    );
+    const { data: msg, error: msgError } = await supabase
+      .from('MESSAGES')
+      .insert({ MessFrom: sender.UserID, MessTo: messTo, MessContent: messContent })
+      .select()
+      .single();
 
-    if (receiverResult.rows.length > 0) {
+    if (msgError) throw msgError;
+
+    // Notify receiver
+    const { data: receiver } = await supabase
+      .from('USER')
+      .select('AccID')
+      .eq('UserID', messTo)
+      .single();
+
+    if (receiver?.AccID) {
       await createNotification({
-        accId: receiverResult.rows[0].AccID,
+        accId: receiver.AccID,
         title: 'New message received',
-        message: `${userResult.rows[0].UserName} sent you a message.`,
-        type: 'message'
+        message: `${sender.UserName} sent you a message.`,
+        type: 'message',
       });
     }
-    
-    res.status(201).json(result.rows[0]);
+
+    res.status(201).json(msg);
   } catch (error) {
     console.error('Send message error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get all conversations (list of users you've chatted with)
+// Get all conversations
 router.get('/conversations', authenticateToken, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+    const sender = await getUserInfo(req.user.accId);
+    if (!sender) return res.status(404).json({ error: 'User not found' });
+
+    const { data: messages, error } = await supabase
+      .from('MESSAGES')
+      .select('MessFrom, MessTo, MessContent, MessTimeStamp')
+      .or(`MessFrom.eq.${sender.UserID},MessTo.eq.${sender.UserID}`)
+      .order('MessTimeStamp', { ascending: false });
+
+    if (error) throw error;
+
+    // Collect unique other-user IDs
+    const otherIds = [...new Set(
+      (messages || []).map(m => m.MessFrom === sender.UserID ? m.MessTo : m.MessFrom)
+    )];
+
+    // Fetch names for those IDs
+    const { data: users } = await supabase
+      .from('USER')
+      .select('UserID, UserName')
+      .in('UserID', otherIds);
+
+    const nameMap = Object.fromEntries((users || []).map(u => [u.UserID, u.UserName]));
+
+    // Build conversation list (last message per user)
+    const seen = new Set();
+    const conversations = [];
+    for (const m of messages || []) {
+      const otherId = m.MessFrom === sender.UserID ? m.MessTo : m.MessFrom;
+      if (!seen.has(otherId)) {
+        seen.add(otherId);
+        conversations.push({
+          other_user_id: otherId,
+          other_user_name: nameMap[otherId] || 'Unknown',
+          last_message: m.MessContent,
+          last_message_time: m.MessTimeStamp,
+        });
+      }
     }
-    
-    const currentUserId = userResult.rows[0].UserID;
-    
-    // Get unique users you've chatted with and their last message
-    const result = await pool.query(
-      `SELECT DISTINCT ON (other_user_id)
-        other_user_id,
-        other_user_name,
-        last_message,
-        last_message_time
-       FROM (
-         SELECT 
-           CASE 
-             WHEN m."MessFrom" = $1 THEN m."MessTo"
-             ELSE m."MessFrom"
-           END as other_user_id,
-           CASE 
-             WHEN m."MessFrom" = $1 THEN u2."UserName"
-             ELSE u1."UserName"
-           END as other_user_name,
-           m."MessContent" as last_message,
-           m."MessTimeStamp" as last_message_time
-         FROM "MESSAGES" m
-         LEFT JOIN "USER" u1 ON m."MessFrom" = u1."UserID"
-         LEFT JOIN "USER" u2 ON m."MessTo" = u2."UserID"
-         WHERE m."MessFrom" = $1 OR m."MessTo" = $1
-         ORDER BY m."MessTimeStamp" DESC
-       ) conversations
-       ORDER BY other_user_id, last_message_time DESC`,
-      [currentUserId]
-    );
-    
-    res.json(result.rows);
+
+    res.json(conversations);
   } catch (error) {
     console.error('Get conversations error:', error);
     res.status(500).json({ error: error.message });
@@ -92,29 +108,28 @@ router.get('/conversations', authenticateToken, async (req, res) => {
 // Get messages with a specific user
 router.get('/with/:userId', authenticateToken, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    const currentUserId = userResult.rows[0].UserID;
-    const otherUserId = req.params.userId;
-    
-    const result = await pool.query(
-      `SELECT m.*, 
-              u1."UserName" as from_name, 
-              u2."UserName" as to_name 
-       FROM "MESSAGES" m 
-       JOIN "USER" u1 ON m."MessFrom" = u1."UserID" 
-       JOIN "USER" u2 ON m."MessTo" = u2."UserID" 
-       WHERE (m."MessFrom" = $1 AND m."MessTo" = $2) 
-          OR (m."MessFrom" = $2 AND m."MessTo" = $1)
-       ORDER BY m."MessTimeStamp" ASC`,
-      [currentUserId, otherUserId]
-    );
-    
-    res.json(result.rows);
+    const sender = await getUserInfo(req.user.accId);
+    if (!sender) return res.status(404).json({ error: 'User not found' });
+
+    const otherId = parseInt(req.params.userId);
+
+    const { data: messages, error } = await supabase
+      .from('MESSAGES')
+      .select('*, FROM_USER:USER!MESSAGES_MessFrom_fkey ( UserName ), TO_USER:USER!MESSAGES_MessTo_fkey ( UserName )')
+      .or(
+        `and(MessFrom.eq.${sender.UserID},MessTo.eq.${otherId}),and(MessFrom.eq.${otherId},MessTo.eq.${sender.UserID})`
+      )
+      .order('MessTimeStamp', { ascending: true });
+
+    if (error) throw error;
+
+    const formatted = (messages || []).map(m => ({
+      ...m,
+      from_name: m.FROM_USER?.UserName || null,
+      to_name: m.TO_USER?.UserName || null,
+    }));
+
+    res.json(formatted);
   } catch (error) {
     console.error('Get messages error:', error);
     res.status(500).json({ error: error.message });

@@ -1,302 +1,272 @@
 import express from 'express';
 import multer from 'multer';
-import pool from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { supabase } from '../config/supabase.js';
 import { createNotification, createNotificationsForVets } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
-// Configure multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Helper function to upload file to Supabase storage
 const uploadToSupabase = async (file, bucket) => {
   const fileExt = file.originalname.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-  
-  const { data, error } = await supabase.storage
+
+  const { error } = await supabase.storage
     .from(bucket)
-    .upload(fileName, file.buffer, {
-      contentType: file.mimetype
-    });
+    .upload(fileName, file.buffer, { contentType: file.mimetype });
 
   if (error) throw error;
 
-  const { data: { publicUrl } } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(fileName);
-
+  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
   return publicUrl;
 };
 
-// Create adoption request
+// Helper: resolve UserID + UserName for an accId
+const getUserInfo = async (accId) => {
+  const { data, error } = await supabase
+    .from('USER')
+    .select('UserID, UserName')
+    .eq('AccID', accId)
+    .single();
+  if (error || !data) return null;
+  return data;
+};
+
+// ── POST /api/adoptions  (create adoption request) ────────────────────────
 router.post('/', authenticateToken, upload.single('waiver'), async (req, res) => {
-  const { userPetId, message } = req.body;
-  
+  const { userPetId } = req.body;
+
   try {
-    console.log('Adoption request body:', req.body);
-    console.log('User from token:', req.user);
-    
-    const userResult = await pool.query('SELECT "UserID", "UserName" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    console.log('Adopter UserID:', userResult.rows[0].UserID);
-    
-    // Get the UserPetID from USERPETS table based on the PetID
-    const userPetResult = await pool.query(
-      `SELECT up."UserPetID", owner."AccID" as owner_acc_id, p."PetName"
-       FROM "USERPETS" up
-       JOIN "USER" owner ON up."UserID" = owner."UserID"
-       JOIN "PET" p ON up."PetID" = p."PetID"
-       WHERE up."PetID" = $1`,
-      [userPetId]
-    );
-    
-    if (userPetResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Pet not found in USERPETS table' });
-    }
-    
-    const userPetID = userPetResult.rows[0].UserPetID;
-    console.log('UserPetID:', userPetID);
-    
+    const adopter = await getUserInfo(req.user.accId);
+    if (!adopter) return res.status(404).json({ error: 'User not found' });
+
+    // Resolve UserPetID and owner info from the pet's USERPETS entry
+    const { data: userPetRow, error: upError } = await supabase
+      .from('USERPETS')
+      .select(`
+        UserPetID,
+        PET ( PetName ),
+        USER ( AccID )
+      `)
+      .eq('PetID', userPetId)
+      .single();
+
+    if (upError || !userPetRow) return res.status(404).json({ error: 'Pet not found in USERPETS table' });
+
     let waiverUrl = null;
-    if (req.file) {
-      waiverUrl = await uploadToSupabase(req.file, 'adoption-waivers');
-    }
-    
-    const result = await pool.query(
-      'INSERT INTO "ADOPTION" ("UserID", "UserPetsID", "AdoptionWaiver") VALUES ($1, $2, $3) RETURNING *',
-      [userResult.rows[0].UserID, userPetID, waiverUrl]
-    );
-    
-    console.log('Adoption created:', result.rows[0]);
+    if (req.file) waiverUrl = await uploadToSupabase(req.file, 'adoption-waivers');
+
+    const { data: adoption, error: adoptError } = await supabase
+      .from('ADOPTION')
+      .insert({ UserID: adopter.UserID, UserPetsID: userPetRow.UserPetID, AdoptionWaiver: waiverUrl })
+      .select()
+      .single();
+
+    if (adoptError) throw adoptError;
 
     await createNotification({
-      accId: userPetResult.rows[0].owner_acc_id,
+      accId: userPetRow.USER?.AccID,
       title: 'New adoption request',
-      message: `${userResult.rows[0].UserName} requested to adopt ${userPetResult.rows[0].PetName}.`,
-      type: 'adoption'
+      message: `${adopter.UserName} requested to adopt ${userPetRow.PET?.PetName}.`,
+      type: 'adoption',
     });
-    
-    res.status(201).json(result.rows[0]);
+
+    res.status(201).json(adoption);
   } catch (error) {
     console.error('Adoption creation error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Upload waiver to existing adoption
+// ── POST /api/adoptions/:id/waiver ────────────────────────────────────────
 router.post('/:id/waiver', authenticateToken, upload.single('waiver'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
     const waiverUrl = await uploadToSupabase(req.file, 'adoption-waivers');
-    
-    const result = await pool.query(
-      'UPDATE "ADOPTION" SET "AdoptionWaiver" = $1 WHERE "AdoptID" = $2 RETURNING *',
-      [waiverUrl, req.params.id]
-    );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Adoption not found' });
-    }
-    
-    res.json(result.rows[0]);
+
+    const { data, error } = await supabase
+      .from('ADOPTION')
+      .update({ AdoptionWaiver: waiverUrl })
+      .eq('AdoptID', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Adoption not found' });
+
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get my adoption requests (as adopter)
+// ── GET /api/adoptions/my-requests ───────────────────────────────────────
 router.get('/my-requests', authenticateToken, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    const result = await pool.query(
-      `SELECT a.*, 
-              p."PetName", p."PetImg", p."PetBreed",
-              up."PetID",
-              owner."UserID" as "OwnerUserID",
-              owner."UserName" as owner_name 
-       FROM "ADOPTION" a 
-       JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID" 
-       JOIN "PET" p ON up."PetID" = p."PetID" 
-       JOIN "USER" owner ON up."UserID" = owner."UserID" 
-       WHERE a."UserID" = $1
-       ORDER BY a."AdoptReqDate" DESC`,
-      [userResult.rows[0].UserID]
-    );
-    
-    res.json(result.rows);
+    const user = await getUserInfo(req.user.accId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { data, error } = await supabase
+      .from('ADOPTION')
+      .select(`
+        AdoptID, AdoptReqDate, AdoptStatus, AdoptionWaiver,
+        USERPETS!ADOPTION_UserPetsID_fkey (
+          PetID,
+          UserPetID,
+          USER ( UserID, UserName ),
+          PET ( PetName, PetImg, PetBreed )
+        )
+      `)
+      .eq('UserID', user.UserID)
+      .order('AdoptReqDate', { ascending: false });
+
+    if (error) throw error;
+
+    res.json((data || []).map(a => ({
+      ...a,
+      PetName: a.USERPETS?.PET?.PetName,
+      PetImg: a.USERPETS?.PET?.PetImg,
+      PetBreed: a.USERPETS?.PET?.PetBreed,
+      PetID: a.USERPETS?.PetID,
+      OwnerUserID: a.USERPETS?.USER?.UserID,
+      owner_name: a.USERPETS?.USER?.UserName,
+    })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get incoming adoption requests (as pet owner)
+// ── GET /api/adoptions/incoming ───────────────────────────────────────────
 router.get('/incoming', authenticateToken, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT "UserID" FROM "USER" WHERE "AccID" = $1', [req.user.accId]);
-    
-    const result = await pool.query(
-      `SELECT a.*, 
-              p."PetName", p."PetImg", p."PetBreed",
-              up."PetID",
-              adopter."UserID" as "AdopterUserID",
-              adopter."UserName" as adopter_name, 
-              acc."AccEmail" as adopter_email, 
-              acc."AccPhoneNum" as adopter_phone
-       FROM "ADOPTION" a 
-       JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID" 
-       JOIN "PET" p ON up."PetID" = p."PetID" 
-       JOIN "USER" adopter ON a."UserID" = adopter."UserID"
-       JOIN "ACCOUNT" acc ON adopter."AccID" = acc."AccID"
-       WHERE up."UserID" = $1
-       ORDER BY a."AdoptReqDate" DESC`,
-      [userResult.rows[0].UserID]
-    );
-    
-    res.json(result.rows);
+    const user = await getUserInfo(req.user.accId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Find all USERPETS entries for this user's pets
+    const { data: userPets, error: upError } = await supabase
+      .from('USERPETS')
+      .select('UserPetID')
+      .eq('UserID', user.UserID);
+
+    if (upError) throw upError;
+
+    const userPetIds = (userPets || []).map(u => u.UserPetID);
+    if (userPetIds.length === 0) return res.json([]);
+
+    const { data, error } = await supabase
+      .from('ADOPTION')
+      .select(`
+        AdoptID, AdoptReqDate, AdoptStatus, AdoptionWaiver,
+        USERPETS!ADOPTION_UserPetsID_fkey (
+          PetID,
+          PET ( PetName, PetImg, PetBreed )
+        ),
+        USER!ADOPTION_UserID_fkey (
+          UserID, UserName,
+          ACCOUNT ( AccEmail, AccPhoneNum )
+        )
+      `)
+      .in('UserPetsID', userPetIds)
+      .order('AdoptReqDate', { ascending: false });
+
+    if (error) throw error;
+
+    res.json((data || []).map(a => ({
+      ...a,
+      PetName: a.USERPETS?.PET?.PetName,
+      PetImg: a.USERPETS?.PET?.PetImg,
+      PetBreed: a.USERPETS?.PET?.PetBreed,
+      PetID: a.USERPETS?.PetID,
+      AdopterUserID: a.USER?.UserID,
+      adopter_name: a.USER?.UserName,
+      adopter_email: a.USER?.ACCOUNT?.AccEmail,
+      adopter_phone: a.USER?.ACCOUNT?.AccPhoneNum,
+    })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Approve adoption
+// ── Helper: update adoption status + notify ───────────────────────────────
+const updateAdoptionStatus = async (id, status, notifyAdopter, notifyVets) => {
+  const { data, error } = await supabase
+    .from('ADOPTION')
+    .update({ AdoptStatus: status })
+    .eq('AdoptID', id)
+    .select(`
+      AdoptID,
+      USER!ADOPTION_UserID_fkey ( AccID ),
+      USERPETS!ADOPTION_UserPetsID_fkey ( PET ( PetName ) )
+    `)
+    .single();
+
+  if (error) throw error;
+  if (!data) throw new Error('Adoption not found');
+
+  const petName = data.USERPETS?.PET?.PetName || 'the pet';
+  const adopterAccId = data.USER?.AccID;
+
+  if (notifyAdopter && adopterAccId) {
+    await createNotification({ accId: adopterAccId, ...notifyAdopter(petName), type: 'adoption' });
+  }
+  if (notifyVets) {
+    await createNotificationsForVets({ ...notifyVets(petName), type: 'adoption' });
+  }
+  return data;
+};
+
 router.put('/:id/approve', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      `UPDATE "ADOPTION" SET "AdoptStatus" = $1
-       WHERE "AdoptID" = $2
-       RETURNING *`,
-      ['Approved', req.params.id]
+    const data = await updateAdoptionStatus(
+      req.params.id, 'Approved',
+      (name) => ({ title: 'Adoption request approved', message: `Your adoption request for ${name} was approved.` }),
+      (name) => ({ title: 'Adoption approved — awaiting vet processing', message: `An adoption for ${name} has been approved and is ready for vet waiver processing.` })
     );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Adoption not found' });
-    }
-    const details = await pool.query(
-      `SELECT adopter."AccID", p."PetName"
-       FROM "ADOPTION" a
-       JOIN "USER" adopter ON a."UserID" = adopter."UserID"
-       JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID"
-       JOIN "PET" p ON up."PetID" = p."PetID"
-       WHERE a."AdoptID" = $1`,
-      [req.params.id]
-    );
-
-    if (details.rows.length > 0) {
-      await createNotification({
-        accId: details.rows[0].AccID,
-        title: 'Adoption request approved',
-        message: `Your adoption request for ${details.rows[0].PetName} was approved.`,
-        type: 'adoption'
-      });
-      // Notify vet staff that an adoption is ready for processing
-      await createNotificationsForVets({
-        title: 'Adoption approved — awaiting vet processing',
-        message: `An adoption for ${details.rows[0].PetName} has been approved and is ready for vet waiver processing.`,
-        type: 'adoption'
-      });
-    }
-
-    res.json(result.rows[0]);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Reject adoption
 router.put('/:id/reject', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      'UPDATE "ADOPTION" SET "AdoptStatus" = $1 WHERE "AdoptID" = $2 RETURNING *',
-      ['Rejected', req.params.id]
+    const data = await updateAdoptionStatus(
+      req.params.id, 'Rejected',
+      (name) => ({ title: 'Adoption request rejected', message: `Your adoption request for ${name} was rejected.` }),
+      null
     );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Adoption not found' });
-    }
-    const details = await pool.query(
-      `SELECT adopter."AccID", p."PetName"
-       FROM "ADOPTION" a
-       JOIN "USER" adopter ON a."UserID" = adopter."UserID"
-       JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID"
-       JOIN "PET" p ON up."PetID" = p."PetID"
-       WHERE a."AdoptID" = $1`,
-      [req.params.id]
-    );
-
-    if (details.rows.length > 0) {
-      await createNotification({
-        accId: details.rows[0].AccID,
-        title: 'Adoption request rejected',
-        message: `Your adoption request for ${details.rows[0].PetName} was rejected.`,
-        type: 'adoption'
-      });
-    }
-
-    res.json(result.rows[0]);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Cancel adoption
 router.put('/:id/cancel', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      'UPDATE "ADOPTION" SET "AdoptStatus" = $1 WHERE "AdoptID" = $2 RETURNING *',
-      ['Cancelled', req.params.id]
-    );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Adoption not found' });
-    }
-    
-    res.json(result.rows[0]);
+    const { data, error } = await supabase
+      .from('ADOPTION')
+      .update({ AdoptStatus: 'Cancelled' })
+      .eq('AdoptID', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Adoption not found' });
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Complete adoption
 router.put('/:id/complete', authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      'UPDATE "ADOPTION" SET "AdoptStatus" = $1 WHERE "AdoptID" = $2 RETURNING *',
-      ['Completed', req.params.id]
+    const data = await updateAdoptionStatus(
+      req.params.id, 'Completed',
+      (name) => ({ title: 'Adoption completed', message: `The adoption process for ${name} was completed.` }),
+      null
     );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Adoption not found' });
-    }
-    const details = await pool.query(
-      `SELECT adopter."AccID", p."PetName"
-       FROM "ADOPTION" a
-       JOIN "USER" adopter ON a."UserID" = adopter."UserID"
-       JOIN "USERPETS" up ON a."UserPetsID" = up."UserPetID"
-       JOIN "PET" p ON up."PetID" = p."PetID"
-       WHERE a."AdoptID" = $1`,
-      [req.params.id]
-    );
-
-    if (details.rows.length > 0) {
-      await createNotification({
-        accId: details.rows[0].AccID,
-        title: 'Adoption completed',
-        message: `The adoption process for ${details.rows[0].PetName} was completed.`,
-        type: 'adoption'
-      });
-    }
-
-    res.json(result.rows[0]);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
