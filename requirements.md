@@ -382,3 +382,7 @@ Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-r
 5. in the admin/AdminReports page, connect its data displayed to the REPORTS table from the real data of supabase
 
 6. there would be choices given to the admin either suspend, warning, or dismiss the report, once it is clicked the system should ask for the admin's confirmation and once it is confirmed it updates the report status directly
+
+7. in admin/AdminReports page, once the admin suspends the reported user, the user's AccStatus should be "Suspended" and therefore unable to login/register again with the same email. tho, if it is "Warning", when that certain user logs in, there should be yellow container floating above about the warning(allow the user to close it through (x) button on the left side of the statement/warning). only "Active" User account should be logged/register normally.
+
+- read petease.sql for you to understand the intruction more and for your reference

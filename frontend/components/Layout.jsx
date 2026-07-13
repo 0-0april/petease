@@ -16,6 +16,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const [warnDismissed, setWarnDismissed] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/landing'); };
   const isActive = (p) => pathname === p;
@@ -110,6 +111,20 @@ export default function Layout({ children }) {
       </nav>
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Warning banner for warned accounts */}
+        {user?.accStatus === 'Warning' && !warnDismissed && (
+          <div className="mb-4 flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium"
+            style={{ background:'hsla(45,100%,51%,0.18)', border:'1px solid hsla(45,100%,51%,0.45)', color:'hsl(35,90%,30%)' }}>
+            <span>⚠️ Your account has received a warning from the admin due to a report. Please review our community guidelines to avoid further action.</span>
+            <button
+              onClick={() => setWarnDismissed(true)}
+              className="shrink-0 ml-2 text-lg leading-none hover:opacity-60 transition-opacity"
+              aria-label="Dismiss warning"
+            >
+              ×
+            </button>
+          </div>
+        )}
         {children}
       </main>
     </div>

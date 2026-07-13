@@ -8,6 +8,7 @@ CREATE TABLE public.ACCOUNT (
   AccPhoneNum character varying,
   AccPass text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  AccStatus USER-DEFINED DEFAULT 'Active'::account_status,
   CONSTRAINT ACCOUNT_pkey PRIMARY KEY (AccID)
 );
 CREATE TABLE public.ADMIN (

@@ -7,10 +7,10 @@ import { adminService } from '../../services/adminService';
 const PAGE_SIZE = 10;
 
 const STATUS_STYLES = {
-  Open:     'bg-yellow-100 text-yellow-800',
-  Resolved: 'bg-red-100 text-red-800',
-  Warning:  'bg-orange-100 text-orange-800',
-  Closed:   'bg-gray-100 text-gray-800',
+  Open:    'bg-yellow-100 text-yellow-800',
+  Suspend: 'bg-red-100 text-red-800',
+  Warning: 'bg-orange-100 text-orange-800',
+  Dismiss: 'bg-gray-100 text-gray-800',
 };
 
 const AdminReports = () => {
@@ -49,7 +49,7 @@ const AdminReports = () => {
 
   const handleUpdateStatus = async (status) => {
     try {
-      await adminService.updateReportStatus(selectedReport.id, status);
+      await adminService.updateReportStatus(selectedReport.id, status, selectedReport.reportedUserId);
       showToast(`Report marked as ${status}.`);
       setShowReviewModal(false);
       setSelectedReport(null);

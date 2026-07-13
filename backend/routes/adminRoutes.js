@@ -60,18 +60,60 @@ router.get('/reports', authenticateToken, authorizeRole('admin'), async (req, re
 
 // ── PATCH /api/admin/reports/:id/status ──────────────────────────────────
 router.patch('/reports/:id/status', authenticateToken, authorizeRole('admin'), async (req, res) => {
-  const { status } = req.body;
+  const { status, reportedUserId } = req.body;
   try {
-    const { data, error } = await supabase
-      .from('REPORTS')
-      .update({ ReportStatus: status })
-      .eq('ReportID', req.params.id)
-      .select()
-      .single();
+    // Map UI action to exact report_status enum values
+    const reportStatusMap = {
+      'Resolved': 'Suspend',
+      'Warning':  'Warning',
+      'Closed':   'Dismiss',
+    };
+    const dbReportStatus = reportStatusMap[status] || 'Dismiss';
 
-    if (error) throw error;
-    res.json(data);
+    const { error: reportError } = await supabase
+      .from('REPORTS')
+      .update({ ReportStatus: dbReportStatus })
+      .eq('ReportID', req.params.id);
+
+    if (reportError) throw reportError;
+
+    // Only update ACCOUNT.AccStatus when action is Suspend
+    if (status === 'Resolved' && reportedUserId) {
+      const { data: userRow } = await supabase
+        .from('USER')
+        .select('AccID')
+        .eq('UserID', reportedUserId)
+        .single();
+
+      if (userRow?.AccID) {
+        const { error: accError } = await supabase
+          .from('ACCOUNT')
+          .update({ AccStatus: 'Suspended' })
+          .eq('AccID', userRow.AccID);
+
+        if (accError) throw accError;
+      }
+    }
+
+    // Warning — update AccStatus to Warning (user can still log in, sees banner)
+    if (status === 'Warning' && reportedUserId) {
+      const { data: userRow } = await supabase
+        .from('USER')
+        .select('AccID')
+        .eq('UserID', reportedUserId)
+        .single();
+
+      if (userRow?.AccID) {
+        await supabase
+          .from('ACCOUNT')
+          .update({ AccStatus: 'Warning' })
+          .eq('AccID', userRow.AccID);
+      }
+    }
+
+    res.json({ success: true });
   } catch (error) {
+    console.error('Update report status error:', error);
     res.status(500).json({ error: error.message });
   }
 });

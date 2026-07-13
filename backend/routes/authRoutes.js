@@ -117,6 +117,17 @@ router.post('/register', async (req, res) => {
   const { username, email, phoneNum, password, name, address, role = 'user' } = req.body;
 
   try {
+    // Check if email is already suspended
+    const { data: existing } = await supabase
+      .from('ACCOUNT')
+      .select('AccStatus')
+      .eq('AccEmail', email)
+      .single();
+
+    if (existing?.AccStatus === 'Suspended') {
+      return res.status(403).json({ error: 'This email is associated with a suspended account.' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const { data: accountData, error: accountError } = await supabase
@@ -179,6 +190,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Block suspended accounts
+    if (account.AccStatus === 'Suspended') {
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+    }
+
     let role = 'user';
     let userData = null;
 
@@ -234,7 +250,8 @@ router.post('/login', async (req, res) => {
         username: account.AccUserName,
         email: account.AccEmail,
         role,
-        UserID: userData?.UserID, // Explicitly include UserID
+        accStatus: account.AccStatus || 'Active',
+        UserID: userData?.UserID,
         ...userData
       }
     });

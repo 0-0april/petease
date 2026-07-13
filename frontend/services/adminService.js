@@ -238,8 +238,8 @@ export const adminService = {
     return response.data;
   },
 
-  updateReportStatus: async (id, status) => {
-    const response = await api.patch(`/admin/reports/${id}/status`, { status });
+  updateReportStatus: async (id, status, reportedUserId) => {
+    const response = await api.patch(`/admin/reports/${id}/status`, { status, reportedUserId });
     return response.data;
   },
 
