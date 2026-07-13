@@ -29,7 +29,7 @@ const RejectModal = ({ request, onConfirm, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+      <div className="glass-card w-full max-w-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">Reject Adoption Request</h3>
         <p className="text-sm text-gray-500 mb-4">
           Rejecting <span className="font-medium text-gray-700">{request.adopterName}</span>'s
@@ -73,7 +73,7 @@ const RejectModal = ({ request, onConfirm, onClose }) => {
 
 const ConfirmModal = ({ message, onConfirm, onClose }) => (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+    <div className="glass-card w-full max-w-sm p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Action</h3>
       <p className="text-sm text-gray-600 mb-5">{message}</p>
       <div className="flex space-x-3">

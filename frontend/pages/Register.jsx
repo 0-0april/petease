@@ -110,7 +110,7 @@ export default function Register() {
             <p className="heading-dark text-3xl">PetEase</p>
             <p className="text-xs tracking-widest mt-2 font-light"
               style={{ color:'hsla(140,100%,7%,0.50)' }}>
-              join the community today
+              pet adoption and services system
             </p>
           </div>
         </div>

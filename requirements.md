@@ -303,6 +303,19 @@ do not explain too much, execute what i said and save credits.
 
 34. In the use/Messages add a  card there named "Announcements" that in the conversations sidebar that behaves just like how the user messages displayed behave but only sends announcement from the vet staff and admin. user cannot reply to this but it sends the necessary information of the annoucement from the Annoucement table.
 
+
+34.1. in the user/Messages page, the currently opened chat by the user should have report icon(behaves as button) in the left part of the opened chat heater, next to the user's name display, to report the user. 
+
+34.2. the report modal value should be connected to REPORTS table. 
+
+- check the petease.sql for your reference.
+
+34.3 the user should be allowed to select a certain or multiple chat from her/himself and from the other user as well by js clicking it before showing the report button
+
+34.4. it the selected message should be stored on the REPORT table ReportMessageLog column. solve first the problem here: the multiple selected chat reporte should be in one reportmessage log and should be separated based on the chat as well, did you get what i mean? 
+
+- check the petease.sql for your reference.
+
 35. connect the announcements from admin/vet staff in the Announcements messages. the announcement should behave like chats but with complete necessary details about the announcement. check backend/petease.sql as your reference
 
 
@@ -348,3 +361,24 @@ Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-r
 * **Styling Hierarchy:** 
   * **Main Titles & Active States:** Set in **All-Caps, Bold/Heavy** weights with tight, compressed tracking (letter-spacing) to anchor sections.
   * **Subtext & Descriptions:** Set in **Regular/Light** weight, using standard lowercase prose with looser tracking for an open, airy, modern aesthetic.
+
+
+
+  ADMIN requirements
+
+  1. when the accid was in the admin table, direct that account to the admin panel. just like what you did to vet staff auth, but this time its for admin.
+
+- read petease.sql for you to understand the intruction more and for your reference
+
+
+2. in the admin/AdminDashboard page, there should be accurate line graphs based on the active users and it should be filtered as this week, this month, and this year( it depends on the filter button clicked by the currently login in admin), the filter should be based on the USER table's UserLastLogin column. 
+
+3. it should b accuratelydisplayed based on the count of the user outcome after the filter
+
+4. in the admin/AdminUsers page, the page should display real users from the USER table, it should display its email, (remove the role part/column), last login, status, should be "active" always, leave the action the same.
+
+- read petease.sql for you to understand the intruction more and for your reference
+
+5. in the admin/AdminReports page, connect its data displayed to the REPORTS table from the real data of supabase
+
+6. there would be choices given to the admin either suspend, warning, or dismiss the report, once it is clicked the system should ask for the admin's confirmation and once it is confirmed it updates the report status directly

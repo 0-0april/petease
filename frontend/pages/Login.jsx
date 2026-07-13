@@ -102,7 +102,7 @@ export default function Login() {
             <p className="heading-dark text-3xl">PetEase</p>
             <p className="text-xs tracking-widest mt-2 font-light"
               style={{ color:'hsla(140,100%,7%,0.50)' }}>
-              pet adoption &amp; vet care
+              pet adoption and services system
             </p>
           </div>
         </div>

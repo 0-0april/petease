@@ -10,15 +10,17 @@ router.get('/users', authenticateToken, authorizeRole('admin'), async (req, res)
   try {
     const { data, error } = await supabase
       .from('USER')
-      .select('*, ACCOUNT ( AccUserName, AccEmail, AccPhoneNum )');
+      .select('UserID, UserName, UserAddress, UserLastLogin, created_at, ACCOUNT ( AccEmail )');
 
     if (error) throw error;
 
     res.json((data || []).map(u => ({
-      ...u,
-      AccUserName: u.ACCOUNT?.AccUserName,
+      UserID: u.UserID,
+      UserName: u.UserName,
+      UserAddress: u.UserAddress,
+      UserLastLogin: u.UserLastLogin,
+      created_at: u.created_at,
       AccEmail: u.ACCOUNT?.AccEmail,
-      AccPhoneNum: u.ACCOUNT?.AccPhoneNum,
     })));
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -34,15 +36,41 @@ router.get('/reports', authenticateToken, authorizeRole('admin'), async (req, re
         *,
         REPORTED_USER:USER!REPORTS_ReportedUser_fkey ( UserName ),
         REPORTED_BY:USER!REPORTS_ReportedBy_fkey ( UserName )
-      `);
+      `)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     res.json((data || []).map(r => ({
-      ...r,
-      reported_user_name: r.REPORTED_USER?.UserName,
-      reported_by_name: r.REPORTED_BY?.UserName,
+      id: r.ReportID,
+      reportedUserId: r.ReportedUser,
+      reportedByUserId: r.ReportedBy,
+      reportedUserName: r.REPORTED_USER?.UserName || 'Unknown',
+      reportedByName: r.REPORTED_BY?.UserName || 'Unknown',
+      reason: r.ReportReason,
+      description: r.ReportDescription,
+      messageLog: r.ReportMessageLog,
+      status: r.ReportStatus,
+      createdAt: r.created_at,
     })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── PATCH /api/admin/reports/:id/status ──────────────────────────────────
+router.patch('/reports/:id/status', authenticateToken, authorizeRole('admin'), async (req, res) => {
+  const { status } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('REPORTS')
+      .update({ ReportStatus: status })
+      .eq('ReportID', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -79,6 +107,23 @@ router.post('/announcements', authenticateToken, authorizeRole('admin'), async (
     await createNotificationsForVets({ title: title || 'New system announcement', message: content, type: 'announcement' });
 
     res.status(201).json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── GET /api/admin/users/chart ────────────────────────────────────────────
+// Returns UserLastLogin timestamps for active-user line graph
+router.get('/users/chart', authenticateToken, authorizeRole('admin'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('USER')
+      .select('UserLastLogin')
+      .not('UserLastLogin', 'is', null);
+
+    if (error) throw error;
+
+    res.json(data || []);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

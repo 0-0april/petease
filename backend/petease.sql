@@ -36,6 +36,7 @@ CREATE TABLE public.USER (
   AccID uuid NOT NULL,
   UserAddress text,
   created_at timestamp with time zone DEFAULT now(),
+  UserLastLogin timestamp without time zone DEFAULT now(),
   CONSTRAINT USER_pkey PRIMARY KEY (UserID),
   CONSTRAINT USER_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
 );
@@ -79,8 +80,8 @@ CREATE TABLE public.USERPETS (
   PetID uuid NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT USERPETS_pkey PRIMARY KEY (UserPetID),
-  CONSTRAINT USERPETS_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID),
-  CONSTRAINT USERPETS_PetID_fkey FOREIGN KEY (PetID) REFERENCES public.PET(PetID)
+  CONSTRAINT USERPETS_PetID_fkey FOREIGN KEY (PetID) REFERENCES public.PET(PetID),
+  CONSTRAINT USERPETS_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID)
 );
 CREATE TABLE public.ADOPTION (
   AdoptID uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -103,8 +104,8 @@ CREATE TABLE public.APPOINTMENT (
   AppointStatus USER-DEFINED NOT NULL DEFAULT 'Pending'::appoint_status,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT APPOINTMENT_pkey PRIMARY KEY (AppointID),
-  CONSTRAINT APPOINTMENT_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID),
-  CONSTRAINT APPOINTMENT_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID)
+  CONSTRAINT APPOINTMENT_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID),
+  CONSTRAINT APPOINTMENT_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID)
 );
 CREATE TABLE public.APPOINTMENTLOGS (
   LogID uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -143,14 +144,14 @@ CREATE TABLE public.REPORTS (
   ReportID uuid NOT NULL DEFAULT gen_random_uuid(),
   ReportedUser uuid NOT NULL,
   ReportedBy uuid NOT NULL,
-  ReportReason character varying NOT NULL,
+  ReportReason text NOT NULL,
   ReportDescription text,
   ReportMessageLog text,
   ReportStatus USER-DEFINED NOT NULL DEFAULT 'Open'::report_status,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT REPORTS_pkey PRIMARY KEY (ReportID),
-  CONSTRAINT REPORTS_ReportedUser_fkey FOREIGN KEY (ReportedUser) REFERENCES public.USER(UserID),
-  CONSTRAINT REPORTS_ReportedBy_fkey FOREIGN KEY (ReportedBy) REFERENCES public.USER(UserID)
+  CONSTRAINT REPORTS_ReportedBy_fkey FOREIGN KEY (ReportedBy) REFERENCES public.USER(UserID),
+  CONSTRAINT REPORTS_ReportedUser_fkey FOREIGN KEY (ReportedUser) REFERENCES public.USER(UserID)
 );
 CREATE TABLE public.NOTIFICATION (
   NotifID uuid NOT NULL DEFAULT gen_random_uuid(),

@@ -1,3 +1,4 @@
+import api from './api';
 import { mockUsers, mockUserReports, mockAnnouncements, mockSystemAnnouncements } from '../data/mockData';
 
 let users = [...mockUsers];
@@ -217,6 +218,29 @@ export const adminService = {
     await new Promise(resolve => setTimeout(resolve, 300));
     systemAnnouncements = systemAnnouncements.filter(a => a.id !== parseInt(id));
     return { success: true };
+  },
+
+  // Chart Data — real DB
+  getActiveUsersChart: async () => {
+    const response = await api.get('/admin/users/chart');
+    return response.data;
+  },
+
+  // Real users from DB
+  getUsers: async () => {
+    const response = await api.get('/admin/users');
+    return response.data;
+  },
+
+  // Real reports from DB
+  getReports: async () => {
+    const response = await api.get('/admin/reports');
+    return response.data;
+  },
+
+  updateReportStatus: async (id, status) => {
+    const response = await api.patch(`/admin/reports/${id}/status`, { status });
+    return response.data;
   },
 
   // Dashboard Stats

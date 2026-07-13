@@ -23,36 +23,36 @@ router.post('/google', async (req, res) => {
       // User exists, log them in
       accId = existingAccount.AccID;
 
-      // Determine role
-      const { data: users } = await supabase
-        .from('USER')
+      // Determine role — check ADMIN first, then VETSTAFF, then USER
+      const { data: admins } = await supabase
+        .from('ADMIN')
         .select('*')
         .eq('AccID', accId)
         .single();
 
-      if (users) {
-        role = 'user';
-        userData = users;
+      if (admins) {
+        role = 'admin';
+        userData = admins;
       } else {
-        const { data: admins } = await supabase
-          .from('ADMIN')
+        const { data: vets } = await supabase
+          .from('VETSTAFF')
           .select('*')
           .eq('AccID', accId)
           .single();
 
-        if (admins) {
-          role = 'admin';
-          userData = admins;
+        if (vets) {
+          role = 'vet';
+          userData = vets;
         } else {
-          const { data: vets } = await supabase
-            .from('VETSTAFF')
+          const { data: users } = await supabase
+            .from('USER')
             .select('*')
             .eq('AccID', accId)
             .single();
 
-          if (vets) {
-            role = 'vet';
-            userData = vets;
+          if (users) {
+            role = 'user';
+            userData = users;
           }
         }
       }
@@ -182,35 +182,43 @@ router.post('/login', async (req, res) => {
     let role = 'user';
     let userData = null;
 
-    const { data: users } = await supabase
-      .from('USER')
+    // Check ADMIN first (highest priority)
+    const { data: admins } = await supabase
+      .from('ADMIN')
       .select('*')
       .eq('AccID', account.AccID)
       .single();
 
-    if (users) {
-      role = 'user';
-      userData = users;
+    if (admins) {
+      role = 'admin';
+      userData = admins;
     } else {
-      const { data: admins } = await supabase
-        .from('ADMIN')
+      // Check VETSTAFF next
+      const { data: vets } = await supabase
+        .from('VETSTAFF')
         .select('*')
         .eq('AccID', account.AccID)
         .single();
 
-      if (admins) {
-        role = 'admin';
-        userData = admins;
+      if (vets) {
+        role = 'vet';
+        userData = vets;
       } else {
-        const { data: vets } = await supabase
-          .from('VETSTAFF')
+        // Fall back to USER
+        const { data: users } = await supabase
+          .from('USER')
           .select('*')
           .eq('AccID', account.AccID)
           .single();
 
-        if (vets) {
-          role = 'vet';
-          userData = vets;
+        if (users) {
+          role = 'user';
+          userData = users;
+          // Update last login timestamp
+          await supabase
+            .from('USER')
+            .update({ UserLastLogin: new Date().toISOString() })
+            .eq('AccID', account.AccID);
         }
       }
     }

@@ -111,7 +111,7 @@ router.get('/with/:userId', authenticateToken, async (req, res) => {
     const sender = await getUserInfo(req.user.accId);
     if (!sender) return res.status(404).json({ error: 'User not found' });
 
-    const otherId = parseInt(req.params.userId);
+    const otherId = req.params.userId;
 
     const { data: messages, error } = await supabase
       .from('MESSAGES')

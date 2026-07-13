@@ -206,3 +206,103 @@ button, a, input, select, textarea {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL WHITE → GLASS OVERRIDES
+   Replaces all bg-white / bg-gray-50 surfaces with the nav glass
+   theme without requiring per-file edits.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Cards / panels */
+.bg-white {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.bg-gray-50 {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.bg-gray-100 {
+  background: rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Borders */
+.border-gray-100 { border-color: rgba(255,255,255,0.55) !important; }
+.border-gray-200 { border-color: rgba(255,255,255,0.55) !important; }
+.border-gray-300 { border-color: hsla(135,40%,60%,0.30) !important; }
+
+/* Text colours — keep readable on the light canvas */
+.text-gray-900 { color: hsl(140,100%,7%)   !important; }
+.text-gray-800 { color: hsla(140,100%,7%,0.88) !important; }
+.text-gray-700 { color: hsla(140,100%,7%,0.75) !important; }
+.text-gray-600 { color: hsla(140,100%,7%,0.60) !important; }
+.text-gray-500 { color: hsla(140,100%,7%,0.48) !important; }
+.text-gray-400 { color: hsla(140,100%,7%,0.36) !important; }
+.text-gray-300 { color: hsla(140,100%,7%,0.25) !important; }
+
+/* Inputs, selects, textareas */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),
+select,
+textarea {
+  background: rgba(255,255,255,0.45) !important;
+  border-color: hsla(135,40%,60%,0.30) !important;
+  color: hsl(140,100%,7%) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.625rem;
+}
+
+input::placeholder,
+textarea::placeholder { color: hsla(135,60%,25%,0.38) !important; }
+
+/* File input */
+input[type=file] {
+  background: rgba(255,255,255,0.35) !important;
+  border-color: hsla(135,40%,60%,0.28) !important;
+}
+
+/* Hover states */
+.hover\:bg-gray-50:hover { background: rgba(255,255,255,0.40) !important; }
+.hover\:bg-gray-100:hover { background: rgba(255,255,255,0.32) !important; }
+.hover\:bg-green-50:hover { background: hsla(130,100%,30%,0.08) !important; }
+
+/* Tab / toggle pill */
+.bg-gray-100.rounded-xl,
+.bg-gray-100.rounded-lg {
+  background: rgba(255,255,255,0.32) !important;
+  border: 1px solid rgba(255,255,255,0.50);
+}
+
+/* Message bubble — received */
+.bg-white.rounded-2xl.rounded-bl-sm,
+.bg-white.text-gray-900 {
+  background: rgba(255,255,255,0.62) !important;
+}
+
+/* Chat area scroll bg */
+.bg-gray-50.flex-1 {
+  background: rgba(255,255,255,0.22) !important;
+}
+
+/* Focus ring on standard inputs */
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: hsl(130,100%,30%) !important;
+  box-shadow: 0 0 0 3px hsla(130,100%,30%,0.15) !important;
+}
+
+/* Shadows — soften hard white shadows */
+.shadow-sm  { box-shadow: 0 2px 12px 0 rgba(6,50,12,0.08)  !important; }
+.shadow-md  { box-shadow: 0 4px 20px 0 rgba(6,50,12,0.11)  !important; }
+.shadow-lg  { box-shadow: 0 8px 32px 0 rgba(6,50,12,0.13)  !important; }
+.shadow-xl  { box-shadow: 0 12px 48px 0 rgba(6,50,12,0.15) !important; }
+.shadow-2xl { box-shadow: 0 16px 64px 0 rgba(6,50,12,0.18) !important; }
+
+/* Inline close button on modals */
+.hover\:bg-gray-100:hover { background: rgba(255,255,255,0.38) !important; }

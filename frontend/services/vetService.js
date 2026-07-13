@@ -80,20 +80,13 @@ export const vetService = {
   },
 
   createAnnouncement: async (announcementData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newAnnouncement = {
-      id: announcements.length + 1,
-      ...announcementData,
-      createdAt: new Date().toISOString(),
-      createdBy: 'Dr. Sarah Wilson'
-    };
-    announcements.push(newAnnouncement);
-    return newAnnouncement;
+    const response = await api.post('/vet/announcements', announcementData);
+    return response.data;
   },
 
   getAnnouncements: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return announcements.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const response = await api.get('/vet/announcements');
+    return response.data;
   },
 
   // Get all approved adoptions waiting for vet processing

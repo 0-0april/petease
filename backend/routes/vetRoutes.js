@@ -733,6 +733,84 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
   }
 });
 
+// ── GET /api/vet/announcements ────────────────────────────────────────────
+router.get('/announcements', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    const { data: staffRow } = await supabase
+      .from('VETSTAFF')
+      .select('StaffID, StaffName')
+      .eq('AccID', req.user.accId)
+      .single();
+
+    const { data, error } = await supabase
+      .from('ANNOUNCEMENT')
+      .select('AnnounceID, AnnounceTitle, AnnounceContent, AnnounceType, AnnounceDateUpdated, created_at, AnnouncedBy')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json((data || []).map(a => ({
+      id: a.AnnounceID,
+      title: a.AnnounceTitle,
+      content: a.AnnounceContent,
+      type: a.AnnounceType,
+      createdAt: a.created_at,
+      updatedAt: a.AnnounceDateUpdated,
+      announcedBy: a.AnnouncedBy,
+      status: a.AnnouncedBy ? 'approved' : 'pending',
+      createdBy: staffRow?.StaffName || 'Vet Staff',
+    })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── POST /api/vet/announcements ───────────────────────────────────────────
+router.post('/announcements', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  const { title, content, serviceType } = req.body;
+
+  try {
+    const { data: staffRow } = await supabase
+      .from('VETSTAFF')
+      .select('StaffID, StaffName')
+      .eq('AccID', req.user.accId)
+      .single();
+
+    // Insert into ANNOUNCEMENT with AnnouncedBy = null (pending admin approval)
+    const { data, error } = await supabase
+      .from('ANNOUNCEMENT')
+      .insert({
+        AnnounceTitle: title,
+        AnnounceContent: content,
+        AnnounceType: serviceType || 'General',
+        AnnouncedBy: null,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Notify admin that a vet submitted an announcement for review
+    await createNotificationsForUsers({
+      title: `New announcement: ${title}`,
+      message: content,
+      type: 'announcement',
+    });
+
+    res.status(201).json({
+      id: data.AnnounceID,
+      title: data.AnnounceTitle,
+      content: data.AnnounceContent,
+      type: data.AnnounceType,
+      createdAt: data.created_at,
+      status: 'pending',
+      createdBy: staffRow?.StaffName || 'Vet Staff',
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get vet notifications from DB
 router.get('/notifications', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {

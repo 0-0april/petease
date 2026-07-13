@@ -42,7 +42,7 @@ const PetCard = ({ pet }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div className="glass-inner overflow-hidden hover:shadow-glass transition-all flex flex-col">
         <Link to={`/pet/${pet.id}`} className="block">
           <img
             src={pet.image || '/placeholder-pet.jpg'}
@@ -81,7 +81,7 @@ const PetCard = ({ pet }) => {
       {/* Adoption Modal */}
       {showModal && !isOwner && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+          <div className="glass-card w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             {done ? (
               <div className="text-center py-4">
                 <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">

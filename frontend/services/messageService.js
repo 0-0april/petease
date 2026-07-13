@@ -39,5 +39,10 @@ export const messageService = {
   getAnnouncements: async () => {
     const response = await api.get('/users/announcements');
     return response.data;
+  },
+
+  reportUser: async ({ reportedUserId, reason, description, messageLog }) => {
+    const response = await api.post('/users/report', { reportedUserId, reason, description, messageLog });
+    return response.data;
   }
 };
