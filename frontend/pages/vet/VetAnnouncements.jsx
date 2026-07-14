@@ -74,20 +74,13 @@ const VetAnnouncements = () => {
 
     try {
       if (editing) {
-        // Update in-place (mock: replace in array)
-        setAnnouncements(prev =>
-          prev.map(a =>
-            a.id === editing.id
-              ? { ...a, ...formData, availableDates: dates, updatedAt: new Date().toISOString() }
-              : a
-          )
-        );
-        showToast('Announcement updated successfully.');
+        await vetService.updateAnnouncement(editing.id, { ...formData, availableDates: dates });
+        showToast('Announcement updated. It will be re-reviewed by admin.');
       } else {
         await vetService.createAnnouncement({ ...formData, availableDates: dates });
-        fetchAnnouncements();
-        showToast('Announcement created. Users will be notified once approved.');
+        showToast('Announcement submitted. Users will be notified once approved.');
       }
+      fetchAnnouncements();
       setShowModal(false);
       setFormData(EMPTY_FORM);
       setEditing(null);

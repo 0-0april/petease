@@ -6,28 +6,39 @@ import { adminService } from '../../services/adminService';
 
 const PAGE_SIZE = 10;
 
+const STATUS_STYLES = {
+  Active:    'bg-green-100 text-green-800',
+  Warning:   'bg-yellow-100 text-yellow-800',
+  Suspended: 'bg-red-100 text-red-800',
+};
+
 const AdminUsers = () => {
   const [allUsers, setAllUsers]               = useState([]);
+  const [loading, setLoading]                 = useState(true);
   const [currentPage, setCurrentPage]         = useState(1);
   const [lastLoginFilter, setLastLoginFilter] = useState('all');
   const [toast, setToast]                     = useState(null);
   const [selectedIds, setSelectedIds]         = useState([]);
-  const [showSuspendModal, setShowSuspendModal] = useState(false);
-  const [suspensionReason, setSuspensionReason] = useState('Violation of Terms');
+  const [showSuspendModal, setShowSuspendModal]   = useState(false);
+  const [suspensionReason, setSuspensionReason]   = useState('Violation of Terms');
   const [singleSuspendUser, setSingleSuspendUser] = useState(null);
+  const [submitting, setSubmitting]               = useState(false);
 
   useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const data = await adminService.getUsers();
       setAllUsers(data || []);
     } catch (err) {
       console.error('Error fetching users:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Filter by last login — shows users INACTIVE since the selected period
+  // Filter by last login inactivity period
   const filteredUsers = allUsers.filter(u => {
     if (lastLoginFilter === 'all') return true;
     if (!u.UserLastLogin) return true; // never logged in = always inactive
@@ -64,17 +75,24 @@ const AdminUsers = () => {
 
   const handleSuspendSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
+      const ids = singleSuspendUser ? [singleSuspendUser.UserID] : selectedIds;
+      // Suspend each selected user by updating their ACCOUNT.AccStatus via the admin API
+      await Promise.all(ids.map(userId => adminService.suspendUser(userId)));
       showToastMsg(
         singleSuspendUser
-          ? `Suspended ${singleSuspendUser.UserName}.`
-          : `Suspended ${selectedIds.length} user(s).`
+          ? `${singleSuspendUser.UserName} has been suspended.`
+          : `${ids.length} user(s) have been suspended.`
       );
       setShowSuspendModal(false);
       setSingleSuspendUser(null);
       setSelectedIds([]);
+      fetchUsers(); // refresh table with updated statuses
     } catch {
-      showToastMsg('Failed to suspend user.', 'error');
+      showToastMsg('Failed to suspend user(s).', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -139,7 +157,11 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {paginated.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">Loading…</td>
+                  </tr>
+                ) : paginated.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No users found.</td>
                   </tr>
@@ -159,17 +181,21 @@ const AdminUsers = () => {
                       {user.UserLastLogin ? new Date(user.UserLastLogin).toLocaleString() : '—'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-800">
-                        active
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[user.AccStatus] || STATUS_STYLES.Active}`}>
+                        {user.AccStatus || 'Active'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleOpenSuspendModal(user)}
-                        className="text-orange-600 hover:text-orange-800 text-sm font-medium"
-                      >
-                        Suspend
-                      </button>
+                      {user.AccStatus !== 'Suspended' ? (
+                        <button
+                          onClick={() => handleOpenSuspendModal(user)}
+                          className="text-orange-600 hover:text-orange-800 text-sm font-medium"
+                        >
+                          Suspend
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">Suspended</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -181,6 +207,7 @@ const AdminUsers = () => {
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
 
+      {/* Suspend Confirmation Modal */}
       <Modal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} title="Suspend User(s)">
         <form onSubmit={handleSuspendSubmit} className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -203,8 +230,12 @@ const AdminUsers = () => {
               <option value="Other">Other</option>
             </select>
           </div>
-          <button type="submit" className="w-full bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 font-medium">
-            Confirm Suspension
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 font-medium disabled:opacity-60"
+          >
+            {submitting ? 'Suspending…' : 'Confirm Suspension'}
           </button>
         </form>
       </Modal>

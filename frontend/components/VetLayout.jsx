@@ -7,7 +7,6 @@ const navLinks = [
   { to: '/vet/appointments',  label: 'Appointments'  },
   { to: '/vet/adoptions',     label: 'Adoptions'     },
   { to: '/vet/services',      label: 'Services'      },
-  { to: '/vet/announcements', label: 'Announcements' },
 ];
 
 export default function VetLayout({ children }) {

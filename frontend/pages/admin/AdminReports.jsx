@@ -7,10 +7,17 @@ import { adminService } from '../../services/adminService';
 const PAGE_SIZE = 10;
 
 const STATUS_STYLES = {
-  Open:    'bg-yellow-100 text-yellow-800',
-  Suspend: 'bg-red-100 text-red-800',
-  Warning: 'bg-orange-100 text-orange-800',
-  Dismiss: 'bg-gray-100 text-gray-800',
+  'Open':         'bg-yellow-100 text-yellow-800',
+  'Under Review': 'bg-orange-100 text-orange-800',
+  'Resolved':     'bg-red-100 text-red-800',
+  'Dismissed':    'bg-gray-100 text-gray-800',
+  'Suspended':    'bg-red-100 text-red-800',
+};
+
+// Derive the display status: if the reported user is suspended, override badge to "Suspended"
+const getDisplayStatus = (report) => {
+  if (report.reportedUserAccStatus === 'Suspended') return 'Suspended';
+  return report.status;
 };
 
 const AdminReports = () => {
@@ -104,12 +111,14 @@ const AdminReports = () => {
                       {new Date(report.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[report.status] || 'bg-gray-100 text-gray-800'}`}>
-                        {report.status}
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[getDisplayStatus(report)] || 'bg-gray-100 text-gray-800'}`}>
+                        {getDisplayStatus(report)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {report.status === 'Open' ? (
+                      {report.reportedUserAccStatus === 'Suspended' ? (
+                        <span className="text-xs text-gray-400">Done</span>
+                      ) : (report.status === 'Open' || report.status === 'Under Review') ? (
                         <button
                           onClick={() => handleReview(report)}
                           className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"

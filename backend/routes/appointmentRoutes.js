@@ -246,19 +246,32 @@ router.get('/available-dates/:serviceId', authenticateToken, async (req, res) =>
 
     console.log('✅ Using service:', service);
 
-    // Generate available dates using local date formatting to avoid UTC timezone shift
+    // Generate available dates — use UTC methods to avoid timezone day-shift
     const availableDates = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const endDate = service.ServEndDate ? new Date(service.ServEndDate) : new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
 
-    for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
-      if (service.ServDayAvailable && service.ServDayAvailable.includes(dayName)) {
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
+    if (service.ServEndDate) {
+      // Specific single date — parse as local date (append T00:00:00 to avoid UTC shift)
+      const specific = new Date(service.ServEndDate + 'T00:00:00');
+      if (specific >= today) {
+        const yyyy = specific.getFullYear();
+        const mm = String(specific.getMonth() + 1).padStart(2, '0');
+        const dd = String(specific.getDate()).padStart(2, '0');
         availableDates.push(`${yyyy}-${mm}-${dd}`);
+      }
+    } else if (service.ServDayAvailable?.length > 0) {
+      // Recurring — iterate 90 days, match by day-of-week name using local time
+      const endDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+      const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dayName = DAY_NAMES[d.getDay()]; // local day — no timezone shift
+        if (service.ServDayAvailable.includes(dayName)) {
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          availableDates.push(`${yyyy}-${mm}-${dd}`);
+        }
       }
     }
 

@@ -139,7 +139,7 @@ CREATE TABLE public.ANNOUNCEMENT (
   AnnouncedBy uuid,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT ANNOUNCEMENT_pkey PRIMARY KEY (AnnounceID),
-  CONSTRAINT ANNOUNCEMENT_AnnouncedBy_fkey FOREIGN KEY (AnnouncedBy) REFERENCES public.ADMIN(AdminID)
+  CONSTRAINT ANNOUNCEMENT_AnnouncedBy_fkey FOREIGN KEY (AnnouncedBy) REFERENCES public.ACCOUNT(AccID)
 );
 CREATE TABLE public.REPORTS (
   ReportID uuid NOT NULL DEFAULT gen_random_uuid(),

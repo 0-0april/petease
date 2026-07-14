@@ -18,7 +18,6 @@ import VetAppointments from './pages/vet/VetAppointments';
 
 import VetAdoptions from './pages/vet/VetAdoptions';
 import VetServices from './pages/vet/VetServices';
-import VetAnnouncements from './pages/vet/VetAnnouncements';
 import VetNotifications from './pages/vet/VetNotifications';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -52,7 +51,6 @@ function App() {
 
           <Route path="/vet/adoptions" element={<PrivateRoute><VetAdoptions /></PrivateRoute>} />
           <Route path="/vet/services" element={<PrivateRoute><VetServices /></PrivateRoute>} />
-          <Route path="/vet/announcements" element={<PrivateRoute><VetAnnouncements /></PrivateRoute>} />
           <Route path="/vet/notifications" element={<PrivateRoute><VetNotifications /></PrivateRoute>} />
 
           <Route path="/admin/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />

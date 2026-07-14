@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const getDashboardPath = (u) => {
@@ -25,12 +25,25 @@ const Field = ({ label, icon, ...props }) => (
 );
 
 export default function Login() {
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [email,       setEmail]       = useState('');
+  const [password,    setPassword]    = useState('');
+  const [error,       setError]       = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [warningUser, setWarningUser] = useState(null);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle error params redirected from Google OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const err = params.get('error');
+    if (err === 'suspended') {
+      setError('Your account has been suspended. Please contact support.');
+    } else if (err === 'auth_failed') {
+      setError('Google sign-in failed. Please try again.');
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +51,12 @@ export default function Login() {
     try {
       const res  = await login(email, password);
       const user = res?.user || res;
-      navigate(getDashboardPath(user), { replace: true });
+      // If account has a Warning status, show the banner before navigating
+      if (user?.accStatus === 'Warning') {
+        setWarningUser(user);
+      } else {
+        navigate(getDashboardPath(user), { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally { setLoading(false); }
@@ -49,6 +67,65 @@ export default function Login() {
     try { await loginWithGoogle(); }
     catch { setError('Google login failed. Please try again.'); }
   };
+
+  // Warning banner — shown when AccStatus === 'Warning'
+  if (warningUser) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden"
+        style={{ background: 'hsla(132,79%,89%,1)' }}>
+        <div className="pe-bg" aria-hidden="true">
+          <div className="pe-sphere animate-float-slow"
+            style={{ width:'560px', height:'560px', top:'-160px', left:'-140px', opacity:0.52 }} />
+          <div className="pe-sphere animate-float-mid"
+            style={{ width:'400px', height:'400px', bottom:'-120px', right:'-100px', opacity:0.40 }} />
+        </div>
+
+        <div className="glass-card relative z-10 w-full max-w-lg px-8 py-10 flex flex-col gap-6">
+          {/* Yellow warning container */}
+          <div className="rounded-2xl border px-5 py-4 flex items-start gap-3"
+            style={{
+              background: 'hsla(48,100%,96%,0.92)',
+              borderColor: 'hsla(45,90%,60%,0.60)',
+            }}>
+            {/* Close (x) button — left side per spec */}
+            <button
+              onClick={() => navigate(getDashboardPath(warningUser), { replace: true })}
+              className="shrink-0 rounded-lg p-1 mt-0.5 transition-opacity hover:opacity-70"
+              style={{ color: 'hsl(38,80%,40%)' }}
+              aria-label="Dismiss warning and continue">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor"
+                strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Warning icon */}
+            <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor"
+              strokeWidth={1.8} viewBox="0 0 24 24"
+              style={{ color: 'hsl(38,95%,45%)' }} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+
+            <div className="flex-1">
+              <p className="font-semibold text-sm mb-1" style={{ color: 'hsl(38,95%,30%)' }}>
+                Account Warning
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: 'hsl(38,80%,35%)' }}>
+                Your account has received a warning from the admin. Please review our community
+                guidelines and ensure your activity complies with PetEase policies.
+                Continued violations may result in suspension.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+            Click <strong>×</strong> to acknowledge and proceed to your dashboard.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     /* ── Full-screen canvas ── */

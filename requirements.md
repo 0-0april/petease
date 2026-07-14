@@ -286,6 +286,7 @@ The service availability choices should display:
 - thursday
 - friday
 - saturday
+- sunday
 - specific date (with input through calendar)
 
 29.  vet staffs can select multiple if it is selecting Days but if the specific date it click it should be the only one selected so disable the specific date if there is day above selected and disable the day if there is date selected.
@@ -316,7 +317,8 @@ do not explain too much, execute what i said and save credits.
 
 - check the petease.sql for your reference.
 
-35. connect the announcements from admin/vet staff in the Announcements messages. the announcement should behave like chats but with complete necessary details about the announcement. check backend/petease.sql as your reference
+35. connect the Announcements table to the user/Messages's announcement pinned chat. the announcement should behave like chats but with complete necessary details about the announcement. check backend/petease.sql as your reference
+
 
 
 
@@ -375,7 +377,7 @@ Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-r
 
 3. it should b accuratelydisplayed based on the count of the user outcome after the filter
 
-4. in the admin/AdminUsers page, the page should display real users from the USER table, it should display its email, (remove the role part/column), last login, status, should be "active" always, leave the action the same.
+4. in the admin/AdminUsers page, the page should display real users from the USER table, it should display its email, (remove the role part/column), last login, status, leave the action the same.
 
 - read petease.sql for you to understand the intruction more and for your reference
 
@@ -386,3 +388,17 @@ Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-r
 7. in admin/AdminReports page, once the admin suspends the reported user, the user's AccStatus should be "Suspended" and therefore unable to login/register again with the same email. tho, if it is "Warning", when that certain user logs in, there should be yellow container floating above about the warning(allow the user to close it through (x) button on the left side of the statement/warning). only "Active" User account should be logged/register normally.
 
 - read petease.sql for you to understand the intruction more and for your reference
+
+4.1 in the dmin/AdminReports page, once the reportedUser account's status was suspended, also display the status of the rest of the report towards the same suspended user as suspended
+
+5. when the user account's status is suspended, the user's shouldn't be allowed to login into the system, it should show an error in the login/register page.
+
+6. if the user's account staus is warning, the system would still be allow the user to login but before proceeding the user to dashboard, it should display inside the container first when the user click the (x) button for it to close it, it should propced the user to the user's dashboard
+
+7. in the admin/AdminAnnouncement, connect the frontend data to the supabase database without damaging the ui, just change the reference of its database
+
+- make sure you correctly apply the filter based on the roles where the announcement came from, the admin is for system announcement, and vet is for vet annoucements. it is connected to the vet services as well where the vetstaff updates the services and they put it to the announcement.
+
+- read petease.sql for you to understand the intruction more and for your reference
+
+

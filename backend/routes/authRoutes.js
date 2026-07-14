@@ -20,6 +20,11 @@ router.post('/google', async (req, res) => {
     let accId, role, userData;
 
     if (existingAccount) {
+      // Block suspended accounts
+      if (existingAccount.AccStatus === 'Suspended') {
+        return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+      }
+
       // User exists, log them in
       accId = existingAccount.AccID;
 
@@ -104,6 +109,7 @@ router.post('/google', async (req, res) => {
         accId,
         email,
         role,
+        accStatus: existingAccount?.AccStatus || 'Active',
         ...userData
       }
     });

@@ -30,7 +30,7 @@ const TYPE_COLORS = {
 const getNavPath = (type) => {
   if (type === 'appointment') return '/vet/appointments';
   if (type === 'adoption') return '/vet/adoptions';
-  if (type === 'announcement') return '/vet/announcements';
+  if (type === 'announcement') return '/vet/services';
   return '/vet/dashboard';
 };
 

@@ -120,104 +120,59 @@ export const adminService = {
     };
   },
 
-  getAllAnnouncements: async (page = 1, limit = 10, status = 'all') => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    let filtered = [...announcements];
-
-    if (status !== 'all') {
-      filtered = filtered.filter(a => a.status === status);
-    }
-
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    return {
-      announcements: filtered.slice(startIndex, endIndex),
-      total: filtered.length,
-      page,
-      totalPages: Math.ceil(filtered.length / limit)
-    };
+  // Vet Submissions — real DB
+  getAllAnnouncements: async () => {
+    const response = await api.get('/admin/announcements/vet-submissions');
+    // Return in the shape the component expects: { announcements: [], totalPages: 1 }
+    return { announcements: response.data || [], totalPages: 1 };
   },
 
-  approveAnnouncement: async (announcementId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = announcements.findIndex(a => a.id === parseInt(announcementId));
-    if (index !== -1) {
-      announcements[index].status = 'approved';
-      announcements[index].reviewedBy = 'Admin User';
-      announcements[index].reviewedAt = new Date().toISOString();
-      return announcements[index];
-    }
-    throw new Error('Announcement not found');
+  approveAnnouncement: async (id) => {
+    const response = await api.patch(`/admin/announcements/${id}/approve`);
+    return response.data;
   },
 
-  rejectAnnouncement: async (announcementId, reason) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = announcements.findIndex(a => a.id === parseInt(announcementId));
-    if (index !== -1) {
-      announcements[index].status = 'rejected';
-      announcements[index].reviewedBy = 'Admin User';
-      announcements[index].reviewedAt = new Date().toISOString();
-      announcements[index].rejectionReason = reason;
-      return announcements[index];
-    }
-    throw new Error('Announcement not found');
+  rejectAnnouncement: async (id) => {
+    const response = await api.delete(`/admin/announcements/${id}/reject`);
+    return response.data;
   },
 
-  editAnnouncement: async (announcementId, data) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = announcements.findIndex(a => a.id === parseInt(announcementId));
-    if (index !== -1) {
-      announcements[index] = {
-        ...announcements[index],
-        ...data,
-        status: 'approved',
-        reviewedBy: 'Admin User',
-        reviewedAt: new Date().toISOString()
-      };
-      return announcements[index];
-    }
-    throw new Error('Announcement not found');
+  editAnnouncement: async (id, data) => {
+    const response = await api.patch(`/admin/announcements/${id}/edit-approve`, {
+      title: data.title,
+      content: data.content,
+      type: data.type || 'General',
+    });
+    return response.data;
   },
 
-  // System Announcements
+  // System Announcements — real DB
   getSystemAnnouncements: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return systemAnnouncements.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const response = await api.get('/admin/announcements');
+    return response.data;
   },
 
   createSystemAnnouncement: async (data) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newAnnouncement = {
-      id: systemAnnouncements.length + 1,
-      ...data,
-      createdAt: new Date().toISOString(),
-      createdBy: 'Admin User',
-      status: 'active'
-    };
-    systemAnnouncements.push(newAnnouncement);
-    return newAnnouncement;
+    const response = await api.post('/admin/announcements', {
+      title: data.title,
+      content: data.content,
+      type: data.type || 'General',
+    });
+    return response.data;
   },
 
   updateSystemAnnouncement: async (id, data) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = systemAnnouncements.findIndex(a => a.id === parseInt(id));
-    if (index !== -1) {
-      systemAnnouncements[index] = {
-        ...systemAnnouncements[index],
-        ...data
-      };
-      return systemAnnouncements[index];
-    }
-    throw new Error('Announcement not found');
+    const response = await api.put(`/admin/announcements/${id}`, {
+      title: data.title,
+      content: data.content,
+      type: data.type || 'General',
+    });
+    return response.data;
   },
 
   deleteSystemAnnouncement: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    systemAnnouncements = systemAnnouncements.filter(a => a.id !== parseInt(id));
-    return { success: true };
+    const response = await api.delete(`/admin/announcements/${id}`);
+    return response.data;
   },
 
   // Chart Data — real DB
@@ -229,6 +184,12 @@ export const adminService = {
   // Real users from DB
   getUsers: async () => {
     const response = await api.get('/admin/users');
+    return response.data;
+  },
+
+  // Suspend a user by UserID — sets ACCOUNT.AccStatus to 'Suspended'
+  suspendUser: async (userId) => {
+    const response = await api.patch(`/admin/users/${userId}/suspend`);
     return response.data;
   },
 

@@ -381,12 +381,12 @@ router.get('/services', authenticateToken, authorizeRole('vet'), async (req, res
     const services = data.map(service => ({
       id: service.ServID,
       name: service.ServType,
-      description: `Available on: ${service.ServDayAvailable?.join(', ') || 'Not set'}`,
+      description: '',   // SERVICES table has no description column
       availabilityType: service.ServEndDate ? 'specific' : 'recurring',
-      specificDate: service.ServEndDate,
+      specificDate: service.ServEndDate || null,
       slots: service.ServSlot,
       status: service.ServStatus,
-      daysAvailable: service.ServDayAvailable,
+      daysAvailable: service.ServDayAvailable || [],
       createdAt: service.created_at
     }));
 
@@ -434,11 +434,17 @@ router.post('/services', authenticateToken, authorizeRole('vet'), async (req, re
 
     console.log('✅ Service created:', data);
     if (notifyUsers) {
-      await createNotificationsForUsers({
-        title: 'New service announcement',
-        message: `${name} is now available.${description ? ` ${description}` : ''}`,
-        type: 'announcement'
-      });
+      // Create a pending announcement (AnnouncedBy = null = awaiting admin approval)
+      await supabase
+        .from('ANNOUNCEMENT')
+        .insert({
+          AnnounceTitle: `New Service: ${name}`,
+          AnnounceContent: description
+            ? `${name} is now available. ${description}`
+            : `${name} is now available for booking.`,
+          AnnounceType: 'General',
+          AnnouncedBy: null,  // pending admin review
+        });
     }
 
     res.status(201).json({
@@ -497,11 +503,17 @@ router.put('/services/:id', authenticateToken, authorizeRole('vet'), async (req,
 
     console.log('✅ Service updated:', data);
     if (notifyUsers) {
-      await createNotificationsForUsers({
-        title: 'Service announcement updated',
-        message: `${name} has been updated.${description ? ` ${description}` : ''}`,
-        type: 'announcement'
-      });
+      // Create a pending announcement (AnnouncedBy = null = awaiting admin approval)
+      await supabase
+        .from('ANNOUNCEMENT')
+        .insert({
+          AnnounceTitle: `Service Update: ${name}`,
+          AnnounceContent: description
+            ? `${name} has been updated. ${description}`
+            : `${name} has been updated.`,
+          AnnounceType: 'Update',
+          AnnouncedBy: null,  // pending admin review
+        });
     }
 
     res.json({
@@ -742,6 +754,16 @@ router.get('/announcements', authenticateToken, authorizeRole('vet'), async (req
       .eq('AccID', req.user.accId)
       .single();
 
+    // Get all VETSTAFF AccIDs so we can identify vet-originated rows
+    const { data: vetAccs } = await supabase
+      .from('VETSTAFF')
+      .select('AccID');
+    const vetAccIds = (vetAccs || []).map(v => v.AccID);
+
+    // Show:
+    // 1. Pending submissions (AnnouncedBy IS NULL) — submitted by any vet
+    // 2. Approved vet submissions (AnnouncedBy is an admin AccID, but originated from vet = no way to tell without extra column)
+    //    → Show ALL approved announcements so vets can see published ones too
     const { data, error } = await supabase
       .from('ANNOUNCEMENT')
       .select('AnnounceID, AnnounceTitle, AnnounceContent, AnnounceType, AnnounceDateUpdated, created_at, AnnouncedBy')
@@ -756,7 +778,7 @@ router.get('/announcements', authenticateToken, authorizeRole('vet'), async (req
       type: a.AnnounceType,
       createdAt: a.created_at,
       updatedAt: a.AnnounceDateUpdated,
-      announcedBy: a.AnnouncedBy,
+      // pending = AnnouncedBy is null, approved = set to admin's AccID
       status: a.AnnouncedBy ? 'approved' : 'pending',
       createdBy: staffRow?.StaffName || 'Vet Staff',
     })));
@@ -766,8 +788,7 @@ router.get('/announcements', authenticateToken, authorizeRole('vet'), async (req
 });
 
 // ── POST /api/vet/announcements ───────────────────────────────────────────
-router.post('/announcements', authenticateToken, authorizeRole('vet'), async (req, res) => {
-  const { title, content, serviceType } = req.body;
+router.post('/announcements', authenticateToken, authorizeRole('vet'), async (req, res) => {  const { title, content, serviceType } = req.body;
 
   try {
     const { data: staffRow } = await supabase
@@ -811,7 +832,38 @@ router.post('/announcements', authenticateToken, authorizeRole('vet'), async (re
   }
 });
 
-// Get vet notifications from DB
+// ── PUT /api/vet/announcements/:id ────────────────────────────────────────
+// Vet edits their own pending announcement (resets to pending if was approved)
+router.put('/announcements/:id', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  const { title, content, serviceType } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('ANNOUNCEMENT')
+      .update({
+        AnnounceTitle: title,
+        AnnounceContent: content,
+        AnnounceType: serviceType || 'General',
+        AnnouncedBy: null,               // reset to pending for re-review
+        AnnounceDateUpdated: new Date().toISOString(),
+      })
+      .eq('AnnounceID', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      id: data.AnnounceID,
+      title: data.AnnounceTitle,
+      content: data.AnnounceContent,
+      type: data.AnnounceType,
+      createdAt: data.created_at,
+      status: 'pending',
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.get('/notifications', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {
     const { data, error } = await supabase

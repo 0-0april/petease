@@ -89,6 +89,11 @@ export const vetService = {
     return response.data;
   },
 
+  updateAnnouncement: async (id, announcementData) => {
+    const response = await api.put(`/vet/announcements/${id}`, announcementData);
+    return response.data;
+  },
+
   // Get all approved adoptions waiting for vet processing
   getApprovedAdoptions: async (page = 1, limit = 10) => {
     const response = await api.get('/vet/adoptions', { params: { page, limit } });

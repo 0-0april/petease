@@ -25,7 +25,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Get announcements for users
+// Get announcements for users — only approved (AnnouncedBy IS NOT NULL)
 router.get('/announcements', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -33,8 +33,9 @@ router.get('/announcements', authenticateToken, async (req, res) => {
       .select(`
         AnnounceID, AnnounceTitle, AnnounceContent, AnnounceType,
         AnnounceDateUpdated, created_at, AnnouncedBy,
-        ADMIN ( AdminName )
+        ACCOUNT ( AccUserName )
       `)
+      .not('AnnouncedBy', 'is', null)   // only approved announcements
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -44,7 +45,7 @@ router.get('/announcements', authenticateToken, async (req, res) => {
       title: a.AnnounceTitle,
       content: a.AnnounceContent,
       type: a.AnnounceType,
-      postedBy: a.ADMIN?.AdminName || 'Vet Staff',
+      postedBy: a.ACCOUNT?.AccUserName || 'Admin',
       createdAt: a.created_at,
       updatedAt: a.AnnounceDateUpdated,
     })));
