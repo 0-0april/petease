@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const features = [
@@ -30,38 +30,109 @@ const steps = [
   { n:'04', title:'Book Vet Services',   desc:'Schedule appointments for your new or existing pets.' },
 ];
 
+// Dropdown menu items
+const servicesItems = [
+  { label: 'Consultation',        desc: 'General health checkups' },
+  { label: 'Anti-Rabies Vaccine', desc: 'Regular vaccination program' },
+  { label: 'Spay / Neuter',       desc: 'Scheduled surgical services' },
+];
+const adoptionItems = [
+  { label: 'Browse Pets',    desc: 'Find your perfect companion' },
+  { label: 'How to Adopt',   desc: 'Step-by-step guide' },
+  { label: 'Success Stories',desc: 'Happy adoption stories' },
+];
+
+function NavDropdown({ label, items }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-colors"
+        style={{ color: 'hsl(140,100%,7%)' }}
+      >
+        {label}
+        <svg className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 nav-glass rounded-2xl overflow-hidden z-50">
+          {items.map((item, i) => (
+            <div key={i} className="px-4 py-3 hover:bg-primary/10 cursor-pointer transition-colors border-b last:border-0"
+              style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>{item.label}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Landing() {
   return (
     <div className="relative min-h-screen overflow-x-hidden"
       style={{ background:'hsla(132,79%,89%,1)' }}>
 
-      {/* Spheres */}
+      {/* Ambient spheres */}
       <div className="pe-bg" aria-hidden="true">
         <div className="pe-sphere animate-float-slow"
           style={{ width:'640px', height:'640px', top:'-200px', left:'-180px', opacity:0.48 }} />
         <div className="pe-sphere animate-float-mid"
           style={{ width:'420px', height:'420px', top:'40%', right:'-130px', opacity:0.30 }} />
         <div className="pe-sphere"
-          style={{ width:'260px', height:'260px', bottom:'-80px', left:'30%', opacity:0.20,
-                   filter:'blur(60px)' }} />
+          style={{ width:'260px', height:'260px', bottom:'-80px', left:'30%', opacity:0.20, filter:'blur(60px)' }} />
       </div>
 
-      {/* ── Navbar ── */}
-      <nav className="nav-glass sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-          <span className="text-2xl font-black tracking-tight" style={{ color:'hsl(140,100%,7%)' }}>
-            PetEase
+      {/* ── Floating Pill Navbar ── */}
+      <div className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8">
+        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-14">
+          {/* Left: Logo */}
+          <span className="text-xl font-black tracking-tight shrink-0" style={{ color:'hsl(140,100%,7%)' }}>
+            🐾 PetEase
           </span>
-          <div className="flex items-center gap-3">
-            <Link to="/login"    className="btn-outline" style={{ padding:'9px 22px', fontSize:'0.75rem' }}>Login</Link>
-            <Link to="/register" className="btn-pay"     style={{ padding:'10px 22px', fontSize:'0.75rem' }}>Get Started</Link>
-          </div>
-        </div>
-      </nav>
 
-      {/* ── Hero ── */}
-      <section className="relative z-10 py-28 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+          {/* Center: Nav links with dropdowns */}
+          <div className="hidden md:flex items-center gap-1">
+            <Link to="/login" className="px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+              style={{ color: 'hsl(140,100%,7%)' }}>
+              Home
+            </Link>
+            <NavDropdown label="Adoption" items={adoptionItems} />
+            <NavDropdown label="Services" items={servicesItems} />
+            <Link to="/login" className="px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+              style={{ color: 'hsl(140,100%,7%)' }}>
+              About
+            </Link>
+          </div>
+
+          {/* Right: CTA */}
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="hidden sm:inline-flex px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+              style={{ color: 'hsl(140,100%,7%)' }}>
+              Login
+            </Link>
+            <Link to="/login" className="btn-outline" style={{ padding: '9px 22px', fontSize: '0.75rem' }}>
+              Contact Us
+            </Link>
+          </div>
+        </nav>
+      </div>
+
+      {/* ── Hero Section ── */}
+      <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden"
+        style={{
+          background: 'linear-gradient(160deg, hsla(130,100%,40%,0.08) 0%, hsla(135,95%,18%,0.06) 50%, hsla(132,79%,89%,0) 100%)',
+        }}>
+        {/* Dot texture overlay */}
+        <div className="absolute inset-0 opacity-30" aria-hidden="true"
+          style={{
+            backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }} />
+
+        <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 py-20">
           <div className="flex-1 text-center lg:text-left">
             <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
               style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(130,100%,30%)' }}>
@@ -93,6 +164,15 @@ export default function Landing() {
                 className={`rounded-3xl object-cover w-full h-48 shadow-glass ${i.mt}`} />
             ))}
           </div>
+        </div>
+
+        {/* Wave SVG divider */}
+        <div className="relative -mb-1" aria-hidden="true">
+          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block"
+            preserveAspectRatio="none">
+            <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"
+              fill="hsla(132,79%,89%,1)" />
+          </svg>
         </div>
       </section>
 

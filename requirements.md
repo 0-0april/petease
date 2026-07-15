@@ -402,3 +402,74 @@ Act as an expert UI/UX developer. Generate a clean, modern, desktop and mobile-r
 - read petease.sql for you to understand the intruction more and for your reference
 
 
+8. in the vet/VetServices page, once the vet staff updated the vet services and puts check to announce it, it should write the changes made in the AnnouncementContent database, like for example:
+
+Neuter Services has been updated!
+
+Neuter is now available on:
+- Monday
+- Wednesday
+
+(or if the neuter or any services updated is changed/updated to a specific schedule):
+
+Neuter is now available on:
+- July 17, 2026, Friday
+
+- take note it depends on the changes made in the vet services page
+
+- read petease.sql for you to understand the intruction more and for your reference
+
+
+
+Navigation Bar and Browse For Pets UI Update:
+
+I want you to restyle the UI of my existing project to match a reference design, without changing any backend logic, data bindings, API calls, database queries, props, or state management. This is a pure presentational/UI refactor. Do not touch functions that fetch or mutate data — only the JSX/HTML/CSS markup and layout. My project uses Tailwind CSS.
+
+Critical constraints:
+
+
+Preserve all existing data connections (props, hooks, API/database calls, loops/.map() rendering, conditional rendering logic).
+Preserve my project's existing color theme/brand colors exactly — do not adopt the reference image's navy/pink palette. Before writing any styles, first inspect my tailwind.config.js/tailwind.config.ts (or theme block / CSS @theme layer if using Tailwind v4) and list out the existing custom color tokens (e.g. primary, secondary, accent, background, muted, etc.).
+Only use Tailwind utility classes built from my existing theme tokens (e.g. bg-primary, text-primary, bg-accent, border-muted) — never hardcode new hex values or Tailwind's default palette colors (like bg-pink-500 or bg-indigo-900) unless that exact shade already exists in my config.
+Map the reference design's structural color roles onto my tokens like this:
+
+Reference's dark navy text/buttons → my theme's primary (or darkest brand color)
+Reference's pink/coral accent (ribbon badge, icons) → my theme's accent/secondary color
+Reference's white card backgrounds → my theme's background/card color
+Reference's gray body text → my theme's muted/foreground-secondary text color
+Reference's light hero gradient → a subtle gradient or tint built from my primary/accent at low opacity (e.g. from-primary/10 to-accent/10), not a new pink/lavender
+
+
+
+If my config has no matching token for a given role, tell me instead of inventing a new color.
+Reuse existing components where possible; only adjust classNames, layout structure, and styling.
+Keep it fully responsive (the reference is a 3-column desktop grid that should collapse to 1–2 columns on smaller screens) using Tailwind's responsive prefixes (sm:, md:, lg:).
+
+
+Build the layout in this exact top-to-bottom order:
+
+
+Navbar — floating pill-shaped rounded container with soft shadow, slightly inset from the page edges (not full-width). Left: logo/icon + brand name. Center: horizontal nav links, with two of them as dropdown menus (chevron icon). Right: a pill-shaped outlined "Contact Us" style CTA button.
+Hero section — full-width band directly below the navbar, soft gradient/tinted background (light, low-saturation), with a subtle background texture (soft dot or wave pattern). Content is centered: a large bold heading, a shorter muted paragraph beneath it (2–3 lines, centered, max-width constrained). Bottom edge of this section has a wavy/curved SVG divider transitioning into the page's base background color.
+
+IN THE user/BrowseForPets page:
+
+pet Card grid section — white/base background, generous top padding after the wave divider. Grid of cards, 3 columns on desktop, 2 on tablet, 1 on mobile, with consistent gutter spacing. Each card:
+
+Rounded corners with a subtle dashed border and soft shadow.
+Top: image (rounded corners, fixed aspect ratio, object-fit: cover) — bind this to the existing data source's image field.
+A small pill-shaped ribbon/badge overlapping the top-left corner of the image (icon + brand/category label) — bind label to existing data field if applicable, otherwise keep static.
+Below the image: bold title (bind to record name/title field), then a short muted description line (bind to description field, truncate if needed).
+A meta row with two small icon+text stats side by side (e.g., a metric icon + value, and a calendar/date icon + value) — bind both to relevant data fields.
+A full-width or auto-width pill-shaped primary action button at the bottom (bind onClick to existing action/handler, e.g., navigate to detail page or trigger existing function).
+Loop this card over the existing dataset/array exactly as it's currently rendered — just change the markup/styling per card, not the data source.
+
+
+
+Empty/loading states — if the existing project has loading or empty-state handling for this data, preserve it and restyle it to match the same card shape (e.g., skeleton cards).
+
+
+Deliverable: Updated component(s)/file(s) with new Tailwind-based markup and styles applied, using only my project's existing tailwind.config color tokens, existing data-fetching logic untouched, and the same component/data structure — only the visual layer changes.
+
+
+remove the user dashboard, once the user logs it it should automatically displays browse for pets page

@@ -5,7 +5,6 @@ import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
-import Dashboard from './pages/user/Dashboard';
 import BrowsePets from './pages/user/BrowsePets';
 import PetProfile from './pages/user/PetProfile';
 import MyPets from './pages/user/MyPets';
@@ -36,7 +35,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/" element={<Navigate to="/browse-pets" replace />} />
           <Route path="/browse-pets" element={<PrivateRoute><BrowsePets /></PrivateRoute>} />
           <Route path="/pet/:id" element={<PrivateRoute><PetProfile /></PrivateRoute>} />
           <Route path="/my-pets" element={<PrivateRoute><MyPets /></PrivateRoute>} />

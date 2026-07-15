@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 const getDashboardPath = (u) => {
   if (u?.role === 'admin') return '/admin/dashboard';
   if (u?.role === 'vet')   return '/vet/dashboard';
-  return '/';
+  return '/browse-pets';
 };
 
 /* ── Reusable underline field ─────────────────────────────────────── */

@@ -503,15 +503,34 @@ router.put('/services/:id', authenticateToken, authorizeRole('vet'), async (req,
 
     console.log('✅ Service updated:', data);
     if (notifyUsers) {
-      // Create a pending announcement (AnnouncedBy = null = awaiting admin approval)
+      // Build human-readable announcement content reflecting the actual changes
+      let availabilityText = '';
+      if (availabilityType === 'specific' && specificDate) {
+        // Format: "July 17, 2026, Friday"
+        const dateObj = new Date(specificDate + 'T00:00:00');
+        const formatted = dateObj.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          weekday: 'long',
+        });
+        // Reorder to "Month Day, Year, Weekday"
+        const parts = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+        availabilityText = `${name} is now available on:\n- ${parts}, ${weekday}`;
+      } else if (selectedDays && selectedDays.length > 0) {
+        const dayList = selectedDays.map(d => `- ${d}`).join('\n');
+        availabilityText = `${name} is now available on:\n${dayList}`;
+      }
+
+      const announceContent = `${name} has been updated!\n\n${availabilityText}`.trim();
+
       await supabase
         .from('ANNOUNCEMENT')
         .insert({
-          AnnounceTitle: `Service Update: ${name}`,
-          AnnounceContent: description
-            ? `${name} has been updated. ${description}`
-            : `${name} has been updated.`,
-          AnnounceType: 'Update',
+          AnnounceTitle: `${name} has been updated!`,
+          AnnounceContent: announceContent,
+          AnnounceType: 'General',
           AnnouncedBy: null,  // pending admin review
         });
     }
