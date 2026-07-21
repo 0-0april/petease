@@ -322,7 +322,7 @@ const BrowsePets = () => {
 
   return (
     <Layout>
-      {/* {showWelcome && (
+      {showWelcome && (
         <div
           className="relative overflow-hidden rounded-2xl mb-8 px-6 py-10 text-center"
           style={{ background: 'transparent', border: 'none' }}
@@ -339,9 +339,9 @@ const BrowsePets = () => {
             </p>
           </div>
         </div>
-      )} */}
+      )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+      <div className={`flex flex-col sm:flex-row sm:items-center gap-3 mb-6 ${!showWelcome ? 'mt-6' : ''}`}>
         <div className="relative flex-1">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
