@@ -4,6 +4,7 @@ import VetLayout from '../../components/VetLayout';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import { vetService } from '../../services/vetService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const STATUS_STYLES = {
   confirmed: 'bg-green-100 text-green-800',
@@ -20,6 +21,7 @@ const SERVICE_LABELS = {
 };
 
 const VetAppointments = () => {
+  const { clear } = useBadge();
   const [appointments, setAppointments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -37,6 +39,7 @@ const VetAppointments = () => {
   const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
+    clear('/vet/appointments');
     fetchAppointments();
   }, [currentPage, activeTab]);
 

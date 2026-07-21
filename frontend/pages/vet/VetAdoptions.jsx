@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import VetLayout from '../../components/VetLayout';
 import Pagination from '../../components/Pagination';
 import { vetService } from '../../services/vetService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const STATUS_STYLES = {
   approved:  'bg-blue-100 text-blue-800',
@@ -140,6 +141,7 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
 };
 
 const VetAdoptions = () => {
+  const { clear } = useBadge();
   const [adoptions, setAdoptions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -148,6 +150,7 @@ const VetAdoptions = () => {
   const [successId, setSuccessId] = useState(null);
 
   useEffect(() => {
+    clear('/vet/adoptions');
     fetchAdoptions();
   }, [currentPage]);
 

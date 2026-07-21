@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useBadge } from '../contexts/BadgeContext';
+import { adminService } from '../services/adminService';
 
 const navLinks = [
   { to: '/admin/dashboard',     label: 'Dashboard'     },
@@ -9,14 +11,70 @@ const navLinks = [
   { to: '/admin/announcements', label: 'Announcements' },
 ];
 
+const Badge = ({ count }) => {
+  if (!count) return null;
+  const label = count > 10 ? '10+' : count;
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-full text-white font-bold leading-none"
+      style={{
+        background: 'hsl(0,72%,51%)',
+        fontSize: '0.6rem',
+        minWidth: '1rem',
+        height: '1rem',
+        padding: '0 0.25rem',
+        marginLeft: '4px',
+      }}
+    >
+      {label}
+    </span>
+  );
+};
+
 export default function AdminLayout({ children }) {
   const { user, logout } = useAuth();
+  const { notify, clear, getCount } = useBadge();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/landing'); };
   const isActive = (p) => pathname === p;
+
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+
+  useEffect(() => {
+    if (!user) return;
+
+    const poll = async () => {
+      const path = pathnameRef.current;
+
+      // Reports badge: open + under-review count
+      if (path !== '/admin/reports') {
+        try {
+          const data = await adminService.getReports();
+          const pending = (data || []).filter(r =>
+            r.status === 'Open' || r.status === 'Under Review'
+          ).length;
+          notify('/admin/reports', pending);
+        } catch { /* silent */ }
+      }
+
+      // Announcements badge: pending vet submissions
+      if (path !== '/admin/announcements') {
+        try {
+          const data = await adminService.getAllAnnouncements();
+          const pending = (data.announcements || []).length;
+          notify('/admin/announcements', pending);
+        } catch { /* silent */ }
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 30_000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <div className="relative min-h-screen" style={{ background: 'hsla(132,79%,89%,1)' }}>
@@ -44,8 +102,9 @@ export default function AdminLayout({ children }) {
           <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map(l => (
               <Link key={l.to} to={l.to}
-                className={`px-3 py-2 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
+                className={`inline-flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
                 {l.label}
+                <Badge count={getCount(l.to)} />
               </Link>
             ))}
           </div>
@@ -86,8 +145,9 @@ export default function AdminLayout({ children }) {
             <div className="grid gap-1">
               {navLinks.map(l => (
                 <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-                  className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive'}`}>
+                  className={`inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive'}`}>
                   {l.label}
+                  <Badge count={getCount(l.to)} />
                 </Link>
               ))}
               <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl px-3 py-2 glass-inner">

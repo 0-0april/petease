@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useBadge } from '../contexts/BadgeContext';
+import { vetService } from '../services/vetService';
 
 const navLinks = [
   { to: '/vet/dashboard',    label: 'Dashboard'    },
@@ -9,14 +11,77 @@ const navLinks = [
   { to: '/vet/services',     label: 'Services'     },
 ];
 
+const Badge = ({ count }) => {
+  if (!count) return null;
+  const label = count > 10 ? '10+' : count;
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-full text-white font-bold leading-none"
+      style={{
+        background: 'hsl(0,72%,51%)',
+        fontSize: '0.6rem',
+        minWidth: '1rem',
+        height: '1rem',
+        padding: '0 0.25rem',
+        marginLeft: '4px',
+      }}
+    >
+      {label}
+    </span>
+  );
+};
+
 export default function VetLayout({ children }) {
   const { user, logout } = useAuth();
+  const { notify, clear, getCount } = useBadge();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/landing'); };
   const isActive = (p) => pathname === p;
+
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+
+  useEffect(() => {
+    if (!user) return;
+
+    const poll = async () => {
+      const path = pathnameRef.current;
+
+      // Appointments badge: pending count
+      if (path !== '/vet/appointments') {
+        try {
+          const data = await vetService.getAllAppointments(1, 100);
+          const pending = data.appointments.filter(a => a.status === 'pending').length;
+          notify('/vet/appointments', pending);
+        } catch { /* silent */ }
+      }
+
+      // Adoptions badge: approved (awaiting vet processing) count
+      if (path !== '/vet/adoptions') {
+        try {
+          const data = await vetService.getApprovedAdoptions(1, 100);
+          const awaiting = data.adoptions.filter(a => a.status === 'approved').length;
+          notify('/vet/adoptions', awaiting);
+        } catch { /* silent */ }
+      }
+
+      // Notifications badge: unread count
+      if (path !== '/vet/notifications') {
+        try {
+          const data = await vetService.getNotifications();
+          const unread = data.filter(n => !n.isRead).length;
+          notify('/vet/notifications', unread);
+        } catch { /* silent */ }
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 30_000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <div className="relative min-h-screen" style={{ background: 'hsla(132,79%,89%,1)' }}>
@@ -44,8 +109,9 @@ export default function VetLayout({ children }) {
           <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map(l => (
               <Link key={l.to} to={l.to}
-                className={`px-3 py-2 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
+                className={`inline-flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
                 {l.label}
+                <Badge count={getCount(l.to)} />
               </Link>
             ))}
           </div>
@@ -86,8 +152,9 @@ export default function VetLayout({ children }) {
             <div className="grid gap-1">
               {navLinks.map(l => (
                 <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-                  className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive'}`}>
+                  className={`inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive'}`}>
                   {l.label}
+                  <Badge count={getCount(l.to)} />
                 </Link>
               ))}
               <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl px-3 py-2 glass-inner">
