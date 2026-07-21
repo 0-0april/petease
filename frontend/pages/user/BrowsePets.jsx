@@ -276,7 +276,7 @@ const isNewUser = () => {
   const elapsed = Date.now() - Number(stamp);
   if (elapsed < WELCOME_DURATION_MS) return true;
   localStorage.removeItem('newUserRegisteredAt');
-  return false;
+  return true;
 };
 
 const BrowsePets = () => {
