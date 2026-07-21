@@ -2,12 +2,15 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { notificationService } from '../../services/notificationService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { notify, clear } = useBadge();
 
   useEffect(() => {
+    clear('/notifications');
     fetchNotifications();
   }, []);
 
@@ -15,6 +18,8 @@ const Notifications = () => {
     try {
       const data = await notificationService.getNotifications();
       setNotifications(data);
+      // Notify badge with unread count — but since we're on this page, keep it cleared
+      // (clear was already called on mount; new data won't re-badge while viewing)
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {

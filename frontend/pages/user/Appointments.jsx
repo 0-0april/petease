@@ -3,19 +3,41 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { appointmentService } from '../../services/appointmentService';
+import { useBadge } from '../../contexts/BadgeContext';
+
+const SEEN_KEY = 'appointments_seen_ids';
+
+const getSeenIds = () => {
+  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
+  catch { return new Set(); }
+};
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const { notify, clear } = useBadge();
 
-  useEffect(() => { fetchAppointments(); }, []);
+  useEffect(() => {
+    fetchAppointments();
+    return () => clear('/appointments');
+  }, []);
 
   const fetchAppointments = async () => {
     try {
       const data = await appointmentService.getMyAppointments();
       setAppointments(data);
+      const seen = getSeenIds();
+      const unseen = data.filter(a =>
+        (a.status === 'pending' || a.status === 'confirmed') && !seen.has(String(a.id))
+      ).length;
+      // Mark all current as seen now that user is on the page
+      const allIds = data.map(a => String(a.id));
+      localStorage.setItem(SEEN_KEY, JSON.stringify(allIds));
+      notify('/appointments', unseen);
+      // immediately clear since user is viewing
+      clear('/appointments');
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {

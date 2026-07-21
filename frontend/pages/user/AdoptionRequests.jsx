@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { adoptionService } from '../../services/adoptionService';
 import { petService } from '../../services/petService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const STATUS_STYLES = {
   pending:   'bg-yellow-100 text-yellow-800',
@@ -92,6 +93,7 @@ const ConfirmModal = ({ message, onConfirm, onClose }) => (
 
 const AdoptionRequests = () => {
   const navigate = useNavigate();
+  const { notify, clear } = useBadge();
   const [incoming, setIncoming] = useState([]);
   const [sent, setSent] = useState([]);
   const [pets, setPets] = useState([]);
@@ -103,7 +105,10 @@ const AdoptionRequests = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+    return () => clear('/adoption-requests');
+  }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -116,6 +121,9 @@ const AdoptionRequests = () => {
       setIncoming(inc);
       setSent(snt);
       setPets(allPets);
+      const pendingCount = inc.filter(r => r.status === 'pending').length;
+      notify('/adoption-requests', pendingCount);
+      clear('/adoption-requests'); // user is viewing the page
     } catch (err) {
       console.error(err);
     } finally {

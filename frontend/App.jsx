@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { BadgeProvider } from './contexts/BadgeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -29,6 +30,7 @@ import Landing from './pages/Landing';
 function App() {
   return (
     <AuthProvider>
+      <BadgeProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/landing" element={<Landing />} />
@@ -61,6 +63,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </BadgeProvider>
     </AuthProvider>
   );
 }

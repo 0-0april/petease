@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { messageService } from '../../services/messageService';
+import { useBadge } from '../../contexts/BadgeContext';
+
+const CONV_SEEN_KEY = 'messages_seen_snapshot';
 const MegaphoneIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -64,6 +67,7 @@ const ThreadRow = ({ selected, onClick, avatar, name, preview, meta, pinned }) =
 
 export default function Messages() {
   const location = useLocation();
+  const { notify, clear } = useBadge();
 
   const [conversations,       setConversations]       = useState([]);
   const [announcements,       setAnnouncements]       = useState([]);
@@ -118,7 +122,15 @@ export default function Messages() {
   }, [messages]);
 
   const fetchConversations = async () => {
-    try { setConversations(await messageService.getConversations()); }
+    try {
+      const data = await messageService.getConversations();
+      setConversations(data);
+      // User is on the page — update snapshot and clear badge
+      const snapshot = {};
+      data.forEach(c => { snapshot[c.id] = c.lastMessageTime || ''; });
+      localStorage.setItem(CONV_SEEN_KEY, JSON.stringify(snapshot));
+      clear('/messages');
+    }
     catch (e) { console.error('conversations:', e); }
   };
 

@@ -475,3 +475,15 @@ Deliverable: Updated component(s)/file(s) with new Tailwind-based markup and sty
 remove the user dashboard, once the user logs it it should automatically displays browse for pets page
 
 in the user/browsepets page, the file's 313 to 321 line should only appear for 1 minute after the newly registered user logs in, if the old user logs in, hide it.
+
+
+Add a notification badge system to the navbar tabs using the observer pattern. When a page linked to a navbar tab has updates/changes, display a small circular badge immediately to the right of that tab's label (inline, same row, slightly overlapping the tab's edge — as shown for the "Home" tab).
+
+Requirements:
+
+The badge is a small filled circle containing a number, vertically centered next to the tab text.
+The number represents the count of unseen updates/changes for that page.
+Implement this using the observer pattern: each page acts as a subject that notifies the navbar (observer) whenever a change/update occurs, so the badge count updates reactively without polling.
+The badge should only appear on tabs that have pending updates — tabs with no changes show no badge.
+Cap the displayed count at 10: if updates exceed 10, show "10+" instead of the exact number.
+Badge count should reset (or decrement) once the user visits/views the corresponding tab's page.
