@@ -9,6 +9,7 @@ import { appointmentService } from '../services/appointmentService';
 
 const CONV_SEEN_KEY = 'messages_seen_snapshot';
 const APPT_SEEN_KEY = 'appointments_seen_ids';
+const ADOPT_SEEN_KEY = 'adoptions_seen_pending_ids';
 
 const navLinks = [
   { to: '/browse-pets',       label: 'Browse Pets' },
@@ -68,12 +69,15 @@ export default function Layout({ children }) {
         } catch { /* silent */ }
       }
 
-      // Adoptions badge
+      // Adoptions badge — only badge IDs not yet seen
       if (path !== '/adoption-requests') {
         try {
           const inc = await adoptionService.getIncomingRequests();
-          const pending = inc.filter(r => r.status === 'pending').length;
-          notify('/adoption-requests', pending);
+          const pendingIds = inc.filter(r => r.status === 'pending').map(r => String(r.id));
+          let seenIds = [];
+          try { seenIds = JSON.parse(localStorage.getItem(ADOPT_SEEN_KEY) || '[]'); } catch { /* */ }
+          const newCount = pendingIds.filter(id => !seenIds.includes(id)).length;
+          notify('/adoption-requests', newCount);
         } catch { /* silent */ }
       }
 

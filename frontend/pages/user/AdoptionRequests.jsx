@@ -91,9 +91,11 @@ const ConfirmModal = ({ message, onConfirm, onClose }) => (
   </div>
 );
 
+const ADOPT_SEEN_KEY = 'adoptions_seen_pending_ids';
+
 const AdoptionRequests = () => {
   const navigate = useNavigate();
-  const { notify, clear } = useBadge();
+  const { clear } = useBadge();
   const [incoming, setIncoming] = useState([]);
   const [sent, setSent] = useState([]);
   const [pets, setPets] = useState([]);
@@ -107,7 +109,6 @@ const AdoptionRequests = () => {
 
   useEffect(() => {
     fetchAll();
-    return () => clear('/adoption-requests');
   }, []);
 
   const fetchAll = async () => {
@@ -121,9 +122,10 @@ const AdoptionRequests = () => {
       setIncoming(inc);
       setSent(snt);
       setPets(allPets);
-      const pendingCount = inc.filter(r => r.status === 'pending').length;
-      notify('/adoption-requests', pendingCount);
-      clear('/adoption-requests'); // user is viewing the page
+      // Save seen pending IDs so the poller won't re-badge them
+      const pendingIds = inc.filter(r => r.status === 'pending').map(r => String(r.id));
+      localStorage.setItem(ADOPT_SEEN_KEY, JSON.stringify(pendingIds));
+      clear('/adoption-requests');
     } catch (err) {
       console.error(err);
     } finally {
