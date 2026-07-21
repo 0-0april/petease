@@ -47,40 +47,31 @@ export default function VetLayout({ children }) {
   useEffect(() => {
     if (!user) return;
 
-    const poll = async () => {
+    const poll = () => {
       const path = pathnameRef.current;
 
-      // Appointments badge: pending count
       if (path !== '/vet/appointments') {
-        try {
-          const data = await vetService.getAllAppointments(1, 100);
-          const pending = data.appointments.filter(a => a.status === 'pending').length;
-          notify('/vet/appointments', pending);
-        } catch { /* silent */ }
+        vetService.getAllAppointments(1, 100)
+          .then(data => notify('/vet/appointments', data.appointments.filter(a => a.status === 'pending').length))
+          .catch(() => {});
       }
 
-      // Adoptions badge: approved (awaiting vet processing) count
       if (path !== '/vet/adoptions') {
-        try {
-          const data = await vetService.getApprovedAdoptions(1, 100);
-          const awaiting = data.adoptions.filter(a => a.status === 'approved').length;
-          notify('/vet/adoptions', awaiting);
-        } catch { /* silent */ }
+        vetService.getApprovedAdoptions(1, 100)
+          .then(data => notify('/vet/adoptions', data.adoptions.filter(a => a.status === 'approved').length))
+          .catch(() => {});
       }
 
-      // Notifications badge: unread count
       if (path !== '/vet/notifications') {
-        try {
-          const data = await vetService.getNotifications();
-          const unread = data.filter(n => !n.isRead).length;
-          notify('/vet/notifications', unread);
-        } catch { /* silent */ }
+        vetService.getNotifications()
+          .then(data => notify('/vet/notifications', data.filter(n => !n.isRead).length))
+          .catch(() => {});
       }
     };
 
-    poll();
+    const initial = setTimeout(poll, 2000);
     const interval = setInterval(poll, 30_000);
-    return () => clearInterval(interval);
+    return () => { clearTimeout(initial); clearInterval(interval); };
   }, [user]);
 
   return (

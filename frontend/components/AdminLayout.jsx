@@ -47,33 +47,25 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     if (!user) return;
 
-    const poll = async () => {
+    const poll = () => {
       const path = pathnameRef.current;
 
-      // Reports badge: open + under-review count
       if (path !== '/admin/reports') {
-        try {
-          const data = await adminService.getReports();
-          const pending = (data || []).filter(r =>
-            r.status === 'Open' || r.status === 'Under Review'
-          ).length;
-          notify('/admin/reports', pending);
-        } catch { /* silent */ }
+        adminService.getReports()
+          .then(data => notify('/admin/reports', (data || []).filter(r => r.status === 'Open' || r.status === 'Under Review').length))
+          .catch(() => {});
       }
 
-      // Announcements badge: pending vet submissions
       if (path !== '/admin/announcements') {
-        try {
-          const data = await adminService.getAllAnnouncements();
-          const pending = (data.announcements || []).length;
-          notify('/admin/announcements', pending);
-        } catch { /* silent */ }
+        adminService.getAllAnnouncements()
+          .then(data => notify('/admin/announcements', (data.announcements || []).length))
+          .catch(() => {});
       }
     };
 
-    poll();
+    const initial = setTimeout(poll, 2000);
     const interval = setInterval(poll, 30_000);
-    return () => clearInterval(interval);
+    return () => { clearTimeout(initial); clearInterval(interval); };
   }, [user]);
 
   return (

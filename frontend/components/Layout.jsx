@@ -57,62 +57,60 @@ export default function Layout({ children }) {
   useEffect(() => {
     if (!user) return;
 
-    const poll = async () => {
+    const poll = () => {
       const path = pathnameRef.current;
 
-      // Notifications badge
+      // Run all badge fetches in parallel — none block each other or the render
       if (path !== '/notifications') {
-        try {
-          const data = await notificationService.getNotifications();
-          const unread = data.filter(n => !n.isRead).length;
-          notify('/notifications', unread);
-        } catch { /* silent */ }
+        notificationService.getNotifications()
+          .then(data => notify('/notifications', data.filter(n => !n.isRead).length))
+          .catch(() => {});
       }
 
-      // Adoptions badge — only badge IDs not yet seen
       if (path !== '/adoption-requests') {
-        try {
-          const inc = await adoptionService.getIncomingRequests();
-          const pendingIds = inc.filter(r => r.status === 'pending').map(r => String(r.id));
-          let seenIds = [];
-          try { seenIds = JSON.parse(localStorage.getItem(ADOPT_SEEN_KEY) || '[]'); } catch { /* */ }
-          const newCount = pendingIds.filter(id => !seenIds.includes(id)).length;
-          notify('/adoption-requests', newCount);
-        } catch { /* silent */ }
+        adoptionService.getIncomingRequests()
+          .then(inc => {
+            const pendingIds = inc.filter(r => r.status === 'pending').map(r => String(r.id));
+            let seenIds = [];
+            try { seenIds = JSON.parse(localStorage.getItem(ADOPT_SEEN_KEY) || '[]'); } catch { /* */ }
+            notify('/adoption-requests', pendingIds.filter(id => !seenIds.includes(id)).length);
+          })
+          .catch(() => {});
       }
 
-      // Messages badge
       if (path !== '/messages') {
-        try {
-          const convs = await messageService.getConversations();
-          let snapshot = {};
-          try { snapshot = JSON.parse(localStorage.getItem(CONV_SEEN_KEY) || '{}'); } catch { /* */ }
-          const newMsgs = convs.filter(c => {
-            const seenTime = snapshot[c.id];
-            if (!seenTime) return !!c.lastMessageTime;
-            return c.lastMessageTime && c.lastMessageTime > seenTime;
-          }).length;
-          notify('/messages', newMsgs);
-        } catch { /* silent */ }
+        messageService.getConversations()
+          .then(convs => {
+            let snapshot = {};
+            try { snapshot = JSON.parse(localStorage.getItem(CONV_SEEN_KEY) || '{}'); } catch { /* */ }
+            const newMsgs = convs.filter(c => {
+              const seenTime = snapshot[c.id];
+              if (!seenTime) return !!c.lastMessageTime;
+              return c.lastMessageTime && c.lastMessageTime > seenTime;
+            }).length;
+            notify('/messages', newMsgs);
+          })
+          .catch(() => {});
       }
 
-      // Appointments badge
       if (path !== '/appointments') {
-        try {
-          const appts = await appointmentService.getMyAppointments();
-          let seenIds = new Set();
-          try { seenIds = new Set(JSON.parse(localStorage.getItem(APPT_SEEN_KEY) || '[]')); } catch { /* */ }
-          const unseen = appts.filter(a =>
-            (a.status === 'pending' || a.status === 'confirmed') && !seenIds.has(String(a.id))
-          ).length;
-          notify('/appointments', unseen);
-        } catch { /* silent */ }
+        appointmentService.getMyAppointments()
+          .then(appts => {
+            let seenIds = new Set();
+            try { seenIds = new Set(JSON.parse(localStorage.getItem(APPT_SEEN_KEY) || '[]')); } catch { /* */ }
+            const unseen = appts.filter(a =>
+              (a.status === 'pending' || a.status === 'confirmed') && !seenIds.has(String(a.id))
+            ).length;
+            notify('/appointments', unseen);
+          })
+          .catch(() => {});
       }
     };
 
-    poll(); // run immediately on mount
-    const interval = setInterval(poll, 30_000); // then every 30s
-    return () => clearInterval(interval);
+    // Delay first poll by 2s so the page renders fully before background fetches start
+    const initial = setTimeout(poll, 2000);
+    const interval = setInterval(poll, 30_000);
+    return () => { clearTimeout(initial); clearInterval(interval); };
   }, [user]);
 
   return (
