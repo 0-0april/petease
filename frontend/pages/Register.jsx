@@ -49,6 +49,7 @@ export default function Register() {
     try {
       const res  = await register(form);
       const user = res?.user || res;
+      localStorage.setItem('newUserRegisteredAt', Date.now().toString());
       navigate(getDashboardPath(user), { replace: true });
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');

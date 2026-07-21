@@ -268,6 +268,8 @@ const SkeletonCard = () => (
   </div>
 );
 
+const WELCOME_DURATION_MS = 60_000; // 1 minute
+
 const BrowsePets = () => {
   const { user } = useAuth();
   const [pets, setPets] = useState([]);
@@ -275,6 +277,25 @@ const BrowsePets = () => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedPet, setSelectedPet] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const stamp = localStorage.getItem('newUserRegisteredAt');
+    if (stamp) {
+      const elapsed = Date.now() - Number(stamp);
+      if (elapsed < WELCOME_DURATION_MS) {
+        setShowWelcome(true);
+        const remaining = WELCOME_DURATION_MS - elapsed;
+        const timer = setTimeout(() => {
+          setShowWelcome(false);
+          localStorage.removeItem('newUserRegisteredAt');
+        }, remaining);
+        return () => clearTimeout(timer);
+      } else {
+        localStorage.removeItem('newUserRegisteredAt');
+      }
+    }
+  }, []);
 
   useEffect(() => { fetchPets(); }, []);
 
@@ -311,13 +332,17 @@ const BrowsePets = () => {
         <div className="absolute inset-0 opacity-0 rounded-2xl" aria-hidden="true"
           style={{ backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.30) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
         <div className="relative">
-          <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: 'hsl(140,100%,7%)' }}>
-            Welcome, {user?.username || user?.name || 'there'}
-          </h1>
-          <p className="text-sm sm:text-base max-w-md mx-auto font-light"
-            style={{ color: 'hsla(140,100%,7%,0.58)', lineHeight: '1.75' }}>
-            Browse adorable pets looking for a loving home. 
-          </p>
+          {showWelcome && (
+            <>
+              <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: 'hsl(140,100%,7%)' }}>
+                Welcome, {user?.username || user?.name || 'there'}
+              </h1>
+              <p className="text-sm sm:text-base max-w-md mx-auto font-light"
+                style={{ color: 'hsla(140,100%,7%,0.58)', lineHeight: '1.75' }}>
+                Browse adorable pets looking for a loving home. 
+              </p>
+            </>
+          )}
         </div>
        
       </div>
