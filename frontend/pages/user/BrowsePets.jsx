@@ -322,7 +322,7 @@ const BrowsePets = () => {
 
   return (
     <Layout>
-      {showWelcome && (
+      {/* {showWelcome && (
         <div
           className="relative overflow-hidden rounded-2xl mb-8 px-6 py-10 text-center"
           style={{ background: 'transparent', border: 'none' }}
@@ -339,7 +339,7 @@ const BrowsePets = () => {
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <div className="relative flex-1">
