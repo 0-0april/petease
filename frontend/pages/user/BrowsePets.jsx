@@ -270,6 +270,15 @@ const SkeletonCard = () => (
 
 const WELCOME_DURATION_MS = 60_000; // 1 minute
 
+const isNewUser = () => {
+  const stamp = localStorage.getItem('newUserRegisteredAt');
+  if (!stamp) return false;
+  const elapsed = Date.now() - Number(stamp);
+  if (elapsed < WELCOME_DURATION_MS) return true;
+  localStorage.removeItem('newUserRegisteredAt');
+  return false;
+};
+
 const BrowsePets = () => {
   const { user } = useAuth();
   const [pets, setPets] = useState([]);
@@ -277,25 +286,25 @@ const BrowsePets = () => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedPet, setSelectedPet] = useState(null);
-  const [showWelcome, setShowWelcome] = useState(false);
+  // initialise synchronously so it's true on the very first render
+  const [showWelcome, setShowWelcome] = useState(isNewUser);
 
   useEffect(() => {
+    if (!showWelcome) return;
     const stamp = localStorage.getItem('newUserRegisteredAt');
-    if (stamp) {
-      const elapsed = Date.now() - Number(stamp);
-      if (elapsed < WELCOME_DURATION_MS) {
-        setShowWelcome(true);
-        const remaining = WELCOME_DURATION_MS - elapsed;
-        const timer = setTimeout(() => {
-          setShowWelcome(false);
-          localStorage.removeItem('newUserRegisteredAt');
-        }, remaining);
-        return () => clearTimeout(timer);
-      } else {
-        localStorage.removeItem('newUserRegisteredAt');
-      }
+    if (!stamp) return;
+    const remaining = WELCOME_DURATION_MS - (Date.now() - Number(stamp));
+    if (remaining <= 0) {
+      setShowWelcome(false);
+      localStorage.removeItem('newUserRegisteredAt');
+      return;
     }
-  }, []);
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+      localStorage.removeItem('newUserRegisteredAt');
+    }, remaining);
+    return () => clearTimeout(timer);
+  }, [showWelcome]);
 
   useEffect(() => { fetchPets(); }, []);
 
