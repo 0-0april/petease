@@ -322,30 +322,24 @@ const BrowsePets = () => {
 
   return (
     <Layout>
-      <div
-        className="relative overflow-hidden rounded-2xl mb-8 px-6 py-10 text-center"
-        style={{
-          background: 'transparent',
-          border: 'none',
-        }}
-      >
-        <div className="absolute inset-0 opacity-0 rounded-2xl" aria-hidden="true"
-          style={{ backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.30) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-        <div className="relative">
-          {showWelcome && (
-            <>
-              <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: 'hsl(140,100%,7%)' }}>
-                Welcome, {user?.username || user?.name || 'there'}
-              </h1>
-              <p className="text-sm sm:text-base max-w-md mx-auto font-light"
-                style={{ color: 'hsla(140,100%,7%,0.58)', lineHeight: '1.75' }}>
-                Browse adorable pets looking for a loving home. 
-              </p>
-            </>
-          )}
+      {showWelcome && (
+        <div
+          className="relative overflow-hidden rounded-2xl mb-8 px-6 py-10 text-center"
+          style={{ background: 'transparent', border: 'none' }}
+        >
+          <div className="absolute inset-0 opacity-0 rounded-2xl" aria-hidden="true"
+            style={{ backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.30) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+          <div className="relative">
+            <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: 'hsl(140,100%,7%)' }}>
+              Welcome, {user?.username || user?.name || 'there'}
+            </h1>
+            <p className="text-sm sm:text-base max-w-md mx-auto font-light"
+              style={{ color: 'hsla(140,100%,7%,0.58)', lineHeight: '1.75' }}>
+              Browse adorable pets looking for a loving home.
+            </p>
+          </div>
         </div>
-       
-      </div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <div className="relative flex-1">

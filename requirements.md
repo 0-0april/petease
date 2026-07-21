@@ -474,4 +474,4 @@ Deliverable: Updated component(s)/file(s) with new Tailwind-based markup and sty
 
 remove the user dashboard, once the user logs it it should automatically displays browse for pets page
 
-in the user/browsepets page, the file's 313 to 321 line should only appear for 1 minute after the newly registered user logs in, if the old user logs it, hide it.
+in the user/browsepets page, the file's 313 to 321 line should only appear for 1 minute after the newly registered user logs in, if the old user logs in, hide it.
