@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VetLayout from '../../components/VetLayout';
 import { vetService } from '../../services/vetService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const TYPE_ICONS = {
   appointment: (
@@ -36,10 +37,12 @@ const getNavPath = (type) => {
 
 const VetNotifications = () => {
   const navigate = useNavigate();
+  const { clear } = useBadge();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    clear('/vet/notifications');
     fetchNotifications();
   }, []);
 

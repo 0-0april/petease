@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import { adminService } from '../../services/adminService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 const PAGE_SIZE = 10;
 
@@ -21,6 +22,7 @@ const getDisplayStatus = (report) => {
 };
 
 const AdminReports = () => {
+  const { clear } = useBadge();
   const [reports, setReports]               = useState([]);
   const [currentPage, setCurrentPage]       = useState(1);
   const [loading, setLoading]               = useState(true);
@@ -29,7 +31,10 @@ const AdminReports = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [pendingAction, setPendingAction]   = useState(null); // 'Resolved' | 'Warning' | 'Closed'
 
-  useEffect(() => { fetchReports(); }, []);
+  useEffect(() => {
+    clear('/admin/reports');
+    fetchReports();
+  }, []);
 
   const fetchReports = async () => {
     setLoading(true);

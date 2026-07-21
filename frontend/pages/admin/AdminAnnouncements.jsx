@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import { adminService } from '../../services/adminService';
+import { useBadge } from '../../contexts/BadgeContext';
 
 // DB enum values for AnnounceType
 const ANNOUNCE_TYPES = ['General', 'Event', 'Alert', 'Update'];
@@ -15,6 +16,7 @@ const TYPE_STYLES = {
 };
 
 const AdminAnnouncements = () => {
+  const { clear } = useBadge();
   const [activeTab, setActiveTab] = useState('system'); // 'system' or 'vet'
 
   // --- System Announcements State ---
@@ -37,6 +39,7 @@ const AdminAnnouncements = () => {
   const [vetEditData, setVetEditData]             = useState({ title: '', content: '', type: 'General' });
 
   useEffect(() => {
+    clear('/admin/announcements');
     if (activeTab === 'system') fetchSysAnnouncements();
     else fetchVetAnnouncements();
   }, [activeTab, vetPage]);
