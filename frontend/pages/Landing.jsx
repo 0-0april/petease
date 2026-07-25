@@ -122,7 +122,7 @@ export default function Landing() {
       </div>
 
       {/* ── Hero Section ── */}
-      <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden">
+      <section className="relative z-10 pt-0 pb-0 px-4 overflow-hidden">
 
         {/* Layer 1 (bottom): video — absolute inset, full coverage, hidden on mobile */}
         <video
@@ -130,31 +130,33 @@ export default function Landing() {
           muted
           loop
           playsInline
+          poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
             objectPosition: 'left center',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 30%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
+            maskImage:       'linear-gradient(to right, transparent 0%, black 55%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 55%)',
           }}
         >
           <source src={landingVideo} type="video/mp4" />
         </video>
 
-        {/* Layer 2 (middle): green gradient + dot texture — sits on top of video,
-            fades out to the right so the video shows through on that side */}
+        {/* Layer 2 (middle): green overlay — matches page bg, fades right into video */}
         <div
           className="absolute inset-0"
           aria-hidden="true"
-          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.5) 40%, hsla(132, 39%, 59%, .3) 70%)',
-            
+          style={{
+            background: 'linear-gradient(to right, hsla(131,88%,72%,1) 0%, hsla(131,88%,72%,1) 40%, hsla(131,88%,72%,0) 70%)',
           }}
         />
+
+        {/* Layer 3: dot texture — full hero, same as rest of landing page */}
         <div
           className="absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
-            backgroundImage: 'radial-gradient(hsla(135, 95%, 18%, 0) 1px, transparent 0px)',
+            backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
             backgroundSize:  '24px 24px',
           }}
         />
