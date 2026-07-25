@@ -146,8 +146,8 @@ export default function Landing() {
         <div
           className="absolute inset-0"
           aria-hidden="true"
-          style={{
-            background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%,1) 40%, hsla(131,88%,72%,0) 70%)',
+          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.9) 40%, hsla(132, 39%, 59%, 0.55) 70%)',
+            
           }}
         />
         <div
