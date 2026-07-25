@@ -156,8 +156,6 @@ export default function Landing() {
           style={{
             backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
             backgroundSize:  '24px 24px',
-            maskImage:       'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
-            WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
           }}
         />
 
