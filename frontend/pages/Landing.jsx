@@ -164,15 +164,16 @@ export default function Landing() {
           style={{ zIndex: 2 }}>
           <div className="w-full lg:w-[58%] text-center lg:text-left">
             <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
-              style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(130,100%,25%)' }}>
+              style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(140,100%,7%)', textShadow:'0 1px 8px rgba(255,255,255,0.8)' }}>
               Pet Adoption &amp; Veterinary System
             </span>
-            <h1 className="heading-dark text-5xl sm:text-6xl lg:text-7xl mb-6">
+            <h1 className="heading-dark text-5xl sm:text-6xl lg:text-7xl mb-6"
+              style={{ textShadow:'0 2px 16px rgba(255,255,255,0.7)' }}>
               Find a Friend.<br />
-              <span style={{ color:'hsl(130,100%,30%)' }}>Care for Life.</span>
+              <span style={{ color:'hsl(130,100%,22%)', textShadow:'0 2px 16px rgba(255,255,255,0.7)' }}>Care for Life.</span>
             </h1>
             <p className="text-lg mb-10 max-w-xl mx-auto lg:mx-0 font-light"
-              style={{ color:'hsla(140,100%,7%,0.58)', lineHeight:'1.75' }}>
+              style={{ color:'hsla(140,100%,7%,0.75)', lineHeight:'1.75', textShadow:'0 1px 8px rgba(255,255,255,0.7)' }}>
               PetEase connects pet owners, adopters, and veterinary staff in one seamless platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
