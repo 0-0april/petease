@@ -134,8 +134,8 @@ export default function Landing() {
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
             objectPosition: 'left center',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 0%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 0%)',
+            maskImage:       'linear-gradient(to right, transparent 0%, black 20%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 20%)',
           }}
         >
           <source src={landingVideo} type="video/mp4" />
