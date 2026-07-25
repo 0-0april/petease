@@ -134,49 +134,47 @@ export default function Landing() {
             backgroundSize: '24px 24px',
           }} />
 
-        {/* ── Background layer 2: Video — right ~42%, hidden on mobile ── */}
+        {/* ── Background layer 2: Video — full-width but masked to appear only on the right ── */}
         {/*
-          The video sits absolutely, covering the rightmost 42% of the hero.
-          A CSS mask-image on the video element itself creates the bloom/feather:
-            - starts fully transparent at the left edge of the video
-            - gradually becomes opaque over ~200px (roughly 15% of the video width)
-            - fully opaque for the rest
-          This makes the video "fade in" from the green side, not cut in hard.
+          Key insight: the video spans the FULL hero width but is masked invisible on the left.
+          The mask is a wide, multi-stop gradient that starts going opaque around 45% and
+          fully reveals the video by 70%. This way there is NO hard left edge on the video
+          element itself — the blend zone is entirely inside the hero, overlapping the green area.
         */}
         <div className="absolute inset-0 hidden lg:block" aria-hidden="true"
           style={{ zIndex: 1 }}>
+
+          {/* Full-width video, masked left-to-right with a wide feather zone */}
           <video
             autoPlay
             muted
             loop
             playsInline
             poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
-            className="absolute top-0 right-0 h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              width: '42%',
-              /* bloom/feather mask: transparent → opaque over ~200px from the left edge of the video */
-              maskImage: 'linear-gradient(to right, transparent 0%, black 18%)',
-              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 18%)',
+              maskImage:        'linear-gradient(to right, transparent 0%, transparent 42%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.55) 58%, black 68%)',
+              WebkitMaskImage:  'linear-gradient(to right, transparent 0%, transparent 42%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.55) 58%, black 68%)',
             }}
           >
             <source src={landingVideo} type="video/mp4" />
           </video>
 
-          {/* Colour-bleed overlay: green gradient bleeds rightward over the video's left edge,
-              then fades to zero — giving the "bloom" of green colour into the video zone */}
+          {/* Green colour-bleed scrim: sits ON TOP of the video in the blend zone,
+              painting the page green over the video's left edge so colours merge.
+              Goes from solid green (left) → semi-transparent (middle) → gone (right). */}
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(to right, transparent 50%, hsla(132,79%,89%,0.55) 55%, hsla(132,79%,89%,0.20) 68%, transparent 80%)',
+              background: 'linear-gradient(to right, hsla(132,79%,89%,1) 0%, hsla(132,79%,89%,1) 44%, hsla(132,79%,89%,0.70) 52%, hsla(132,79%,89%,0.30) 62%, hsla(132,79%,89%,0.08) 72%, transparent 82%)',
             }}
           />
 
-          {/* Slight darkening over video for text contrast (left side of video stays bright via mask anyway) */}
+          {/* Subtle darkening over the fully-visible video portion only, for text contrast */}
           <div
-            className="absolute top-0 right-0 h-full"
+            className="absolute inset-0"
             style={{
-              width: '42%',
-              background: 'rgba(0,0,0,0.18)',
+              background: 'linear-gradient(to right, transparent 65%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.28) 100%)',
             }}
           />
         </div>
