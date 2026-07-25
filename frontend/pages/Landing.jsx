@@ -146,7 +146,7 @@ export default function Landing() {
         <div
           className="absolute inset-0"
           aria-hidden="true"
-          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.2) 40%, hsla(132, 39%, 59%, 0) 70%)',
+          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.5) 40%, hsla(132, 39%, 59%, 0) 70%)',
             
           }}
         />
@@ -154,7 +154,7 @@ export default function Landing() {
           className="absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
-            backgroundImage: 'radial-gradient(hsla(135,95%,18%,0) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(hsla(135,95%,18%,.2) 1px, transparent 1px)',
             backgroundSize:  '24px 24px',
           }}
         />
