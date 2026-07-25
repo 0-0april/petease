@@ -87,8 +87,7 @@ export default function Landing() {
       </div>
 
       {/* ── Floating Pill Navbar ── */}
-      <div className="sticky top-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 pb-2"
-        style={{ background: 'linear-gradient(to bottom, hsl(140,100%,7%) 60%, transparent 100%)' }}>
+      <div className="sticky top-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-14">
           {/* Left: Logo */}
           <span className="text-xl font-black tracking-tight shrink-0" style={{ color:'hsl(140,100%,7%)' }}>
