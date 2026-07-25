@@ -134,8 +134,8 @@ export default function Landing() {
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
             objectPosition: 'left center',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 20%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 20%)',
+            maskImage:       'linear-gradient(to right, transparent 0%, black 30%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
           }}
         >
           <source src={landingVideo} type="video/mp4" />
@@ -146,7 +146,7 @@ export default function Landing() {
         <div
           className="absolute inset-0"
           aria-hidden="true"
-          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.3) 40%, hsla(132, 39%, 59%, 0) 70%)',
+          style={{background: 'linear-gradient(to right, hsla(132, 39%, 59%, 1) 0%, hsla(132, 39%, 59%, 0.5) 40%, hsla(132, 39%, 59%, .3) 70%)',
             
           }}
         />
