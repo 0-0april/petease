@@ -87,15 +87,25 @@ function monthKey(dateStr) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-/** Infer species from pet breed string. */
+/** Use the stored PetSpecie value directly; fall back to breed-keyword matching only as a last resort. */
 function getSpecies(appointment) {
-  const raw = appointment.pets
-    .map(p => ((p.breed || '') + ' ' + (p.species || '')).toLowerCase())
-    .join(' ');
-  if (/retriever|labrador|beagle|bulldog|poodle|shih|husky|corgi|dachshund/.test(raw)) return 'Dog';
-  if (/persian|siamese|maine coon|tabby|ragdoll|bengal|sphynx/.test(raw)) return 'Cat';
-  if (/parrot|cockatiel|canary|macaw|budgie/.test(raw)) return 'Bird';
-  if (/rabbit|bunny|lop/.test(raw)) return 'Rabbit';
+  // Use the species field from the DB if present
+  const speciesRaw = appointment.pets.map(p => p.species || '').join(' ').trim();
+  if (speciesRaw) {
+    const s = speciesRaw.toLowerCase();
+    if (s.includes('cat') || s.includes('feline')) return 'Cat';
+    if (s.includes('dog') || s.includes('canine')) return 'Dog';
+    if (s.includes('bird') || s.includes('avian')) return 'Bird';
+    if (s.includes('rabbit') || s.includes('bunny')) return 'Rabbit';
+    // Return it capitalised as-is for any other stored value
+    return speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
+  }
+  // Fallback: infer from breed keywords
+  const breed = appointment.pets.map(p => (p.breed || '').toLowerCase()).join(' ');
+  if (/retriever|labrador|beagle|bulldog|poodle|shih|husky|corgi|dachshund/.test(breed)) return 'Dog';
+  if (/persian|siamese|maine coon|tabby|ragdoll|bengal|sphynx/.test(breed)) return 'Cat';
+  if (/parrot|cockatiel|canary|macaw|budgie/.test(breed)) return 'Bird';
+  if (/rabbit|bunny|lop/.test(breed)) return 'Rabbit';
   return 'Other';
 }
 

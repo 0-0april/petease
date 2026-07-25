@@ -41,7 +41,8 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
           PET (
             PetID,
             PetName,
-            PetBreed
+            PetBreed,
+            PetSpecie
           )
         ),
         SERVICES!APPOINTMENT_ServID_fkey (
@@ -84,7 +85,8 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
         pets: [{
           id: apt.USERPETS.PET.PetID,
           name: apt.USERPETS.PET.PetName,
-          breed: apt.USERPETS.PET.PetBreed
+          breed: apt.USERPETS.PET.PetBreed,
+          species: apt.USERPETS.PET.PetSpecie,
         }],
         attended: attendedLog ? true : (attendanceLogs.length > 0 ? false : null),
         createdAt: apt.AppointDateCreated,
