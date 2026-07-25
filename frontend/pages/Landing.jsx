@@ -126,47 +126,64 @@ export default function Landing() {
         style={{
           background: 'linear-gradient(160deg, hsla(130,100%,40%,0.08) 0%, hsla(135,95%,18%,0.06) 50%, hsla(132,79%,89%,0) 100%)',
         }}>
-        {/* Dot texture overlay — left side only, fades out before video area */}
+
+        {/* ── Background layer 1: Dot texture (full coverage, intact — same as before) ── */}
         <div className="absolute inset-0 opacity-30" aria-hidden="true"
           style={{
             backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
-            maskImage: 'linear-gradient(to right, black 40%, transparent 70%)',
-            WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 70%)',
           }} />
 
-        {/* Video background — right side with bloom blend */}
-        <div className="absolute inset-0 hidden lg:block overflow-hidden" aria-hidden="true">
+        {/* ── Background layer 2: Video — right ~42%, hidden on mobile ── */}
+        {/*
+          The video sits absolutely, covering the rightmost 42% of the hero.
+          A CSS mask-image on the video element itself creates the bloom/feather:
+            - starts fully transparent at the left edge of the video
+            - gradually becomes opaque over ~200px (roughly 15% of the video width)
+            - fully opaque for the rest
+          This makes the video "fade in" from the green side, not cut in hard.
+        */}
+        <div className="absolute inset-0 hidden lg:block" aria-hidden="true"
+          style={{ zIndex: 1 }}>
           <video
             autoPlay
             muted
             loop
             playsInline
-            className="absolute top-0 right-0 h-full w-[55%] object-cover"
+            poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
+            className="absolute top-0 right-0 h-full object-cover"
             style={{
-              maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 20%, black 55%)',
-              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 20%, black 55%)',
+              width: '42%',
+              /* bloom/feather mask: transparent → opaque over ~200px from the left edge of the video */
+              maskImage: 'linear-gradient(to right, transparent 0%, black 18%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 18%)',
             }}
           >
             <source src={landingVideo} type="video/mp4" />
           </video>
-          {/* Dark overlay for contrast + bloom colour bleed over video left edge */}
+
+          {/* Colour-bleed overlay: green gradient bleeds rightward over the video's left edge,
+              then fades to zero — giving the "bloom" of green colour into the video zone */}
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(to right, hsla(132,79%,89%,1) 0%, hsla(132,79%,89%,0.85) 25%, hsla(132,79%,89%,0.35) 45%, hsla(132,79%,89%,0.10) 60%, hsla(132,79%,89%,0) 100%)',
+              background: 'linear-gradient(to right, transparent 50%, hsla(132,79%,89%,0.55) 55%, hsla(132,79%,89%,0.20) 68%, transparent 80%)',
             }}
           />
-          {/* Extra contrast darkening only over the video portion */}
+
+          {/* Slight darkening over video for text contrast (left side of video stays bright via mask anyway) */}
           <div
-            className="absolute inset-0"
+            className="absolute top-0 right-0 h-full"
             style={{
-              background: 'linear-gradient(to right, transparent 40%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.32) 100%)',
+              width: '42%',
+              background: 'rgba(0,0,0,0.18)',
             }}
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 py-20">
+        {/* ── All hero content sits above both background layers ── */}
+        <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 py-20"
+          style={{ zIndex: 2 }}>
           <div className="flex-1 text-center lg:text-left">
             <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
               style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(130,100%,30%)' }}>
