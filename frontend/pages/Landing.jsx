@@ -148,7 +148,7 @@ export default function Landing() {
           className="absolute inset-0"
           aria-hidden="true"
           style={{
-            background: 'linear-gradient(to right, rgb(110,192,127) 0%, rgb(110,192,127) 25%, rgba(110,192,127,0.85) 40%, rgba(110,192,127,0) 70%)',
+            background: 'linear-gradient(to right, hsl(140,100%,7%) 0%, hsl(140,100%,7%) 25%, hsla(140,100%,7%,0.85) 40%, hsla(140,100%,7%,0) 70%)',
           }}
         />
         <div
@@ -167,21 +167,21 @@ export default function Landing() {
           style={{ zIndex: 2 }}>
           <div className="w-full lg:w-[58%] text-center lg:text-left">
             <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
-              style={{ background:'rgba(255,255,255,0.30)', color:'hsl(140,100%,7%)' }}>
+              style={{ background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.85)' }}>
               Pet Adoption &amp; Veterinary System
             </span>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl mb-6 font-extrabold tracking-tight leading-tight"
-              style={{ color:'hsl(140,100%,7%)' }}>
+              style={{ color:'#fff' }}>
               Find a Friend.<br />
-              <span style={{ color:'hsl(140,100%,7%)' }}>Care for Life.</span>
+              <span style={{ color:'hsl(130,100%,72%)' }}>Care for Life.</span>
             </h1>
             <p className="text-lg mb-10 max-w-xl mx-auto lg:mx-0 font-light"
-              style={{ color:'hsla(140,100%,7%,0.72)', lineHeight:'1.75' }}>
+              style={{ color:'rgba(255,255,255,0.70)', lineHeight:'1.75' }}>
               PetEase connects pet owners, adopters, and veterinary staff in one seamless platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link to="/register" className="btn-pay text-center" style={{ padding:'14px 36px' }}>Start Adopting</Link>
-              <Link to="/login" className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
+              <Link to="/login" className="text-center font-bold text-sm uppercase tracking-widest rounded-full border-2 border-white text-white hover:bg-white hover:text-green-900 transition-colors" style={{ padding:'13px 36px' }}>Sign In</Link>
             </div>
           </div>
         </div>
