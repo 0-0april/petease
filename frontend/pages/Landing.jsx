@@ -74,7 +74,7 @@ function NavDropdown({ label, items }) {
 export default function Landing() {
   return (
     <div className="relative min-h-screen overflow-x-hidden"
-      style={{ background:'hsla(132,79%,89%,1)' }}>
+      style={{ background:'hsla(132,79%,89%, 1)' }}>
 
       {/* Ambient spheres */}
       <div className="pe-bg" aria-hidden="true">
@@ -134,7 +134,7 @@ export default function Landing() {
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
             objectPosition: 'left center',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 35%)',
+            maskImage:       'linear-gradient(to right, transparent 0%, black 30%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
           }}
         >
@@ -154,7 +154,7 @@ export default function Landing() {
           className="absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
-            backgroundImage: 'radial-gradient(hsla(135,95%,18%,0) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(hsla(135, 95%, 18%, 0) 1px, transparent 1px)',
             backgroundSize:  '24px 24px',
           }}
         />
