@@ -122,62 +122,44 @@ export default function Landing() {
       </div>
 
       {/* ── Hero Section ── */}
-      <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, hsla(130,100%,40%,0.08) 0%, hsla(135,95%,18%,0.06) 50%, hsla(132,79%,89%,0) 100%)',
-        }}>
+      <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden">
 
-        {/* ── Background layer 1: Dot texture (full coverage, intact — same as before) ── */}
-        <div className="absolute inset-0 opacity-30" aria-hidden="true"
+        {/* Layer 1 (bottom): video — absolute inset, full coverage, hidden on mobile */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover hidden lg:block"
+          style={{
+            maskImage:       'linear-gradient(to right, transparent 0%, black 55%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 55%)',
+          }}
+        >
+          <source src={landingVideo} type="video/mp4" />
+        </video>
+
+        {/* Layer 2 (middle): green gradient + dot texture — sits on top of video,
+            fades out to the right so the video shows through on that side */}
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{
+            background: 'linear-gradient(to right, hsla(132,79%,89%,1) 0%, hsla(132,79%,89%,1) 40%, hsla(132,79%,89%,0) 70%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-30"
+          aria-hidden="true"
           style={{
             backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }} />
-
-        {/* ── Background layer 2: Video — full-width but masked to appear only on the right ── */}
-        {/*
-          Key insight: the video spans the FULL hero width but is masked invisible on the left.
-          The mask is a wide, multi-stop gradient that starts going opaque around 45% and
-          fully reveals the video by 70%. This way there is NO hard left edge on the video
-          element itself — the blend zone is entirely inside the hero, overlapping the green area.
-        */}
-        <div className="absolute inset-0 hidden lg:block" aria-hidden="true"
-          style={{ zIndex: 1 }}>
-
-          {/* Full-width video, masked left-to-right with a wide feather zone */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              maskImage:        'linear-gradient(to right, transparent 0%, transparent 42%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.55) 58%, black 68%)',
-              WebkitMaskImage:  'linear-gradient(to right, transparent 0%, transparent 42%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.55) 58%, black 68%)',
-            }}
-          >
-            <source src={landingVideo} type="video/mp4" />
-          </video>
-
-          {/* Green colour-bleed scrim: sits ON TOP of the video in the blend zone,
-              painting the page green over the video's left edge so colours merge.
-              Goes from solid green (left) → semi-transparent (middle) → gone (right). */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to right, hsla(132,79%,89%,1) 0%, hsla(132,79%,89%,1) 44%, hsla(132,79%,89%,0.70) 52%, hsla(132,79%,89%,0.30) 62%, hsla(132,79%,89%,0.08) 72%, transparent 82%)',
-            }}
-          />
-
-          {/* Subtle darkening over the fully-visible video portion only, for text contrast */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to right, transparent 65%, rgba(0,0,0,0.22) 80%, rgba(0,0,0,0.28) 100%)',
-            }}
-          />
-        </div>
+            backgroundSize:  '24px 24px',
+            maskImage:       'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
+          }}
+        />
 
         {/* ── All hero content sits above both background layers ── */}
         <div className="relative max-w-7xl mx-auto flex flex-col items-start py-20"
