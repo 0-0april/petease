@@ -154,7 +154,7 @@ export default function Landing() {
           className="absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
-            backgroundImage: 'radial-gradient(hsla(135, 95%, 18%, 0) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(hsla(135, 95%, 18%, 0) 1px, transparent 0px)',
             backgroundSize:  '24px 24px',
           }}
         />
