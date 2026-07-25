@@ -182,9 +182,9 @@ export default function Landing() {
         </div>
 
         {/* ── All hero content sits above both background layers ── */}
-        <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 py-20"
+        <div className="relative max-w-7xl mx-auto flex flex-col items-start py-20"
           style={{ zIndex: 2 }}>
-          <div className="flex-1 text-center lg:text-left">
+          <div className="w-full lg:w-[58%] text-center lg:text-left">
             <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6"
               style={{ background:'hsla(130,100%,30%,0.14)', color:'hsl(130,100%,30%)' }}>
               Pet Adoption &amp; Veterinary System
@@ -201,19 +201,6 @@ export default function Landing() {
               <Link to="/register" className="btn-pay text-center" style={{ padding:'14px 36px' }}>Start Adopting</Link>
               <Link to="/login"    className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
             </div>
-          </div>
-
-          {/* Pet photo grid */}
-          <div className="flex-1 grid grid-cols-2 gap-4 max-w-md w-full">
-            {[
-              { src:'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300', alt:'Dog',   mt:'' },
-              { src:'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300', alt:'Cat',   mt:'mt-8' },
-              { src:'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=300', alt:'Cat 2', mt:'-mt-4' },
-              { src:'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=300', alt:'Dog 2', mt:'mt-4' },
-            ].map(i => (
-              <img key={i.alt} src={i.src} alt={i.alt}
-                className={`rounded-3xl object-cover w-full h-48 shadow-glass ${i.mt}`} />
-            ))}
           </div>
         </div>
 
