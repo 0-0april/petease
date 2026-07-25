@@ -526,3 +526,18 @@ General requirements:
 - Keep the three charts as separate components/sections, not merged into one
 
 Please implement this and show me the updated component code.
+
+
+
+In my landing page hero section (the area just below the navbar), I need to update the background so it's a hybrid of a solid color and a video, blending smoothly into each other.
+
+Requirements:
+
+Left ~55–60% of the hero section: keep the current green gradient background exactly as it is (the dark-to-light green gradient with the subtle dot pattern).
+Right ~40–45% of the hero section: replace the background with a looping, muted, autoplaying video located at frontend/data/landingvideo (adjust extension/path as needed, e.g. .mp4).
+Blend/transition zone: where the green background meets the video, apply a smooth "bloom"/feather effect — not a hard edge. Use a CSS mask or gradient overlay so the video fades in from transparent to fully visible over roughly 150–250px, blending into the green gradient rather than cutting off abruptly. The green gradient's color should bleed slightly over the edge of the video using a linear-gradient mask (mask-image / -webkit-mask-image) going from transparent → opaque left-to-right on the video layer, and/or an overlapping div with the same green gradient at low-to-zero opacity fading out over the video's left edge.
+Keep the video behind all existing content (badge, heading, subtext, buttons, and the 4-image collage on the right) — those should remain layered on top and fully legible, so darken/overlay the video slightly if needed for contrast.
+Video should be autoplay, muted, loop, playsInline, and have a poster fallback image for slow connections.
+Make sure this is responsive — on smaller screens, decide whether to keep the split layout or stack/simplify (ask me if unsure, or default to keeping just the green gradient on mobile and hiding the video for performance).
+
+Please implement this using CSS gradient masks (not a hard-edged clip) so the merge point looks organic and soft, similar to a "bloom" transition, positioned roughly where the current image collage begins on the right side.

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import landingVideo from '../data/landingvideo.mp4';
 
 const features = [
   { icon:'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
@@ -125,12 +126,45 @@ export default function Landing() {
         style={{
           background: 'linear-gradient(160deg, hsla(130,100%,40%,0.08) 0%, hsla(135,95%,18%,0.06) 50%, hsla(132,79%,89%,0) 100%)',
         }}>
-        {/* Dot texture overlay */}
+        {/* Dot texture overlay — left side only, fades out before video area */}
         <div className="absolute inset-0 opacity-30" aria-hidden="true"
           style={{
             backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.25) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
+            maskImage: 'linear-gradient(to right, black 40%, transparent 70%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 70%)',
           }} />
+
+        {/* Video background — right side with bloom blend */}
+        <div className="absolute inset-0 hidden lg:block overflow-hidden" aria-hidden="true">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute top-0 right-0 h-full w-[55%] object-cover"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 20%, black 55%)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 20%, black 55%)',
+            }}
+          >
+            <source src={landingVideo} type="video/mp4" />
+          </video>
+          {/* Dark overlay for contrast + bloom colour bleed over video left edge */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to right, hsla(132,79%,89%,1) 0%, hsla(132,79%,89%,0.85) 25%, hsla(132,79%,89%,0.35) 45%, hsla(132,79%,89%,0.10) 60%, hsla(132,79%,89%,0) 100%)',
+            }}
+          />
+          {/* Extra contrast darkening only over the video portion */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to right, transparent 40%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.32) 100%)',
+            }}
+          />
+        </div>
 
         <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 py-20">
           <div className="flex-1 text-center lg:text-left">
