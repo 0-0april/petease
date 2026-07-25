@@ -133,7 +133,7 @@ export default function Landing() {
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
-            objectPosition: 'left top',
+            objectPosition: 'left center',
             maskImage:       'linear-gradient(to right, transparent 0%, black 0%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 0%)',
           }}
