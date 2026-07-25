@@ -131,7 +131,6 @@ export default function Landing() {
           muted
           loop
           playsInline
-          poster="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200"
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
