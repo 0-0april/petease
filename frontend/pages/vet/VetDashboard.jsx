@@ -87,26 +87,12 @@ function monthKey(dateStr) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-/** Use the stored PetSpecie value directly; fall back to breed-keyword matching only as a last resort. */
+/** Read PetSpecie directly from the DB value. */
 function getSpecies(appointment) {
-  // Use the species field from the DB if present
-  const speciesRaw = appointment.pets.map(p => p.species || '').join(' ').trim();
-  if (speciesRaw) {
-    const s = speciesRaw.toLowerCase();
-    if (s.includes('cat') || s.includes('feline')) return 'Cat';
-    if (s.includes('dog') || s.includes('canine')) return 'Dog';
-    if (s.includes('bird') || s.includes('avian')) return 'Bird';
-    if (s.includes('rabbit') || s.includes('bunny')) return 'Rabbit';
-    // Return it capitalised as-is for any other stored value
-    return speciesRaw.charAt(0).toUpperCase() + speciesRaw.slice(1).toLowerCase();
-  }
-  // Fallback: infer from breed keywords
-  const breed = appointment.pets.map(p => (p.breed || '').toLowerCase()).join(' ');
-  if (/retriever|labrador|beagle|bulldog|poodle|shih|husky|corgi|dachshund/.test(breed)) return 'Dog';
-  if (/persian|siamese|maine coon|tabby|ragdoll|bengal|sphynx/.test(breed)) return 'Cat';
-  if (/parrot|cockatiel|canary|macaw|budgie/.test(breed)) return 'Bird';
-  if (/rabbit|bunny|lop/.test(breed)) return 'Rabbit';
-  return 'Other';
+  const raw = appointment.pets.map(p => p.species || '').join(' ').trim();
+  if (!raw) return 'Other';
+  // Capitalise first letter, lowercase the rest for consistent grouping
+  return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
 }
 
 // ─── Chart: Service Usage (multi-line, monthly trends) ───────────────────────
@@ -226,14 +212,20 @@ function ServiceUsageChart({ appointments }) {
 // ─── Chart: Species Distribution (pie) ───────────────────────────────────────
 
 function SpeciesDistributionChart({ appointments }) {
+  // Only count pets from completed appointments
+  const completedAppointments = useMemo(
+    () => appointments.filter(a => a.status === 'completed'),
+    [appointments]
+  );
+
   const speciesCounts = useMemo(() => {
     const counts = {};
-    appointments.forEach(a => {
+    completedAppointments.forEach(a => {
       const s = getSpecies(a);
       counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [appointments]);
+  }, [completedAppointments]);
 
   const labels = Object.keys(speciesCounts);
   const values = Object.values(speciesCounts);
@@ -301,8 +293,8 @@ function SpeciesDistributionChart({ appointments }) {
       aria-label="Species distribution pie chart showing percentage of appointments per pet species"
     >
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Species Distribution</h2>
-      {appointments.length === 0 ? (
-        <p className="text-gray-400 text-sm">No data available.</p>
+      {completedAppointments.length === 0 ? (
+        <p className="text-gray-400 text-sm">No completed appointments yet.</p>
       ) : (
         <div style={{ height: '280px' }}>
           <Pie data={data} options={options} aria-label="Species distribution pie chart" />
