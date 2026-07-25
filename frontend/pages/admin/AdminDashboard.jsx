@@ -1,6 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import AdminLayout from '../../components/AdminLayout';
 import { adminService } from '../../services/adminService';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const FILTER_OPTIONS = [
   { value: 'week',  label: 'This Week'  },
@@ -53,70 +76,66 @@ function buildChartPoints(rawUsers, filter) {
   });
 }
 
-// SVG line graph — no external library
+// Chart.js line graph
 function LineGraph({ points }) {
-  const W = 800;
-  const H = 200;
-  const PAD = { top: 20, right: 20, bottom: 32, left: 36 };
-  const innerW = W - PAD.left - PAD.right;
-  const innerH = H - PAD.top - PAD.bottom;
+  const primaryColor = 'hsl(130, 100%, 30%)';
+  const primaryColorTransparent = 'hsla(130, 100%, 30%, 0.15)';
 
-  const maxVal = Math.max(1, ...points.map(p => p.count));
-  const step = innerW / Math.max(points.length - 1, 1);
+  const data = {
+    labels: points.map(p => p.label),
+    datasets: [
+      {
+        label: 'Active Users',
+        data: points.map(p => p.count),
+        borderColor: primaryColor,
+        backgroundColor: primaryColorTransparent,
+        borderWidth: 2.5,
+        pointBackgroundColor: primaryColor,
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.3,
+      },
+    ],
+  };
 
-  const coords = points.map((p, i) => ({
-    x: PAD.left + i * step,
-    y: PAD.top + innerH - (p.count / maxVal) * innerH,
-    ...p,
-  }));
-
-  const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-  const fillD = `${pathD} L${coords[coords.length - 1].x.toFixed(1)},${(PAD.top + innerH).toFixed(1)} L${PAD.left.toFixed(1)},${(PAD.top + innerH).toFixed(1)} Z`;
-
-  // y-axis ticks
-  const yTicks = Array.from({ length: 5 }, (_, i) => {
-    const val = Math.round((maxVal / 4) * i);
-    const y = PAD.top + innerH - (val / maxVal) * innerH;
-    return { val, y };
-  });
+  const options = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const v = ctx.parsed.y;
+            return ` ${v} user${v !== 1 ? 's' : ''}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#6b7280', font: { size: 11 } },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e5e7eb', borderDash: [4, 3] },
+        ticks: {
+          color: '#9ca3af',
+          font: { size: 11 },
+          precision: 0,
+        },
+      },
+    },
+  };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: '200px' }} aria-label="Active users line graph">
-      {/* Grid lines */}
-      {yTicks.map((t, i) => (
-        <g key={i}>
-          <line x1={PAD.left} x2={W - PAD.right} y1={t.y} y2={t.y}
-            stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 3" />
-          <text x={PAD.left - 6} y={t.y + 4} textAnchor="end"
-            fontSize="10" fill="#9ca3af">{t.val}</text>
-        </g>
-      ))}
-
-      {/* Fill area */}
-      <path d={fillD} fill="url(#lineGrad)" opacity="0.18" />
-
-      {/* Line */}
-      <path d={pathD} fill="none" stroke="hsl(130,100%,30%)" strokeWidth="2.5"
-        strokeLinecap="round" strokeLinejoin="round" />
-
-      {/* Dots + tooltips */}
-      {coords.map((c, i) => (
-        <g key={i}>
-          <circle cx={c.x} cy={c.y} r="4" fill="hsl(130,100%,30%)" stroke="white" strokeWidth="2" />
-          {/* hover label via title */}
-          <title>{`${c.label}: ${c.count} user${c.count !== 1 ? 's' : ''}`}</title>
-          {/* x-axis label */}
-          <text x={c.x} y={H - 6} textAnchor="middle" fontSize="10" fill="#6b7280">{c.label}</text>
-        </g>
-      ))}
-
-      <defs>
-        <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(130,100%,30%)" />
-          <stop offset="100%" stopColor="hsl(130,100%,30%)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-    </svg>
+    <div style={{ height: '200px' }}>
+      <Line data={data} options={options} aria-label="Active users line graph" />
+    </div>
   );
 }
 

@@ -487,3 +487,42 @@ Implement this using the observer pattern: each page acts as a subject that noti
 The badge should only appear on tabs that have pending updates — tabs with no changes show no badge.
 Cap the displayed count at 10: if updates exceed 10, show "10+" instead of the exact number.
 Badge count should reset (or decrement) once the user visits/views the corresponding tab's page.
+
+
+in vet/VetDashboard page:
+I need to update the vet dashboard component
+to use line charts for three metrics. Stack: [React + Chart.js].
+
+
+1. VET SERVICES USAGE
+- Replace the current charts with line charts, each plotting monthly trends:
+   - One line per service type (vaccination, consultation and any others in the data)
+   - X-axis: month, Y-axis: number of appointments per service
+   - Add a toggle-able legend — clicking a legend item hides/shows that line, so it stays 
+     readable as more service types get added
+   - If a service type falls below 5% of total volume, group it into an "Other" line 
+     instead of adding a new color
+
+2. SPECIES DISTRIBUTION
+Chart type: pie chart 
+   - Data: percentage/count of appointments or patients per species (dog, cat, bird, rabbit, other, etc.)
+   - Distinct color per species, with a legend below the chart showing color + label + percentage
+   - Show percentage labels on/near each segment if space allows
+
+3. APPOINTMENTS: COMPLETED VS CANCELLED
+- Replace the current charts with line charts, each plotting monthly trends:
+   - Two lines only: "Completed" (green) and "Cancelled" (red)
+   - X-axis: week or month, Y-axis: appointment count
+   - Keep green/red fixed to these two lines specifically — don't reuse 
+     green/red elsewhere in the dashboard so the color stays meaningful
+
+General requirements:
+- Each chart needs its own container with a fixed height, responsive width
+- Include a title above each chart and an accessible label (aria-label or 
+  equivalent) describing what it shows
+- Use consistent, distinct colors per line across the services and species 
+  charts (don't reuse the same color for two different lines in one chart)
+- Pull data from my supabase db, check petease.sql for reference
+- Keep the three charts as separate components/sections, not merged into one
+
+Please implement this and show me the updated component code.
