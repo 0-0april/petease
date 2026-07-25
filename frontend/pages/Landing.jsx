@@ -134,7 +134,7 @@ export default function Landing() {
           className="absolute inset-0 w-full h-full object-cover hidden lg:block"
           style={{
             objectPosition: 'left center',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 30%)',
+            maskImage:       'linear-gradient(to right, transparent 0%, black 35%)',
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
           }}
         >
