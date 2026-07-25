@@ -122,7 +122,7 @@ export default function Landing() {
       </div>
 
       {/* ── Hero Section ── */}
-      <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden">
+      <section className="relative z-10 pt-0 pb-0 px-4 overflow-hidden">
 
         {/* Layer 1 (bottom): video — absolute inset, full coverage, hidden on mobile */}
         <video
