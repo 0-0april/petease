@@ -72,6 +72,7 @@ function NavDropdown({ label, items }) {
 }
 
 export default function Landing() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="relative min-h-screen overflow-x-hidden"
       style={{ background:'hsla(132,79%,89%,1)' }}>
@@ -87,38 +88,68 @@ export default function Landing() {
       </div>
 
       {/* ── Floating Pill Navbar ── */}
-      <div className="sticky top-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 pb-2">
-        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-14">
+      <div className="sticky top-0 z-50 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2">
+        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14">
           {/* Left: Logo */}
-          <span className="text-xl font-black tracking-tight shrink-0" style={{ color:'hsl(140,100%,7%)' }}>
+          <span className="text-base sm:text-xl font-black tracking-tight shrink-0" style={{ color:'hsl(140,100%,7%)' }}>
             🐾 PetEase
           </span>
 
-          {/* Center: Nav links with dropdowns */}
+          {/* Center: Nav links with dropdowns — hidden on small screens */}
           <div className="hidden md:flex items-center gap-1">
-            <Link to="/login" className="px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+            <Link to="/login" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               Home
             </Link>
             <NavDropdown label="Adoption" items={adoptionItems} />
             <NavDropdown label="Services" items={servicesItems} />
-            <Link to="/login" className="px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+            <Link to="/login" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               About
             </Link>
           </div>
 
-          {/* Right: CTA */}
+          {/* Right: CTA + mobile hamburger */}
           <div className="flex items-center gap-2">
-            <Link to="/login" className="hidden sm:inline-flex px-4 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+            <Link to="/login" className="hidden sm:inline-flex px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               Login
             </Link>
-            <Link to="/login" className="btn-outline" style={{ padding: '9px 22px', fontSize: '0.75rem' }}>
+            <Link to="/login" className="hidden md:inline-flex btn-outline" style={{ padding: '8px 18px', fontSize: '0.75rem' }}>
               Contact Us
             </Link>
+            {/* Mobile hamburger */}
+            <button type="button" onClick={() => setMobileOpen(o => !o)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full md:hidden"
+              style={{ background: 'rgba(255,255,255,0.50)', color: 'hsl(140,100%,7%)' }}
+              aria-label="Toggle menu">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d={mobileOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+              </svg>
+            </button>
           </div>
         </nav>
+
+        {/* Mobile drawer */}
+        {mobileOpen && (
+          <div className="md:hidden mt-2 max-w-6xl mx-auto nav-glass rounded-2xl px-4 py-3">
+            <div className="grid gap-1">
+              <Link to="/login" onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Home</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Adoption</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Services</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">About</Link>
+              <div className="flex gap-2 mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.4)' }}>
+                <Link to="/login" className="flex-1 text-center btn-outline" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>Login</Link>
+                <Link to="/login" className="flex-1 text-center btn-pay" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>Contact Us</Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Hero Section ── */}

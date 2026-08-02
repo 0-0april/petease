@@ -124,10 +124,10 @@ export default function Layout({ children }) {
       </div>
 
       {/* Floating pill navbar */}
-      <div className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8">
-        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-5 h-14">
+      <div className="sticky top-0 z-40 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2">
+        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-3 sm:px-5 h-12 sm:h-14">
           {/* Left: Logo */}
-          <Link to="/browse-pets" className="shrink-0 text-xl font-black tracking-tight"
+          <Link to="/browse-pets" className="shrink-0 text-base sm:text-xl font-black tracking-tight"
             style={{ color: 'hsl(140,100%,7%)' }}>
             🐾 PetEase
           </Link>
@@ -136,7 +136,7 @@ export default function Layout({ children }) {
           <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map(l => (
               <Link key={l.to} to={l.to}
-                className={`inline-flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
+                className={`inline-flex items-center px-2 lg:px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors ${isActive(l.to) ? 'nav-active' : 'nav-inactive hover:opacity-80'}`}>
                 {l.label}
                 <Badge count={getCount(l.to)} />
               </Link>
@@ -144,7 +144,7 @@ export default function Layout({ children }) {
           </div>
 
           {/* Right: Notifications + user + logout */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Link to="/notifications"
               className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-opacity hover:opacity-70"
               style={{ color: 'hsla(140,100%,7%,0.55)' }} title="Notifications">
@@ -153,12 +153,12 @@ export default function Layout({ children }) {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </Link>
-            <span className="hidden lg:block max-w-[140px] truncate text-sm font-medium"
+            <span className="hidden lg:block max-w-[120px] truncate text-sm font-medium"
               style={{ color: 'hsla(140,100%,7%,0.65)' }}>
               {user?.name || user?.email}
             </span>
             <button onClick={handleLogout} className="btn-pay hidden sm:inline-flex"
-              style={{ padding: '8px 20px', fontSize: '0.75rem' }}>
+              style={{ padding: '7px 16px', fontSize: '0.75rem' }}>
               Logout
             </button>
             {/* Mobile hamburger */}
