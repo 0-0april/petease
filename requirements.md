@@ -550,7 +550,7 @@ Vet Staff
 in vet/Appointment page, the display of Actions buttons should be arraged in line 
 Erase the ID (convert to number-regular), put the patient instead
 
-• Put date in the adoption for cats (kung kailan na post ang pets) 
+in the user/BrowsePets page, display the pet's date of creation in the in all the post in the right side above the request adoption button inlined with the age and specie, but it is in the right side
 
 Email address: detect if the format is correct
 

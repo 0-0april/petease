@@ -48,8 +48,7 @@ export const petService = {
       status: pet.PetAvailable ? 'available' : 'adopted',
       ownerId: pet.ownerId,
       ownerName: pet.owner_name,
-      ownerUsername: pet.owner_username,
-      createdAt: pet.created_at || null,
+      ownerUsername: pet.owner_username
     }));
   },
 

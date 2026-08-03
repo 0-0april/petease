@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
         PET (
           PetID, PetName, PetBDay, PetSpecie, PetBreed,
           PetMarkings, PetGender, PetDetails, PetImg,
-          PetAvailable, PetRegType, created_at
+          PetAvailable, PetRegType
         ),
         USER (
           UserID, UserName,
