@@ -7,9 +7,72 @@ import { useBadge } from '../../contexts/BadgeContext';
 
 const SEEN_KEY = 'appointments_seen_ids';
 
+const CANCEL_REASONS = [
+  'I have a scheduling conflict',
+  'My pet is feeling better and no longer needs the appointment',
+  'I need to reschedule for a different date',
+  'Financial reasons',
+  'I found an alternative veterinary service',
+  'Personal emergency or family obligation',
+];
+
 const getSeenIds = () => {
   try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
   catch { return new Set(); }
+};
+
+const CancelModal = ({ onConfirm, onClose }) => {
+  const [selected, setSelected] = useState('');
+  const [custom, setCustom] = useState('');
+  const finalReason = selected === '__other__' ? custom.trim() : selected;
+  const toggle = (val) => setSelected(prev => prev === val ? '' : val);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="glass-card w-full max-w-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">Cancel Appointment</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Please select a reason for cancellation. This helps us improve our scheduling.
+        </p>
+        <div className="space-y-2 mb-3">
+          {CANCEL_REASONS.map(r => (
+            <button key={r} onClick={() => toggle(r)}
+              className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                selected === r
+                  ? 'border-red-400 bg-red-50 text-red-700 font-medium'
+                  : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+              }`}>
+              {selected === r && <span className="mr-2">✓</span>}{r}
+            </button>
+          ))}
+          <button onClick={() => toggle('__other__')}
+            className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+              selected === '__other__'
+                ? 'border-red-400 bg-red-50 text-red-700 font-medium'
+                : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+            }`}>
+            {selected === '__other__' && <span className="mr-2">✓</span>}Other reason...
+          </button>
+        </div>
+        {selected === '__other__' && (
+          <textarea value={custom} onChange={e => setCustom(e.target.value)} rows={3}
+            placeholder="Write your reason here..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-3"
+            autoFocus />
+        )}
+        <div className="flex space-x-3 mt-1">
+          <button onClick={onClose}
+            className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            Keep It
+          </button>
+          <button onClick={() => onConfirm(finalReason)} disabled={!finalReason}
+            className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium">
+            Confirm Cancellation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Appointments = () => {
@@ -45,9 +108,9 @@ const Appointments = () => {
     }
   };
 
-  const handleCancelConfirmed = async () => {
+  const handleCancelConfirmed = async (reason) => {
     try {
-      await appointmentService.cancelAppointment(cancelTarget);
+      await appointmentService.cancelAppointment(cancelTarget, reason);
       setCancelTarget(null);
       setFeedback('Appointment cancelled successfully.');
       setTimeout(() => setFeedback(null), 3000);
@@ -136,24 +199,12 @@ const Appointments = () => {
         )}
       </div>
 
-      {/* Cancel confirmation modal */}
+      {/* Cancel reason modal */}
       {cancelTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Cancel Appointment</h3>
-            <p className="text-sm text-gray-600 mb-5">Are you sure you want to cancel this appointment? This action cannot be undone.</p>
-            <div className="flex space-x-3">
-              <button onClick={() => setCancelTarget(null)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                Keep It
-              </button>
-              <button onClick={handleCancelConfirmed}
-                className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 text-sm font-medium">
-                Yes, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <CancelModal
+          onConfirm={handleCancelConfirmed}
+          onClose={() => setCancelTarget(null)}
+        />
       )}
     </Layout>
   );

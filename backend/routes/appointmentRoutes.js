@@ -157,6 +157,8 @@ router.get('/', authenticateToken, async (req, res) => {
 // Cancel appointment
 router.patch('/:id/cancel', authenticateToken, async (req, res) => {
   try {
+    const { reason } = req.body;
+
     const { data: userData, error: userError } = await supabase
       .from('USER')
       .select('UserID')
@@ -181,9 +183,12 @@ router.patch('/:id/cancel', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Appointment not found' });
     }
 
+    const updatePayload = { AppointStatus: 'Cancelled' };
+    if (reason) updatePayload.CancellationReason = reason;
+
     const { data, error } = await supabase
       .from('APPOINTMENT')
-      .update({ AppointStatus: 'Cancelled' })
+      .update(updatePayload)
       .eq('AppointID', req.params.id)
       .select()
       .single();

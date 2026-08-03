@@ -541,3 +541,23 @@ Video should be autoplay, muted, loop, playsInline, and have a poster fallback i
 Make sure this is responsive — on smaller screens, decide whether to keep the split layout or stack/simplify (ask me if unsure, or default to keeping just the green gradient on mobile and hiding the video for performance).
 
 Please implement this using CSS gradient masks (not a hard-edged clip) so the merge point looks organic and soft, similar to a "bloom" transition, positioned roughly where the current image collage begins on the right side.
+
+in the user/Appointment page, when the user cancels the appointment the system should ask a pre-template question of the reason of cancelation/ you can use the same template as the reject adoption have.
+
+If i-cancel ang appointment (put remarks) 
+
+Vet Staff
+Actions in appointment (buttons - line) 
+Erase the ID (convert to number-regular), put the patient instead
+
+• Put date in the adoption for cats (kung kailan na post ang pets) 
+
+Email address: detect if the format is correct
+
+Details of the Pet: (Important) - can be seen by the adoptee
+Vaccination Card (img) 
+
+Registration Type:
+Erase the 'both'
+
+-- localize it, put a background of the client on the login page
