@@ -247,10 +247,12 @@ const PetCard = ({ pet, onClick }) => {
               {speciesLabel}
             </span>
           </div>
-          {pet.createdAt && (
+          {pet.createdAt ? (
             <span className="text-xs shrink-0 text-right" style={{ color: 'hsla(140,100%,7%,0.38)' }}>
               {new Date(pet.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
+          ) : (
+            <span className="text-xs shrink-0 text-right" style={{ color: 'hsla(140,100%,7%,0.25)' }}>—</span>
           )}
         </div>
         <div className="mt-2 w-full py-2 rounded-full text-sm font-semibold text-center text-white transition-all duration-150"
@@ -324,17 +326,21 @@ const BrowsePets = () => {
       const ids = data.map(p => p.id).filter(Boolean);
       let createdAtMap = {};
       if (ids.length > 0) {
-        const { data: petRows } = await supabase
+        const { data: petRows, error: petError } = await supabase
           .from('PET')
           .select('PetID, created_at')
           .in('PetID', ids);
+        console.log('🐾 Supabase PET rows:', petRows, 'error:', petError);
         if (petRows) {
           petRows.forEach(r => { createdAtMap[r.PetID] = r.created_at; });
         }
       }
 
+      console.log('🗓️ createdAtMap:', createdAtMap);
+
       // Merge created_at into each pet
       const merged = data.map(p => ({ ...p, createdAt: createdAtMap[p.id] || null }));
+      console.log('🐕 First merged pet:', merged[0]);
       setPets(merged);
     } catch (error) {
       console.error('Error fetching pets:', error);
