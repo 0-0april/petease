@@ -328,7 +328,6 @@ const VetAppointments = () => {
                     />
                   </th>
                 )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
@@ -340,7 +339,7 @@ const VetAppointments = () => {
             <tbody className="divide-y divide-gray-100">
               {displayed.length === 0 ? (
                 <tr>
-                  <td colSpan={activeTab === 'pending' ? 8 : 7} className="px-6 py-10 text-center text-gray-400 text-sm">
+                  <td colSpan={activeTab === 'pending' ? 7 : 6} className="px-6 py-10 text-center text-gray-400 text-sm">
                     No appointments found.
                   </td>
                 </tr>
@@ -356,7 +355,6 @@ const VetAppointments = () => {
                       />
                     </td>
                   )}
-                  <td className="px-6 py-4 text-sm text-gray-500">#{apt.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {SERVICE_LABELS[apt.type] || apt.type}
