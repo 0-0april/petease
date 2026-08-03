@@ -5,6 +5,7 @@ import { petService } from '../../services/petService';
 import { adoptionService } from '../../services/adoptionService';
 import { messageService } from '../../services/messageService';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../config/supabase';
 
 const getAgeInMonths = (birthday) => {
   if (!birthday) return null;
@@ -318,7 +319,23 @@ const BrowsePets = () => {
   const fetchPets = async () => {
     try {
       const data = await petService.getAllPets();
-      setPets(data);
+
+      // Fetch created_at directly from Supabase for all pet IDs
+      const ids = data.map(p => p.id).filter(Boolean);
+      let createdAtMap = {};
+      if (ids.length > 0) {
+        const { data: petRows } = await supabase
+          .from('PET')
+          .select('PetID, created_at')
+          .in('PetID', ids);
+        if (petRows) {
+          petRows.forEach(r => { createdAtMap[r.PetID] = r.created_at; });
+        }
+      }
+
+      // Merge created_at into each pet
+      const merged = data.map(p => ({ ...p, createdAt: createdAtMap[p.id] || null }));
+      setPets(merged);
     } catch (error) {
       console.error('Error fetching pets:', error);
     } finally {
