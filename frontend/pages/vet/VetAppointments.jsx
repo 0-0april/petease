@@ -371,10 +371,10 @@ const VetAppointments = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-nowrap gap-2 items-center">
                       <button
                         onClick={() => handleViewDetails(apt)}
-                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors whitespace-nowrap"
                       >
                         View
                       </button>
@@ -382,13 +382,13 @@ const VetAppointments = () => {
                         <>
                           <button
                             onClick={() => handleConfirm(apt.id)}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => { setCancelModal(apt); setCancelReason(''); }}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors whitespace-nowrap"
                           >
                             Cancel
                           </button>
@@ -397,7 +397,7 @@ const VetAppointments = () => {
                       {activeTab === 'confirmed' && (
                         <button
                           onClick={() => setAttendanceModal(apt)}
-                          className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
                         >
                           Mark Attendance
                         </button>

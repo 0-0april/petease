@@ -547,7 +547,7 @@ in the user/Appointment page, when the user cancels the appointment the system s
 If i-cancel ang appointment (put remarks) 
 
 Vet Staff
-Actions in appointment (buttons - line) 
+in vet/Appointment page, the display of Actions buttons should be arraged in line 
 Erase the ID (convert to number-regular), put the patient instead
 
 • Put date in the adoption for cats (kung kailan na post ang pets) 
