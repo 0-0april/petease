@@ -15,7 +15,24 @@ const STATUS_STYLES = {
 
 const SERVICE_LABELS = {
   consultation: 'Consultation',
-  'anti-rabies': 'Rabies Vaccination',
+  'anti-rabies': 'Anti-Rabies Vaccine',
+  'anti-rabies-vaccination': 'Anti-Rabies Vaccination',
+  'anti-rabies-vaccine': 'Anti-Rabies Vaccine',
+  spay: 'Spay / Neuter',
+  'spay/neuter': 'Spay / Neuter',
+  neuter: 'Neuter',
+};
+
+// Convert any slug or raw ServType to a readable label
+const formatServiceType = (type) => {
+  if (!type) return '';
+  if (SERVICE_LABELS[type]) return SERVICE_LABELS[type];
+  // Split on hyphens and slashes, capitalise each word
+  return type
+    .split(/[-/]/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
   spay: 'Spay',
   neuter: 'Neuter',
 };
@@ -357,7 +374,7 @@ const VetAppointments = () => {
                   )}
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {apt.serviceType || SERVICE_LABELS[apt.type] || apt.type}
+                    {apt.serviceType || apt.type}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -442,7 +459,7 @@ const VetAppointments = () => {
               <div className="col-span-2">
                 <p className="text-xs text-gray-500">Service</p>
                 <p className="font-semibold capitalize">
-                  {selectedAppointment.serviceType || SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
+                  {selectedAppointment.serviceType || selectedAppointment.type}
                 </p>
               </div>
             </div>

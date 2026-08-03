@@ -80,7 +80,7 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
         userName: apt.USERPETS.USER.UserName,
         userPhone: apt.USERPETS.USER.ACCOUNT.AccPhoneNum || 'N/A',
         date: schedDate.toISOString().split('T')[0],
-        type: apt.SERVICES.ServType.toLowerCase().replace(/\s+/g, '-'),
+        type: apt.SERVICES.ServType,
         serviceType: apt.SERVICES.ServType,
         status: apt.AppointStatus.toLowerCase(),
         pets: [{
@@ -176,7 +176,7 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
       userPhone: data.USERPETS.USER.ACCOUNT.AccPhoneNum || 'N/A',
       userAddress: data.USERPETS.USER.UserAddress || 'N/A',
       date: schedDate.toISOString().split('T')[0],
-      type: data.SERVICES.ServType.toLowerCase().replace(/\s+/g, '-'),
+      type: data.SERVICES.ServType,
       serviceType: data.SERVICES.ServType,
       status: data.AppointStatus.toLowerCase(),
       pets: [{

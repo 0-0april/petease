@@ -137,6 +137,7 @@ router.get('/', authenticateToken, async (req, res) => {
     const appointments = data.map(apt => ({
       id: apt.AppointID,
       type: normalizeAppointmentType(apt.SERVICES?.ServType),
+      serviceType: apt.SERVICES?.ServType,
       date: apt.AppointSchedDate.split('T')[0],
       status: apt.AppointStatus.toLowerCase(),
       pets: [{
