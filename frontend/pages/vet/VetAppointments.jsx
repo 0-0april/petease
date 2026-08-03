@@ -151,11 +151,11 @@ const VetAppointments = () => {
       if (attended) {
         // Only create medical history if patient showed up
         await vetService.addMedicalHistory(attendanceModal.pets[0]?.id, {
-          medication: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          medication: attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
           date: attendanceModal.date,
-          notes: `Service performed: ${SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date}.`,
+          notes: `Service performed: ${attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date}.`,
           diagnosis: '',
-          treatment: SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          treatment: attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
           followUp: ''
         });
       }
@@ -357,7 +357,7 @@ const VetAppointments = () => {
                   )}
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {SERVICE_LABELS[apt.type] || apt.type}
+                    {apt.serviceType || SERVICE_LABELS[apt.type] || apt.type}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -442,7 +442,7 @@ const VetAppointments = () => {
               <div className="col-span-2">
                 <p className="text-xs text-gray-500">Service</p>
                 <p className="font-semibold capitalize">
-                  {SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
+                  {selectedAppointment.serviceType || SERVICE_LABELS[selectedAppointment.type] || selectedAppointment.type}
                 </p>
               </div>
             </div>
@@ -572,7 +572,7 @@ const VetAppointments = () => {
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-800">
               If marked as "Show", a medical record will be automatically created for{' '}
               <span className="font-medium">{attendanceModal.pets.map(p => p.name).join(', ')}</span> with the service:{' '}
-              <span className="font-medium">{SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}</span>.
+              <span className="font-medium">{attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}</span>.
             </div>
             <div className="flex space-x-3 pt-2">
               <button
