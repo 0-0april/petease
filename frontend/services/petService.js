@@ -49,7 +49,7 @@ export const petService = {
       ownerId: pet.ownerId,
       ownerName: pet.owner_name,
       ownerUsername: pet.owner_username,
-      createdAt: pet.created_at || null,
+      createdAt: pet.created_at,
     }));
   },
 
