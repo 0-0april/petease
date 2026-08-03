@@ -14,23 +14,27 @@ const STATUS_STYLES = {
 };
 
 const SERVICE_LABELS = {
-  consultation: 'Consultation',
-  'anti-rabies': 'Anti-Rabies Vaccine',
+  consultation:              'Consultation',
+  'anti-rabies':             'Anti-Rabies Vaccine',
+  'anti-rabies-vaccine':     'Anti-Rabies Vaccine',
   'anti-rabies-vaccination': 'Anti-Rabies Vaccination',
-  'anti-rabies-vaccine': 'Anti-Rabies Vaccine',
-  spay: 'Spay / Neuter',
-  'spay/neuter': 'Spay / Neuter',
-  neuter: 'Neuter',
+  spay:                      'Spay / Neuter',
+  neuter:                    'Neuter',
+  'spay/neuter':             'Spay / Neuter',
+  'spay-neuter':             'Spay / Neuter',
 };
 
-// Convert any slug or raw ServType to a readable label
+// Converts any slug (anti-rabies-vaccination) or raw value (Spay/Neuter)
+// to a properly capitalised readable label
 const formatServiceType = (type) => {
   if (!type) return '';
-  if (SERVICE_LABELS[type]) return SERVICE_LABELS[type];
-  // Split on hyphens and slashes, capitalise each word
-  return type
-    .split(/[-/]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  const lower = type.toLowerCase().trim();
+  if (SERVICE_LABELS[lower]) return SERVICE_LABELS[lower];
+  // Split on hyphens, slashes, underscores — capitalise each word
+  return lower
+    .split(/[-/_\s]+/)
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 };
   spay: 'Spay',
@@ -168,11 +172,11 @@ const VetAppointments = () => {
       if (attended) {
         // Only create medical history if patient showed up
         await vetService.addMedicalHistory(attendanceModal.pets[0]?.id, {
-          medication: attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          medication: attendanceModal.serviceType || formatServiceType(attendanceModal.type),
           date: attendanceModal.date,
-          notes: `Service performed: ${attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}. Appointment on ${attendanceModal.date}.`,
+          notes: `Service performed: ${attendanceModal.serviceType || formatServiceType(attendanceModal.type)}. Appointment on ${attendanceModal.date}.`,
           diagnosis: '',
-          treatment: attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type,
+          treatment: attendanceModal.serviceType || formatServiceType(attendanceModal.type),
           followUp: ''
         });
       }
@@ -374,7 +378,7 @@ const VetAppointments = () => {
                   )}
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {apt.serviceType || apt.type}
+                    {apt.serviceType || formatServiceType(apt.type)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -459,7 +463,7 @@ const VetAppointments = () => {
               <div className="col-span-2">
                 <p className="text-xs text-gray-500">Service</p>
                 <p className="font-semibold capitalize">
-                  {selectedAppointment.serviceType || selectedAppointment.type}
+                  {selectedAppointment.serviceType || formatServiceType(selectedAppointment.type)}
                 </p>
               </div>
             </div>
@@ -589,7 +593,7 @@ const VetAppointments = () => {
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-800">
               If marked as "Show", a medical record will be automatically created for{' '}
               <span className="font-medium">{attendanceModal.pets.map(p => p.name).join(', ')}</span> with the service:{' '}
-              <span className="font-medium">{attendanceModal.serviceType || SERVICE_LABELS[attendanceModal.type] || attendanceModal.type}</span>.
+              <span className="font-medium">{attendanceModal.serviceType || formatServiceType(attendanceModal.type)}</span>.
             </div>
             <div className="flex space-x-3 pt-2">
               <button
