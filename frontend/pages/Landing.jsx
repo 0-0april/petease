@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import landingVideo from '../data/landingvideo.mp4';
 
 let pvoLogo, peteaseLogo;
 try { pvoLogo = new URL('../data/pvo-logo.png', import.meta.url).href; } catch { pvoLogo = null; }
 try { peteaseLogo = new URL('../data/petease-logo.png', import.meta.url).href; } catch { peteaseLogo = null; }
+
+// Smooth-scroll to a section id, offset by the sticky navbar height
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const navHeight = 72; // sticky navbar ~72px
+  const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
 
 const features = [
   { icon:'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
@@ -36,19 +45,30 @@ const steps = [
 ];
 
 // Dropdown menu items
+// sectionId  → smooth-scroll to that id on this page
+// to         → navigate to a different route
 const servicesItems = [
-  { label: 'Consultation',        desc: 'General health checkups' },
-  { label: 'Anti-Rabies Vaccine', desc: 'Regular vaccination program' },
-  { label: 'Spay / Neuter',       desc: 'Scheduled surgical services' },
+  { label: 'Consultation',        desc: 'General health checkups',    sectionId: 'services' },
+  { label: 'Anti-Rabies Vaccine', desc: 'Regular vaccination program', sectionId: 'services' },
+  { label: 'Spay / Neuter',       desc: 'Scheduled surgical services', sectionId: 'services' },
 ];
 const adoptionItems = [
-  { label: 'Browse Pets',    desc: 'Find your perfect companion' },
-  { label: 'How to Adopt',   desc: 'Step-by-step guide' },
-  { label: 'Success Stories',desc: 'Happy adoption stories' },
+  { label: 'Browse Pets',     desc: 'Find your perfect companion', to: '/register' },
+  { label: 'How to Adopt',    desc: 'Step-by-step guide',          sectionId: 'how-it-works' },
+  { label: 'Success Stories', desc: 'Happy adoption stories',      sectionId: 'stats' },
 ];
 
-function NavDropdown({ label, items }) {
+function NavDropdown({ label, items, navigate }) {
   const [open, setOpen] = useState(false);
+
+  function handleItemClick(item) {
+    setOpen(false);
+    if (item.to) {
+      navigate(item.to);
+    } else if (item.sectionId) {
+      scrollToSection(item.sectionId);
+    }
+  }
 
   return (
     <div
@@ -69,8 +89,7 @@ function NavDropdown({ label, items }) {
         </svg>
       </button>
 
-      {/* Invisible bridge — fills the gap between button bottom and panel top
-          so the hover zone is continuous and the dropdown never flickers closed */}
+      {/* Invisible bridge — keeps hover alive across the gap */}
       {open && (
         <div className="absolute left-0 right-0 h-3 top-full" aria-hidden="true" />
       )}
@@ -91,10 +110,14 @@ function NavDropdown({ label, items }) {
           {items.map((item, i) => (
             <div
               key={i}
+              role="button"
+              tabIndex={0}
               className="px-4 py-3 cursor-pointer transition-colors"
               style={{
                 borderBottom: i < items.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
               }}
+              onClick={() => handleItemClick(item)}
+              onKeyDown={e => e.key === 'Enter' && handleItemClick(item)}
               onMouseEnter={e => e.currentTarget.style.background = 'hsla(130,100%,30%,0.08)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
@@ -110,6 +133,7 @@ function NavDropdown({ label, items }) {
 
 export default function Landing() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="relative min-h-screen overflow-x-hidden"
       style={{ background:'hsla(132,79%,89%,1)' }}>
@@ -161,8 +185,8 @@ export default function Landing() {
               style={{ color: 'hsl(140,100%,7%)' }}>
               Home
             </Link>
-            <NavDropdown label="Adoption" items={adoptionItems} />
-            <NavDropdown label="Services" items={servicesItems} />
+            <NavDropdown label="Adoption" items={adoptionItems} navigate={navigate} />
+            <NavDropdown label="Services" items={servicesItems} navigate={navigate} />
             <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               About
@@ -197,10 +221,10 @@ export default function Landing() {
             <div className="grid gap-1">
               <Link to="/login" onClick={() => setMobileOpen(false)}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Home</Link>
-              <Link to="/login" onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Adoption</Link>
-              <Link to="/login" onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Services</Link>
+              <button onClick={() => { setMobileOpen(false); scrollToSection('how-it-works'); }}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Adoption</button>
+              <button onClick={() => { setMobileOpen(false); scrollToSection('services'); }}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Services</button>
               <Link to="/about" onClick={() => setMobileOpen(false)}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">About</Link>
               <div className="flex gap-2 mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.4)' }}>
@@ -285,7 +309,7 @@ export default function Landing() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="relative z-10 py-10 px-4">
+      <section id="stats" className="relative z-10 py-10 px-4">
         <div className="max-w-5xl mx-auto glass-card overflow-hidden">
           <div className="grid grid-cols-2 md:grid-cols-4">
             {stats.map((s, i) => (
@@ -332,7 +356,7 @@ export default function Landing() {
       </section>
 
       {/* ── How It Works ── */}
-      <section className="relative z-10 py-24 px-4">
+      <section id="how-it-works" className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="heading-dark text-4xl mb-4">How It Works</h2>
@@ -359,7 +383,7 @@ export default function Landing() {
       </section>
 
       {/* ── Vet Services ── */}
-      <section className="relative z-10 py-24 px-4">
+      <section id="services" className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="heading-dark text-4xl mb-4">Veterinary Services</h2>
