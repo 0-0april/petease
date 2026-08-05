@@ -257,7 +257,7 @@ const AdoptionRequests = () => {
                         </button>
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">{req.adopterEmail} · {req.adopterPhone} · {formatDate(req.createdAt)}</p>
-                      {req.message && (
+                      {req.message && req.status !== 'completed' && (
                         <p className="mt-2 text-sm text-gray-600 italic bg-gray-50 rounded-lg px-3 py-2">"{req.message}"</p>
                       )}
                       {req.status === 'rejected' && req.rejectionReason && (
@@ -336,7 +336,7 @@ const AdoptionRequests = () => {
                         </button>
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">Submitted {formatDate(req.createdAt)}</p>
-                      {req.message && (
+                      {req.message && req.status !== 'completed' && (
                         <p className="mt-2 text-sm text-gray-600 italic bg-gray-50 rounded-lg px-3 py-2">"{req.message}"</p>
                       )}
                       {req.status === 'rejected' && req.rejectionReason && (
