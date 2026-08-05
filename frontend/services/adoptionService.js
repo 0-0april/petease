@@ -1,4 +1,5 @@
 import api from './api';
+import { supabase } from '../config/supabase';
 
 export const adoptionService = {
   requestAdoption: async (petId, message = '', waiverFile = null) => {
@@ -46,7 +47,7 @@ export const adoptionService = {
 
   getMyAdoptionRequests: async () => {
     const response = await api.get('/adoptions/my-requests');
-    return response.data.map(req => ({
+    const mapped = response.data.map(req => ({
       id: req.AdoptID,
       petId: req.PetID,
       petName: req.PetName,
@@ -56,15 +57,37 @@ export const adoptionService = {
       ownerName: req.owner_name,
       status: req.AdoptStatus?.toLowerCase() || 'pending',
       message: req.AdoptionWaiver,
-      waiverUrl: req.AdoptStatus?.toLowerCase() === 'completed' && req.AdoptionWaiver?.startsWith('http') ? req.AdoptionWaiver : null,
+      waiverUrl: null,
       rejectionReason: req.RejectionReason,
       createdAt: req.AdoptReqDate
     }));
+
+    // Pull fresh status + waiver directly from Supabase to bypass stale Railway data
+    const ids = mapped.map(r => r.id).filter(Boolean);
+    if (ids.length > 0) {
+      const { data: rows } = await supabase
+        .from('ADOPTION')
+        .select('AdoptID, AdoptStatus, AdoptionWaiver')
+        .in('AdoptID', ids);
+      if (rows) {
+        const map = {};
+        rows.forEach(r => { map[r.AdoptID] = r; });
+        mapped.forEach(r => {
+          const row = map[r.id];
+          if (row) {
+            r.status = row.AdoptStatus?.toLowerCase() || r.status;
+            const w = row.AdoptionWaiver;
+            r.waiverUrl = r.status === 'completed' && w?.startsWith('http') ? w : null;
+          }
+        });
+      }
+    }
+    return mapped;
   },
 
   getIncomingRequests: async () => {
     const response = await api.get('/adoptions/incoming');
-    return response.data.map(req => ({
+    const mapped = response.data.map(req => ({
       id: req.AdoptID,
       petId: req.PetID,
       petName: req.PetName,
@@ -76,9 +99,31 @@ export const adoptionService = {
       adopterPhone: req.adopter_phone,
       status: req.AdoptStatus?.toLowerCase() || 'pending',
       message: req.AdoptionWaiver,
-      waiverUrl: req.AdoptStatus?.toLowerCase() === 'completed' && req.AdoptionWaiver?.startsWith('http') ? req.AdoptionWaiver : null,
+      waiverUrl: null,
       rejectionReason: req.RejectionReason,
       createdAt: req.AdoptReqDate
     }));
+
+    // Pull fresh status + waiver directly from Supabase to bypass stale Railway data
+    const ids = mapped.map(r => r.id).filter(Boolean);
+    if (ids.length > 0) {
+      const { data: rows } = await supabase
+        .from('ADOPTION')
+        .select('AdoptID, AdoptStatus, AdoptionWaiver')
+        .in('AdoptID', ids);
+      if (rows) {
+        const map = {};
+        rows.forEach(r => { map[r.AdoptID] = r; });
+        mapped.forEach(r => {
+          const row = map[r.id];
+          if (row) {
+            r.status = row.AdoptStatus?.toLowerCase() || r.status;
+            const w = row.AdoptionWaiver;
+            r.waiverUrl = r.status === 'completed' && w?.startsWith('http') ? w : null;
+          }
+        });
+      }
+    }
+    return mapped;
   }
 };
