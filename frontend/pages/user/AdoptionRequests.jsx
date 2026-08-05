@@ -291,7 +291,7 @@ const AdoptionRequests = () => {
                     {req.status === 'completed' && req.waiverUrl && (
                       <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer"
                         download
-                        className="flex-shrink-0 inline-flex flex-col items-center gap-1 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
+                        className="flex-shrink-0 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
                         Download Waiver
                       </a>
                     )}
@@ -340,6 +340,11 @@ const AdoptionRequests = () => {
                           Reason: {req.rejectionReason}
                         </div>
                       )}
+                      {req.status === 'cancelled' && !pets.find(p => p.id === req.petId) && (
+                        <div className="mt-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600">
+                          This pet has already been adopted by someone else.
+                        </div>
+                      )}
                       {req.status === 'approved' && (
                         <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm text-blue-800">
                           Your request was approved. Please visit the Provincial Veterinary Office with the owner to sign the adoption waiver.
@@ -360,11 +365,7 @@ const AdoptionRequests = () => {
                     {req.status === 'completed' && req.waiverUrl && (
                       <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer"
                         download
-                        className="flex-shrink-0 inline-flex flex-col items-center gap-1 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                        className="flex-shrink-0 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
                         Download Waiver
                       </a>
                     )}

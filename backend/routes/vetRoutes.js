@@ -699,7 +699,8 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
         AdoptID,
         USERPETS!ADOPTION_UserPetsID_fkey (
           PET (
-            PetID
+            PetID,
+            PetName
           )
         )
       `)
@@ -734,6 +735,42 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
 
     if (petError) {
       console.error('⚠️ Error updating pet availability:', petError);
+    }
+
+    // Cancel all other pending/approved adoption requests for this pet
+    // so other applicants know it's been adopted
+    const { data: petUserpets } = await supabase
+      .from('USERPETS')
+      .select('UserPetID')
+      .eq('PetID', petIdToUpdate);
+
+    if (petUserpets?.length > 0) {
+      const userPetIds = petUserpets.map(u => u.UserPetID);
+      const { data: otherRequests } = await supabase
+        .from('ADOPTION')
+        .select('AdoptID, USER!ADOPTION_UserID_fkey(AccID)')
+        .in('UserPetsID', userPetIds)
+        .in('AdoptStatus', ['Pending', 'Approved'])
+        .neq('AdoptID', req.params.id);
+
+      if (otherRequests?.length > 0) {
+        await supabase
+          .from('ADOPTION')
+          .update({ AdoptStatus: 'Cancelled' })
+          .in('AdoptID', otherRequests.map(r => r.AdoptID));
+
+        // Notify the other applicants
+        for (const other of otherRequests) {
+          if (other.USER?.AccID) {
+            await createNotification({
+              accId: other.USER.AccID,
+              title: 'Adoption unavailable',
+              message: `Sorry, ${adoption.USERPETS?.PET?.PetName || 'this pet'} has already been adopted by someone else.`,
+              type: 'adoption'
+            });
+          }
+        }
+      }
     }
 
     console.log('✅ Adoption completed successfully');
