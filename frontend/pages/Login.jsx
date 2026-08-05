@@ -8,8 +8,10 @@ const getDashboardPath = (u) => {
   return '/browse-pets';
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /* ── Reusable underline field ─────────────────────────────────────── */
-const Field = ({ label, icon, ...props }) => (
+const Field = ({ label, icon, error, ...props }) => (
   <div>
     <p className="label-caps mb-2">{label}</p>
     <div className="flex items-center gap-2.5">
@@ -19,14 +21,16 @@ const Field = ({ label, icon, ...props }) => (
           <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
         </svg>
       )}
-      <input className="input-ul flex-1" {...props} />
+      <input className={`input-ul flex-1 ${error ? 'border-b-red-400' : ''}`} {...props} />
     </div>
+    {error && <p className="mt-1 text-xs" style={{ color: 'hsl(0,65%,45%)' }}>{error}</p>}
   </div>
 );
 
 export default function Login() {
   const [email,       setEmail]       = useState('');
   const [password,    setPassword]    = useState('');
+  const [emailError,  setEmailError]  = useState('');
   const [error,       setError]       = useState('');
   const [loading,     setLoading]     = useState(false);
   const [warningUser, setWarningUser] = useState(null);
@@ -47,6 +51,10 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!EMAIL_REGEX.test(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
     setError(''); setLoading(true);
     try {
       const res  = await login(email, password);
@@ -230,7 +238,9 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <Field label="Email address"
               icon="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              type="email" value={email}
+              onChange={e => { setEmail(e.target.value); setEmailError(EMAIL_REGEX.test(e.target.value) || !e.target.value ? '' : 'Please enter a valid email address.'); }}
+              error={emailError}
               placeholder="you@example.com" required autoComplete="email" />
 
             <Field label="Password"

@@ -8,7 +8,9 @@ const getDashboardPath = (u) => {
   return '/browse-pets';
 };
 
-const Field = ({ label, icon, textarea, rows, ...props }) => (
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const Field = ({ label, icon, textarea, rows, error, ...props }) => (
   <div>
     <p className="label-caps mb-2">{label}</p>
     <div className="flex items-start gap-2.5">
@@ -20,9 +22,10 @@ const Field = ({ label, icon, textarea, rows, ...props }) => (
       )}
       {textarea
         ? <textarea className="input-ul flex-1 resize-none" rows={rows || 2} {...props} />
-        : <input    className="input-ul flex-1" {...props} />
+        : <input    className={`input-ul flex-1 ${error ? 'border-b-red-400' : ''}`} {...props} />
       }
     </div>
+    {error && <p className="mt-1 text-xs" style={{ color: 'hsl(0,65%,45%)' }}>{error}</p>}
   </div>
 );
 
@@ -35,7 +38,8 @@ const ICONS = {
 };
 
 export default function Register() {
-  const [form,    setForm]    = useState({ username:'', name:'', email:'', password:'', phone:'', address:'' });
+  const [form,    setForm]       = useState({ username:'', name:'', email:'', password:'', phone:'', address:'' });
+  const [emailError, setEmailError] = useState('');
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const { register, loginWithGoogle } = useAuth();
@@ -45,6 +49,10 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!EMAIL_REGEX.test(form.email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
     setError(''); setLoading(true);
     try {
       const res  = await register(form);
@@ -163,7 +171,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Field label="Username"    icon={ICONS.user}  type="text"     name="username" value={form.username} onChange={e => set('username', e.target.value)} placeholder="johndoe" required />
             <Field label="Full Name"   icon={ICONS.user}  type="text"     name="name"     value={form.name}     onChange={e => set('name',     e.target.value)} placeholder="John Doe" required />
-            <Field label="Email Address" icon={ICONS.email} type="email"  name="email"    value={form.email}    onChange={e => set('email',    e.target.value)} placeholder="you@example.com" required autoComplete="email" />
+            <Field label="Email Address" icon={ICONS.email} type="email"  name="email"    value={form.email}    onChange={e => { set('email', e.target.value); setEmailError(EMAIL_REGEX.test(e.target.value) || !e.target.value ? '' : 'Please enter a valid email address.'); }} error={emailError} placeholder="you@example.com" required autoComplete="email" />
             <Field label="Password"    icon={ICONS.lock}  type="password" name="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" required minLength={6} autoComplete="new-password" />
             <Field label="Phone Number" icon={ICONS.phone} type="tel"     name="phone"    value={form.phone}    onChange={e => set('phone',    e.target.value)} placeholder="+1 (555) 000-0000" required />
             <Field label="Address"     icon={ICONS.pin}   textarea        name="address"  value={form.address}  onChange={e => set('address',  e.target.value)} placeholder="123 Main St, City, State" required />

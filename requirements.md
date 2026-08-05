@@ -552,9 +552,10 @@ Erase the ID (convert to number-regular), put the patient instead
 
 n the user/BrowsePets page, display the pet's date of creation Pet table (created_at) in the in all the post in the right side above the request adoption button inlined with the age and specie, but it is in the right side
 
-Email address: detect if the format is correct
+in login and register page, the system should detect if the email format is correct and should accept in email format only 
 
 Details of the Pet: (Important) - can be seen by the adoptee
+
 Vaccination Card (img) 
 
 Registration Type:
