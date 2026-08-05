@@ -558,7 +558,7 @@ Details of the Pet: (Important) - can be seen by the adoptee
 
 in the user/Adotion page, once the adoption waiver is signed by the vet staff, it should show to the user that it is completed and it the button shouldnt show anything for both adopters and pet owners but the download waiver button where they would download the waiver uploaded by vet staff
 
-in user/Vaccination Card (img) 
+in user/MyPets page, register pet feature, the uploading of vaccination card should allow user to upload file in photo instead of typing the path, then store it in the supabase's bucket named pet-vaccinationcard
 
 Registration Type:
 Erase the 'both'

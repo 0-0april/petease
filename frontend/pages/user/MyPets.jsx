@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import Modal from '../../components/Modal';
 import { petService } from '../../services/petService';
+import { supabase } from '../../config/supabase';
 
 const EMPTY_FORM = {
   name: '',
@@ -28,6 +29,8 @@ const MyPets = () => {
   const [feedback, setFeedback] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [vaccinationFile, setVaccinationFile] = useState(null);
+  const [vaccinationUploading, setVaccinationUploading] = useState(false);
 
   useEffect(() => { fetchMyPets(); }, []);
 
@@ -49,6 +52,21 @@ const MyPets = () => {
     e.preventDefault();
     setSaving(true);
     try {
+      // Upload vaccination card to Supabase Storage if a file was selected
+      let vaccinationUrl = formData.vaccinationCard || '';
+      if (vaccinationFile) {
+        setVaccinationUploading(true);
+        const fileExt = vaccinationFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('pet-vaccinationcard')
+          .upload(fileName, vaccinationFile, { contentType: vaccinationFile.type, upsert: true });
+        if (uploadError) throw new Error('Failed to upload vaccination card: ' + uploadError.message);
+        const { data: { publicUrl } } = supabase.storage.from('pet-vaccinationcard').getPublicUrl(fileName);
+        vaccinationUrl = publicUrl;
+        setVaccinationUploading(false);
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('petName', formData.name);
       formDataToSend.append('petBDay', formData.birthday);
@@ -65,6 +83,10 @@ const MyPets = () => {
         formDataToSend.append('petImg', formData.image);
       }
 
+      if (vaccinationUrl) {
+        formDataToSend.append('vaccinationCard', vaccinationUrl);
+      }
+
       if (editingPet) {
         await petService.updatePet(editingPet.id, formDataToSend);
         showFeedback('Pet updated successfully.');
@@ -77,9 +99,11 @@ const MyPets = () => {
       setFormData(EMPTY_FORM);
       setImageFile(null);
       setImagePreview(null);
+      setVaccinationFile(null);
       fetchMyPets();
     } catch (error) {
       console.error('Save error:', error);
+      setVaccinationUploading(false);
       showFeedback('Failed to save pet. Please try again.', 'error');
     } finally {
       setSaving(false);
@@ -305,14 +329,28 @@ const MyPets = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vaccination Card URL <span className="text-gray-400 font-normal">(optional)</span></label>
-            <input type="url" value={formData.vaccinationCard} onChange={e => field('vaccinationCard', e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Vaccination Card <span className="text-gray-400 font-normal">(optional — photo or PDF)</span>
+            </label>
+            {formData.vaccinationCard && !vaccinationFile && (
+              <p className="text-xs text-green-700 mb-1">
+                ✓ Vaccination card already uploaded.{' '}
+                <a href={formData.vaccinationCard} target="_blank" rel="noopener noreferrer" className="underline">View</a>
+              </p>
+            )}
+            {vaccinationFile && (
+              <p className="text-xs text-green-700 mb-1">✓ {vaccinationFile.name} selected</p>
+            )}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={e => setVaccinationFile(e.target.files[0] || null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
-          <button type="submit" disabled={saving}
+          <button type="submit" disabled={saving || vaccinationUploading}
             className="w-full bg-primary text-white py-2.5 rounded-lg hover:bg-primary-dark disabled:opacity-60 font-medium text-sm">
-            {saving ? 'Saving...' : editingPet ? 'Update Pet' : 'Register Pet'}
+            {vaccinationUploading ? 'Uploading card...' : saving ? 'Saving...' : editingPet ? 'Update Pet' : 'Register Pet'}
           </button>
         </form>
       </Modal>
