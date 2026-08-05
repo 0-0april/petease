@@ -37,9 +37,6 @@ const formatServiceType = (type) => {
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 };
-  spay: 'Spay',
-  neuter: 'Neuter',
-};
 
 const VetAppointments = () => {
   const { clear } = useBadge();
