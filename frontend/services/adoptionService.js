@@ -46,17 +46,17 @@ export const adoptionService = {
 
   getMyAdoptionRequests: async () => {
     const response = await api.get('/adoptions/my-requests');
-    // Map backend fields to frontend format for SENT requests
     return response.data.map(req => ({
       id: req.AdoptID,
-      petId: req.PetID, // The actual PetID from the PET table
+      petId: req.PetID,
       petName: req.PetName,
       petImage: req.PetImg,
       petBreed: req.PetBreed,
-      ownerId: req.OwnerUserID, // The owner's UserID
+      ownerId: req.OwnerUserID,
       ownerName: req.owner_name,
       status: req.AdoptStatus?.toLowerCase() || 'pending',
       message: req.AdoptionWaiver,
+      waiverUrl: req.AdoptStatus?.toLowerCase() === 'completed' && req.AdoptionWaiver?.startsWith('http') ? req.AdoptionWaiver : null,
       rejectionReason: req.RejectionReason,
       createdAt: req.AdoptReqDate
     }));
@@ -64,19 +64,19 @@ export const adoptionService = {
 
   getIncomingRequests: async () => {
     const response = await api.get('/adoptions/incoming');
-    // Map backend fields to frontend format for RECEIVED requests
     return response.data.map(req => ({
       id: req.AdoptID,
-      petId: req.PetID, // The actual PetID from the PET table
+      petId: req.PetID,
       petName: req.PetName,
       petImage: req.PetImg,
       petBreed: req.PetBreed,
-      adopterId: req.AdopterUserID, // The adopter's UserID
+      adopterId: req.AdopterUserID,
       adopterName: req.adopter_name,
       adopterEmail: req.adopter_email,
       adopterPhone: req.adopter_phone,
       status: req.AdoptStatus?.toLowerCase() || 'pending',
       message: req.AdoptionWaiver,
+      waiverUrl: req.AdoptStatus?.toLowerCase() === 'completed' && req.AdoptionWaiver?.startsWith('http') ? req.AdoptionWaiver : null,
       rejectionReason: req.RejectionReason,
       createdAt: req.AdoptReqDate
     }));
