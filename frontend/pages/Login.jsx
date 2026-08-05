@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+let pvoLogo, peteaseLogo;
+try { pvoLogo = new URL('../data/pvo-logo.png', import.meta.url).href; } catch { pvoLogo = null; }
+try { peteaseLogo = new URL('../data/petease-logo.png', import.meta.url).href; } catch { peteaseLogo = null; }
+
 const getDashboardPath = (u) => {
   if (u?.role === 'admin') return '/admin/dashboard';
   if (u?.role === 'vet')   return '/vet/dashboard';
@@ -154,11 +158,11 @@ export default function Login() {
       {/* ── Main glass card ── */}
       <div className="glass-card relative z-10 w-full max-w-4xl flex flex-col lg:flex-row overflow-hidden">
 
-        {/* ── Left: pet visual panel ── */}
-        <div className="lg:w-[42%] flex flex-col items-center justify-center gap-6 px-8 py-10 lg:py-12 relative overflow-hidden"
+        {/* ── Left: co-brand visual panel ── */}
+        <div className="lg:w-[42%] flex flex-col items-center justify-center gap-8 px-8 py-10 lg:py-12 relative overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.18)' }}>
 
-          {/* Subtle green glow behind image */}
+          {/* Subtle green glow */}
           <div style={{
             position:'absolute', bottom:'-60px', right:'-60px',
             width:'260px', height:'260px', borderRadius:'50%',
@@ -166,27 +170,43 @@ export default function Login() {
             filter:'blur(32px)',
           }} aria-hidden="true" />
 
-          {/* Pet image */}
-          <div className="relative w-full max-w-[260px]">
-            <img
-              src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=500"
-              alt="A happy dog"
-              className="w-full h-64 object-cover rounded-3xl shadow-glass"
-            />
-            {/* Small floating accent image */}
-            <img
-              src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300"
-              alt="A cute cat"
-              className="absolute -bottom-5 -right-5 w-24 h-24 object-cover rounded-2xl shadow-glass"
-              style={{ border:'3px solid rgba(255,255,255,0.70)' }}
-            />
+          {/* PVO Logo */}
+          <div className="flex flex-col items-center gap-3 relative z-10">
+            {pvoLogo ? (
+              <img src={pvoLogo} alt="Provincial Veterinary Office – Lanao del Sur"
+                style={{ height: '100px', width: 'auto', objectFit: 'contain' }} />
+            ) : (
+              <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
+                style={{ background: 'rgba(255,255,255,0.50)' }}>🏛️</div>
+            )}
+            <div className="text-center">
+              <p className="text-sm font-bold" style={{ color: 'hsl(140,100%,7%)' }}>
+                Provincial Veterinary Office
+              </p>
+              <p className="text-xs font-light" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+                Lanao del Sur, Philippines
+              </p>
+            </div>
           </div>
 
-          {/* Brand */}
-          <div className="text-center mt-4 relative z-10">
-            <p className="heading-dark text-3xl">PetEase</p>
-            <p className="text-xs tracking-widest mt-2 font-light"
-              style={{ color:'hsla(140,100%,7%,0.50)' }}>
+          {/* Divider */}
+          <div className="flex items-center gap-3 w-full max-w-[180px] relative z-10">
+            <div className="flex-1 h-px" style={{ background: 'hsla(140,100%,7%,0.18)' }} />
+            <span className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: 'hsla(140,100%,7%,0.40)' }}>In Partnership</span>
+            <div className="flex-1 h-px" style={{ background: 'hsla(140,100%,7%,0.18)' }} />
+          </div>
+
+          {/* PetEase Logo */}
+          <div className="flex flex-col items-center gap-3 relative z-10">
+            {peteaseLogo ? (
+              <img src={peteaseLogo} alt="PetEase"
+                style={{ height: '80px', width: 'auto', objectFit: 'contain' }} />
+            ) : (
+              <p className="heading-dark text-3xl">🐾 PetEase</p>
+            )}
+            <p className="text-xs tracking-widest font-light text-center"
+              style={{ color: 'hsla(140,100%,7%,0.50)' }}>
               pet adoption and services system
             </p>
           </div>

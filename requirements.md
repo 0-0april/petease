@@ -564,3 +564,43 @@ Registration Type:
 Erase the 'both'
 
 -- localize it, put a background of the client on the login page
+
+# PetEase Branding Integration Prompt
+
+Copy and paste this into your AI coding assistant. Fill in the bracketed placeholders first.
+
+---
+
+## Prompt
+
+I'm building **PetEase**, a Pet Adoption and Services System, in partnership with the **Provincial Veterinary Office (PVO) – Lanao del Sur**, our official client who manages appointments and provides free services through the system. I need to localize/co-brand the site with their identity. I have two logo files ready:
+
+- `frontend/data/petease-logo.png` — PetEase logo
+- `frontend/data/pvo-logo.png` — PVO-Lanao del Sur official logo
+
+Please implement the following across the site:
+
+### 1. Header/Navbar
+- Add `pvo-logo.png` to the left of `petease-logo.png`, separated by a thin vertical divider (`|`), forming a co-branding lockup: `[PVO Logo] | [PetEase Logo]`.
+- Keep both logos proportionally sized so neither dominates (PVO logo ~36–40px height, PetEase logo similar).
+- Make the PVO logo clickable, linking to `https://www.facebook.com/PVO.LDS`.
+- Ensure this is responsive — on mobile, stack or shrink gracefully, don't break the nav.
+
+### 2. Footer
+- Add a "In Partnership With" section containing: PVO logo, office name, address, contact info/office hours (placeholders if not yet provided), and a link to their favebook page
+
+
+### 3. About Page
+- Add a section titled "Our Partner Office" introducing PVO-Lanao del Sur — their mandate, and the programs they run (e.g., free rabies vaccination, spay & neuter drives, disease preparedness). Use placeholder text I can edit, don't fabricate specific facts.
+
+### 4. Login/Splash Screen
+- replace the images of the pet in the left side of the register and login to petease's logo and pvo logo, but keep the design as it is.
+
+### 5. Admin/Staff Dashboard (PVO-facing side)
+- Make the PVO logo the dominant brand mark in the staff/admin dashboard header, since this side is used by their office staff, while keeping a small PetEase watermark/label indicating the system name.
+
+### 6. Generated Documents (adoption certificates, appointment confirmations, vaccination records)
+- Add a letterhead template with `pvo-logo.png`, office name, and address at the top of any generated PDF/printable document.
+
+### 7. Favicon / Document `<head>` Icon
+- Set `petease-logo.png` (or a cropped/simplified version of it) as the site favicon, referenced in the `<head>` via a `<link rel="icon">` tag, so it shows in the browser tab.

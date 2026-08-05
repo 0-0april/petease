@@ -6,6 +6,10 @@ import { notificationService } from '../services/notificationService';
 import { adoptionService } from '../services/adoptionService';
 import { messageService } from '../services/messageService';
 import { appointmentService } from '../services/appointmentService';
+import CoBrandLockup from './CoBrandLockup';
+
+let pvoLogo;
+try { pvoLogo = new URL('../data/pvo-logo.png', import.meta.url).href; } catch { pvoLogo = null; }
 
 const CONV_SEEN_KEY = 'messages_seen_snapshot';
 const APPT_SEEN_KEY = 'appointments_seen_ids';
@@ -127,10 +131,7 @@ export default function Layout({ children }) {
       <div className="sticky top-0 z-40 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2">
         <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-3 sm:px-5 h-12 sm:h-14">
           {/* Left: Logo */}
-          <Link to="/browse-pets" className="shrink-0 text-base sm:text-xl font-black tracking-tight"
-            style={{ color: 'hsl(140,100%,7%)' }}>
-            🐾 PetEase
-          </Link>
+          <CoBrandLockup variant="user" linkTo="/browse-pets" />
 
           {/* Center: Nav links */}
           <div className="hidden md:flex items-center gap-0.5">
@@ -212,6 +213,62 @@ export default function Layout({ children }) {
         )}
         {children}
       </main>
+
+      {/* ── Footer ── */}
+      <footer className="relative z-10 mt-12 border-t px-4 py-8 sm:px-6 lg:px-8"
+        style={{ borderColor: 'rgba(255,255,255,0.50)' }}>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+          {/* PetEase info */}
+          <div>
+            <p className="text-base font-black" style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</p>
+            <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
+              Pet Adoption &amp; Veterinary Appointment System
+            </p>
+          </div>
+
+          {/* In Partnership With */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'hsla(140,100%,7%,0.45)' }}>
+              In Partnership With
+            </p>
+            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              {pvoLogo ? (
+                <img src={pvoLogo} alt="PVO Lanao del Sur"
+                  style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-lg shadow-sm">🏛️</div>
+              )}
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>
+                  Provincial Veterinary Office
+                </p>
+                <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.50)' }}>Lanao del Sur, Philippines</p>
+              </div>
+            </a>
+            <div className="text-xs mt-1 space-y-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
+              <p>📍 Capitol Compound, Marawi City, Lanao del Sur</p>
+              <p>📞 [Office contact — to be provided]</p>
+              <p>🕐 Mon – Fri, 8:00 AM – 5:00 PM</p>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-col gap-1 text-sm">
+            <Link to="/browse-pets" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Browse Pets</Link>
+            <Link to="/appointments" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Appointments</Link>
+            <Link to="/notifications" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Notifications</Link>
+            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+              className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+              PVO Facebook Page ↗
+            </a>
+          </div>
+        </div>
+        <p className="text-center text-xs mt-8 font-light" style={{ color: 'hsla(140,100%,7%,0.35)' }}>
+          © {new Date().getFullYear()} PetEase · In partnership with the Provincial Veterinary Office – Lanao del Sur
+        </p>
+      </footer>
     </div>
   );
 }

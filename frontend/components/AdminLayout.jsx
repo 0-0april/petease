@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useBadge } from '../contexts/BadgeContext';
 import { adminService } from '../services/adminService';
+import CoBrandLockup from './CoBrandLockup';
 
 const navLinks = [
   { to: '/admin/dashboard',     label: 'Dashboard'     },
@@ -81,14 +82,7 @@ export default function AdminLayout({ children }) {
       <div className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8">
         <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-5 h-14">
           {/* Left: Logo + role badge */}
-          <Link to="/admin/dashboard" className="shrink-0 flex items-center gap-2 font-black tracking-tight text-xl"
-            style={{ color: 'hsl(140,100%,7%)' }}>
-            🐾 PetEase
-            <span className="text-xs font-semibold uppercase tracking-widest"
-              style={{ color: 'hsl(130,100%,30%)' }}>
-              Admin
-            </span>
-          </Link>
+          <CoBrandLockup variant="admin" linkTo="/admin/dashboard" />
 
           {/* Center: Nav links */}
           <div className="hidden md:flex items-center gap-0.5">

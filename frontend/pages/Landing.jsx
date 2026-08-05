@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import landingVideo from '../data/landingvideo.mp4';
 
+let pvoLogo, peteaseLogo;
+try { pvoLogo = new URL('../data/pvo-logo.png', import.meta.url).href; } catch { pvoLogo = null; }
+try { peteaseLogo = new URL('../data/petease-logo.png', import.meta.url).href; } catch { peteaseLogo = null; }
+
 const features = [
   { icon:'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
     title:'Pet Adoption',    desc:'Browse and adopt pets from loving owners. Find your perfect companion today.' },
@@ -90,10 +94,31 @@ export default function Landing() {
       {/* ── Floating Pill Navbar ── */}
       <div className="sticky top-0 z-50 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2">
         <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14">
-          {/* Left: Logo */}
-          <span className="text-base sm:text-xl font-black tracking-tight shrink-0" style={{ color:'hsl(140,100%,7%)' }}>
-            🐾 PetEase
-          </span>
+          {/* Left: Co-brand lockup */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* PVO Logo */}
+            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+              className="flex items-center shrink-0" title="Provincial Veterinary Office – Lanao del Sur">
+              {pvoLogo ? (
+                <img src={pvoLogo} alt="PVO Lanao del Sur"
+                  style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+              ) : (
+                <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'hsl(140,100%,7%)' }}>PVO</span>
+              )}
+            </a>
+            {/* Divider */}
+            <div className="w-px h-6" style={{ background: 'hsla(140,100%,7%,0.20)' }} />
+            {/* PetEase Logo */}
+            <Link to="/" className="flex items-center shrink-0">
+              {peteaseLogo ? (
+                <img src={peteaseLogo} alt="PetEase"
+                  style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
+              ) : (
+                <span className="text-base sm:text-xl font-black tracking-tight"
+                  style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</span>
+              )}
+            </Link>
+          </div>
 
           {/* Center: Nav links with dropdowns — hidden on small screens */}
           <div className="hidden md:flex items-center gap-1">
@@ -328,6 +353,102 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Our Partner Office ── */}
+      <section className="relative z-10 py-24 px-4" id="about">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="heading-dark text-4xl mb-4">Our Partner Office</h2>
+            <p className="font-light max-w-xl mx-auto"
+              style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.75' }}>
+              PetEase is officially developed in partnership with the Provincial Veterinary Office of Lanao del Sur.
+            </p>
+          </div>
+
+          <div className="glass-card overflow-hidden">
+            <div className="flex flex-col lg:flex-row">
+              {/* Left: PVO identity */}
+              <div className="lg:w-[38%] flex flex-col items-center justify-center gap-6 px-10 py-12 text-center"
+                style={{ background: 'rgba(255,255,255,0.22)', borderRight: '1px solid rgba(255,255,255,0.35)' }}>
+                {pvoLogo ? (
+                  <img src={pvoLogo} alt="Provincial Veterinary Office – Lanao del Sur"
+                    style={{ height: '120px', width: 'auto', objectFit: 'contain' }} />
+                ) : (
+                  <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
+                    style={{ background: 'rgba(255,255,255,0.50)' }}>🏛️</div>
+                )}
+                <div>
+                  <p className="text-lg font-black" style={{ color: 'hsl(140,100%,7%)' }}>
+                    Provincial Veterinary Office
+                  </p>
+                  <p className="text-sm font-semibold mt-0.5" style={{ color: 'hsl(130,100%,30%)' }}>
+                    Lanao del Sur, Philippines
+                  </p>
+                  <p className="text-xs mt-3 font-light" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+                    📍 Capitol Compound, Marawi City, Lanao del Sur
+                  </p>
+                  <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+                    🕐 Mon – Fri, 8:00 AM – 5:00 PM
+                  </p>
+                </div>
+                <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+                  className="btn-outline text-sm" style={{ padding: '8px 20px', fontSize: '0.78rem' }}>
+                  Visit Facebook Page ↗
+                </a>
+              </div>
+
+              {/* Right: About PVO */}
+              <div className="flex-1 px-8 py-10 lg:px-12">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4"
+                  style={{ color: 'hsl(130,100%,30%)' }}>About the Office</p>
+                <p className="text-sm font-light leading-relaxed mb-6"
+                  style={{ color: 'hsla(140,100%,7%,0.70)' }}>
+                  The Provincial Veterinary Office (PVO) of Lanao del Sur is the lead government agency responsible
+                  for animal health, welfare, and disease control in the province. Its mandate includes the regulation
+                  of veterinary practice, livestock disease management, and delivery of veterinary services to the community.
+                  {/* Placeholder — edit with your actual office mandate text */}
+                </p>
+
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3"
+                  style={{ color: 'hsla(140,100%,7%,0.45)' }}>Programs &amp; Services</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    {
+                      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                      title: 'Free Rabies Vaccination',
+                      desc: 'Regular anti-rabies vaccination drives for pets and livestock throughout the province.',
+                    },
+                    {
+                      icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+                      title: 'Spay & Neuter Drives',
+                      desc: 'Scheduled community-based spay and neuter programs to support responsible pet ownership.',
+                    },
+                    {
+                      icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z',
+                      title: 'Disease Preparedness',
+                      desc: 'Surveillance, response, and disease-prevention programs to protect animal and public health.',
+                    },
+                  ].map((prog, i) => (
+                    <div key={i} className="glass-inner p-4">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
+                        style={{ background: 'hsla(130,100%,30%,0.13)' }}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          style={{ color: 'hsl(130,100%,30%)' }} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={prog.icon} />
+                        </svg>
+                      </div>
+                      <p className="text-xs font-bold uppercase tracking-wide mb-1"
+                        style={{ color: 'hsl(140,100%,7%)' }}>{prog.title}</p>
+                      <p className="text-xs font-light leading-relaxed"
+                        style={{ color: 'hsla(140,100%,7%,0.55)' }}>{prog.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section className="relative z-10 py-24 px-4">
         <div className="max-w-3xl mx-auto glass-card text-center px-8 py-16">
@@ -346,22 +467,63 @@ export default function Landing() {
       {/* ── Footer ── */}
       <footer className="relative z-10 py-10 px-4"
         style={{ borderTop:'1px solid rgba(255,255,255,0.50)' }}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+          {/* PetEase info */}
           <div>
-            <p className="text-xl font-black" style={{ color:'hsl(140,100%,7%)' }}>PetEase</p>
-            <p className="text-sm font-light mt-0.5"
-              style={{ color:'hsla(140,100%,7%,0.45)' }}>
+            <div className="flex items-center gap-2 mb-2">
+              {peteaseLogo ? (
+                <img src={peteaseLogo} alt="PetEase" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+              ) : (
+                <p className="text-xl font-black" style={{ color:'hsl(140,100%,7%)' }}>🐾 PetEase</p>
+              )}
+            </div>
+            <p className="text-xs font-light" style={{ color:'hsla(140,100%,7%,0.45)' }}>
               Pet Adoption &amp; Veterinary Appointment System
             </p>
           </div>
-          <div className="flex gap-6 text-sm">
+
+          {/* In Partnership With */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-1"
+              style={{ color: 'hsla(140,100%,7%,0.45)' }}>
+              In Partnership With
+            </p>
+            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              {pvoLogo ? (
+                <img src={pvoLogo} alt="PVO Lanao del Sur"
+                  style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-lg shadow-sm">🏛️</div>
+              )}
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>
+                  Provincial Veterinary Office
+                </p>
+                <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.50)' }}>Lanao del Sur, Philippines</p>
+              </div>
+            </a>
+            <div className="text-xs mt-1 space-y-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
+              <p>📍 Capitol Compound, Marawi City, Lanao del Sur</p>
+              <p>📞 [Office contact — to be provided]</p>
+              <p>🕐 Mon – Fri, 8:00 AM – 5:00 PM</p>
+            </div>
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-col gap-1 text-sm">
             <Link to="/login"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Login</Link>
             <Link to="/register" className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Register</Link>
+            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+              className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>
+              PVO Facebook Page ↗
+            </a>
           </div>
-          <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.35)' }}>
-            © {new Date().getFullYear()} PetEase. All rights reserved.
-          </p>
         </div>
+        <p className="text-center text-xs mt-8 font-light" style={{ color:'hsla(140,100%,7%,0.35)' }}>
+          © {new Date().getFullYear()} PetEase · In partnership with the Provincial Veterinary Office – Lanao del Sur
+        </p>
       </footer>
     </div>
   );
