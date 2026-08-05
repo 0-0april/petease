@@ -187,10 +187,12 @@ export default function Landing() {
             </Link>
             <NavDropdown label="Adoption" items={adoptionItems} navigate={navigate} />
             <NavDropdown label="Services" items={servicesItems} navigate={navigate} />
-            <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+            <button
+              onClick={() => scrollToSection('about')}
+              className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               About
-            </Link>
+            </button>
           </div>
 
           {/* Right: CTA + mobile hamburger */}
@@ -225,8 +227,8 @@ export default function Landing() {
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Adoption</button>
               <button onClick={() => { setMobileOpen(false); scrollToSection('services'); }}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Services</button>
-              <Link to="/about" onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">About</Link>
+              <button onClick={() => { setMobileOpen(false); scrollToSection('about'); }}
+                className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">About</button>
               <div className="flex gap-2 mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.4)' }}>
                 <Link to="/login" className="flex-1 text-center btn-outline" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>Login</Link>
                 <Link to="/login" className="flex-1 text-center btn-pay" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>Contact Us</Link>
@@ -413,98 +415,143 @@ export default function Landing() {
       </section>
 
       {/* ── Our Partner Office ── */}
-      <section className="relative z-10 py-24 px-4" id="about">
+      <section id="about" className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
+
+          {/* Heading */}
           <div className="text-center mb-16">
+            <span className="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-4"
+              style={{ background: 'hsla(130,100%,30%,0.14)', color: 'hsl(140,100%,7%)' }}>
+              About PetEase
+            </span>
             <h2 className="heading-dark text-4xl mb-4">Our Partner Office</h2>
             <p className="font-light max-w-xl mx-auto"
-              style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.75' }}>
-              PetEase is officially developed in partnership with the Provincial Veterinary Office of Lanao del Sur.
+              style={{ color: 'hsla(140,100%,7%,0.55)', lineHeight: '1.75' }}>
+              PetEase is built in official partnership with the Provincial Veterinary Office of Lanao del Sur —
+              the government agency responsible for animal health and welfare across the province.
             </p>
           </div>
 
-          <div className="glass-card overflow-hidden">
+          {/* PVO Identity Card */}
+          <div className="glass-card overflow-hidden mb-10">
             <div className="flex flex-col lg:flex-row">
-              {/* Left: PVO identity */}
-              <div className="lg:w-[38%] flex flex-col items-center justify-center gap-6 px-10 py-12 text-center"
+
+              {/* Left: Logo + contact */}
+              <div className="lg:w-[38%] flex flex-col items-center justify-center gap-6 px-10 py-14 text-center"
                 style={{ background: 'rgba(255,255,255,0.22)', borderRight: '1px solid rgba(255,255,255,0.35)' }}>
                 {pvoLogo ? (
                   <img src={pvoLogo} alt="Provincial Veterinary Office – Lanao del Sur"
-                    style={{ height: '120px', width: 'auto', objectFit: 'contain' }} />
+                    style={{ height: '130px', width: 'auto', objectFit: 'contain' }} />
                 ) : (
-                  <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
+                  <div className="w-28 h-28 rounded-full flex items-center justify-center text-5xl"
                     style={{ background: 'rgba(255,255,255,0.50)' }}>🏛️</div>
                 )}
                 <div>
-                  <p className="text-lg font-black" style={{ color: 'hsl(140,100%,7%)' }}>
+                  <p className="text-xl font-black" style={{ color: 'hsl(140,100%,7%)' }}>
                     Provincial Veterinary Office
                   </p>
-                  <p className="text-sm font-semibold mt-0.5" style={{ color: 'hsl(130,100%,30%)' }}>
+                  <p className="text-sm font-semibold mt-1" style={{ color: 'hsl(130,100%,30%)' }}>
                     Lanao del Sur, Philippines
                   </p>
-                  <p className="text-xs mt-3 font-light" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
-                    📍 Capitol Compound, Marawi City, Lanao del Sur
-                  </p>
-                  <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
-                    🕐 Mon – Fri, 8:00 AM – 5:00 PM
-                  </p>
+                </div>
+                <div className="text-sm space-y-2 font-light" style={{ color: 'hsla(140,100%,7%,0.60)' }}>
+                  <p>📍 Capitol Compound, Marawi City<br />Lanao del Sur</p>
+                  <p>📞 [Office contact — to be provided]</p>
+                  <p>✉️ [Email — to be provided]</p>
+                  <p>🕐 Mon – Fri, 8:00 AM – 5:00 PM</p>
                 </div>
                 <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
-                  className="btn-outline text-sm" style={{ padding: '8px 20px', fontSize: '0.78rem' }}>
+                  className="btn-outline" style={{ padding: '9px 22px', fontSize: '0.8rem' }}>
                   Visit Facebook Page ↗
                 </a>
               </div>
 
-              {/* Right: About PVO */}
-              <div className="flex-1 px-8 py-10 lg:px-12">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4"
-                  style={{ color: 'hsl(130,100%,30%)' }}>About the Office</p>
-                <p className="text-sm font-light leading-relaxed mb-6"
-                  style={{ color: 'hsla(140,100%,7%,0.70)' }}>
-                  The Provincial Veterinary Office (PVO) of Lanao del Sur is the lead government agency responsible
-                  for animal health, welfare, and disease control in the province. Its mandate includes the regulation
-                  of veterinary practice, livestock disease management, and delivery of veterinary services to the community.
-                  {/* Placeholder — edit with your actual office mandate text */}
-                </p>
-
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: 'hsla(140,100%,7%,0.45)' }}>Programs &amp; Services</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    {
-                      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
-                      title: 'Free Rabies Vaccination',
-                      desc: 'Regular anti-rabies vaccination drives for pets and livestock throughout the province.',
-                    },
-                    {
-                      icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
-                      title: 'Spay & Neuter Drives',
-                      desc: 'Scheduled community-based spay and neuter programs to support responsible pet ownership.',
-                    },
-                    {
-                      icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z',
-                      title: 'Disease Preparedness',
-                      desc: 'Surveillance, response, and disease-prevention programs to protect animal and public health.',
-                    },
-                  ].map((prog, i) => (
-                    <div key={i} className="glass-inner p-4">
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
-                        style={{ background: 'hsla(130,100%,30%,0.13)' }}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                          style={{ color: 'hsl(130,100%,30%)' }} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={prog.icon} />
-                        </svg>
-                      </div>
-                      <p className="text-xs font-bold uppercase tracking-wide mb-1"
-                        style={{ color: 'hsl(140,100%,7%)' }}>{prog.title}</p>
-                      <p className="text-xs font-light leading-relaxed"
-                        style={{ color: 'hsla(140,100%,7%,0.55)' }}>{prog.desc}</p>
-                    </div>
-                  ))}
+              {/* Right: Mandate + Partnership */}
+              <div className="flex-1 px-8 py-12 lg:px-12 flex flex-col justify-center gap-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-3"
+                    style={{ color: 'hsl(130,100%,30%)' }}>Mandate</p>
+                  <p className="text-sm font-light leading-relaxed"
+                    style={{ color: 'hsla(140,100%,7%,0.70)' }}>
+                    The Provincial Veterinary Office (PVO) of Lanao del Sur is the lead provincial government agency
+                    responsible for animal health, welfare, and disease control. Its mandate covers the regulation of
+                    veterinary practice, management of livestock diseases, and the delivery of veterinary services to
+                    the communities of Lanao del Sur.
+                    {/* Placeholder — replace with the official mandate from the PVO */}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-3"
+                    style={{ color: 'hsl(130,100%,30%)' }}>Our Partnership</p>
+                  <p className="text-sm font-light leading-relaxed"
+                    style={{ color: 'hsla(140,100%,7%,0.70)' }}>
+                    PetEase was developed as a digital solution to support the PVO's outreach and services. Through
+                    this platform, residents of Lanao del Sur can book veterinary appointments, facilitate pet
+                    adoptions, and access PVO's free services — all in one place. The PVO's veterinary staff manages
+                    appointments, adoption processing, and medical records directly through the system.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Programs & Services */}
+          <div className="text-center mb-10">
+            <h3 className="heading-dark text-3xl mb-3">Programs &amp; Services</h3>
+            <p className="font-light max-w-xl mx-auto"
+              style={{ color: 'hsla(140,100%,7%,0.55)', lineHeight: '1.75' }}>
+              Free and subsidized programs run by the PVO for communities across Lanao del Sur.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              {
+                icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                title: 'Free Rabies Vaccination',
+                desc: 'Regular anti-rabies vaccination drives for pets and livestock throughout the province. The program aims to eliminate rabies transmission and protect both animal and public health.',
+              },
+              {
+                icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+                title: 'Spay & Neuter Drives',
+                desc: 'Scheduled community-based spay and neuter programs to support responsible pet ownership and manage the stray animal population across Lanao del Sur.',
+              },
+              {
+                icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z',
+                title: 'Disease Preparedness',
+                desc: 'Active surveillance, rapid response, and disease-prevention programs to safeguard animal and public health, including monitoring of zoonotic diseases and livestock epidemics.',
+              },
+              {
+                icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+                title: 'Veterinary Consultations',
+                desc: 'Walk-in and scheduled consultations with licensed government veterinarians, providing accessible professional care for pets and livestock in the province.',
+              },
+              {
+                icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+                title: 'Livestock Development',
+                desc: 'Technical assistance, training, and support programs for livestock raisers to improve animal productivity and promote sustainable agricultural practices.',
+              },
+              {
+                icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+                title: 'Community Outreach',
+                desc: 'Education and awareness campaigns on responsible pet ownership, animal welfare, and zoonotic disease prevention targeted at barangay-level communities.',
+              },
+            ].map((prog, i) => (
+              <div key={i} className="glass-inner p-6 transition-all hover:shadow-glass">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: 'hsla(130,100%,30%,0.13)' }}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style={{ color: 'hsl(130,100%,30%)' }} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={prog.icon} />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-wider mb-2"
+                  style={{ color: 'hsl(140,100%,7%)' }}>{prog.title}</h3>
+                <p className="text-sm font-light leading-relaxed"
+                  style={{ color: 'hsla(140,100%,7%,0.55)', lineHeight: '1.7' }}>{prog.desc}</p>
+              </div>
+            ))}
+          </div>
+
         </div>
       </section>
 
@@ -572,7 +619,7 @@ export default function Landing() {
 
           {/* Links */}
           <div className="flex flex-col gap-1 text-sm">
-            <Link to="/about"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>About</Link>
+            <button onClick={() => scrollToSection('about')} className="font-light transition-opacity hover:opacity-100 text-left" style={{ color:'hsla(140,100%,7%,0.50)' }}>About</button>
             <Link to="/login"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Login</Link>
             <Link to="/register" className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Register</Link>
             <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
