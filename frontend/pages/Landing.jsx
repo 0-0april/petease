@@ -128,7 +128,7 @@ export default function Landing() {
             </Link>
             <NavDropdown label="Adoption" items={adoptionItems} />
             <NavDropdown label="Services" items={servicesItems} />
-            <Link to="/login" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
+            <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-primary/10"
               style={{ color: 'hsl(140,100%,7%)' }}>
               About
             </Link>
@@ -166,7 +166,7 @@ export default function Landing() {
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Adoption</Link>
               <Link to="/login" onClick={() => setMobileOpen(false)}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Services</Link>
-              <Link to="/login" onClick={() => setMobileOpen(false)}
+              <Link to="/about" onClick={() => setMobileOpen(false)}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">About</Link>
               <div className="flex gap-2 mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.4)' }}>
                 <Link to="/login" className="flex-1 text-center btn-outline" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>Login</Link>
@@ -513,6 +513,7 @@ export default function Landing() {
 
           {/* Links */}
           <div className="flex flex-col gap-1 text-sm">
+            <Link to="/about"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>About</Link>
             <Link to="/login"    className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Login</Link>
             <Link to="/register" className="font-light transition-opacity hover:opacity-100" style={{ color:'hsla(140,100%,7%,0.50)' }}>Register</Link>
             <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"

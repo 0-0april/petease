@@ -26,6 +26,7 @@ import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminNotifications from './pages/admin/AdminNotifications';
 import AdoptionRequests from './pages/user/AdoptionRequests';
 import Landing from './pages/Landing';
+import About from './pages/About';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/landing" element={<Landing />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
