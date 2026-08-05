@@ -558,7 +558,7 @@ Details of the Pet: (Important) - can be seen by the adoptee
 
 in the user/Adotion page, once the adoption waiver is signed by the vet staff, it should show to the user that it is completed and it the button shouldnt show anything for both adopters and pet owners but the download waiver button where they would download the waiver uploaded by vet staff
 
-Vaccination Card (img) 
+in user/Vaccination Card (img) 
 
 Registration Type:
 Erase the 'both'

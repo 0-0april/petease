@@ -135,7 +135,7 @@ const AdoptionRequests = () => {
 
   const getPetImage = (petId) => {
     const pet = pets.find(p => p.id === petId);
-    return pet?.image || 'https://via.placeholder.com/80?text=Pet';
+    return pet?.image || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23e8f5e9'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='%2381c784'%3E🐾%3C/text%3E%3C/svg%3E`;
   };
 
   const showFeedback = (msg, type = 'success') => {

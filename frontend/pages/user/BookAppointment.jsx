@@ -227,7 +227,7 @@ const BookAppointment = () => {
                     >
                       <div className="relative flex-shrink-0">
                         <img
-                          src={pet.image || 'https://via.placeholder.com/60'}
+                          src={pet.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23e8f5e9'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='24' fill='%2381c784'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E"}
                           alt={pet.name}
                           className="w-14 h-14 rounded-full object-cover"
                         />

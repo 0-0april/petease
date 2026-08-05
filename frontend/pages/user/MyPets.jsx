@@ -175,7 +175,7 @@ const MyPets = () => {
             {pets.map(pet => (
               <div key={pet.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <img
-                  src={pet.image || 'https://via.placeholder.com/400x200?text=No+Image'}
+                  src={pet.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23e8f5e9'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%2381c784'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E"}
                   alt={pet.name}
                   className="w-full h-44 object-cover"
                 />

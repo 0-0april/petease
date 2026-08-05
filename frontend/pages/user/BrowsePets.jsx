@@ -85,7 +85,7 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="glass-card w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="relative">
-          <img src={pet.image || 'https://via.placeholder.com/600x300?text=No+Image'} alt={pet.name}
+          <img src={pet.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect width='600' height='300' fill='%23e8f5e9'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='64' fill='%2381c784'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E"} alt={pet.name}
             className="w-full h-56 object-cover rounded-t-2xl" />
           <button onClick={onClose} className="absolute top-3 right-3 bg-white/90 rounded-full p-1.5 hover:bg-white shadow">
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +205,7 @@ const PetCard = ({ pet, onClick }) => {
     >
       <div className="relative overflow-hidden">
         <img
-          src={pet.image || 'https://via.placeholder.com/400x220?text=No+Image'}
+          src={pet.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='220' viewBox='0 0 400 220'%3E%3Crect width='400' height='220' fill='%23e8f5e9'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='52' fill='%2381c784'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E"}
           alt={pet.name}
           className="w-full h-48 object-cover rounded-t-2xl transition-transform duration-300 group-hover:scale-105"
         />
