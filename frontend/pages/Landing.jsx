@@ -48,9 +48,9 @@ const steps = [
 // sectionId  → smooth-scroll to that id on this page
 // to         → navigate to a different route
 const servicesItems = [
-  { label: 'Consultation',        desc: 'General health checkups',    sectionId: 'services' },
-  { label: 'Anti-Rabies Vaccine', desc: 'Regular vaccination program', sectionId: 'services' },
-  { label: 'Spay / Neuter',       desc: 'Scheduled surgical services', sectionId: 'services' },
+  { label: 'Consultation',        desc: 'General health checkups',    sectionId: 'about' },
+  { label: 'Anti-Rabies Vaccine', desc: 'Regular vaccination program', sectionId: 'about' },
+  { label: 'Spay / Neuter',       desc: 'Scheduled surgical services', sectionId: 'about' },
 ];
 const adoptionItems = [
   { label: 'Browse Pets',     desc: 'Find your perfect companion', to: '/register' },
@@ -225,7 +225,7 @@ export default function Landing() {
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive">Home</Link>
               <button onClick={() => { setMobileOpen(false); scrollToSection('how-it-works'); }}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Adoption</button>
-              <button onClick={() => { setMobileOpen(false); scrollToSection('services'); }}
+              <button onClick={() => { setMobileOpen(false); scrollToSection('about'); }}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">Services</button>
               <button onClick={() => { setMobileOpen(false); scrollToSection('about'); }}
                 className="rounded-xl px-3 py-2 text-sm font-medium nav-inactive text-left">About</button>
@@ -375,36 +375,6 @@ export default function Landing() {
                 </div>
                 <h3 className="text-sm font-bold uppercase tracking-wider mb-2"
                   style={{ color:'hsl(140,100%,7%)' }}>{s.title}</h3>
-                <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.7' }}>
-                  {s.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Vet Services ── */}
-      <section id="services" className="relative z-10 py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="heading-dark text-4xl mb-4">Veterinary Services</h2>
-            <p className="font-light" style={{ color:'hsla(140,100%,7%,0.55)' }}>
-              Professional care for your pets, scheduled at your convenience.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              { title:'Consultation',        schedule:'Every Monday', desc:'General health checkups and medical consultations with our licensed veterinarians.' },
-              { title:'Anti-Rabies Vaccine', schedule:'Weekdays',     desc:'Keep your pets protected with our regular anti-rabies vaccination program.' },
-              { title:'Spay / Neuter',       schedule:'By Schedule',  desc:'Scheduled spay and neuter services announced by our veterinary staff.' },
-            ].map((s, i) => (
-              <div key={i} className="glass-inner p-6"
-                style={{ borderTop:'2.5px solid hsl(130,100%,30%)' }}>
-                <h3 className="text-sm font-black uppercase tracking-wider mb-1"
-                  style={{ color:'hsl(140,100%,7%)' }}>{s.title}</h3>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color:'hsl(130,100%,30%)' }}>{s.schedule}</p>
                 <p className="text-sm font-light" style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.7' }}>
                   {s.desc}
                 </p>
