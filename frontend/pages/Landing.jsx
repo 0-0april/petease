@@ -49,22 +49,55 @@ const adoptionItems = [
 
 function NavDropdown({ label, items }) {
   const [open, setOpen] = useState(false);
+
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <button
         className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-colors"
         style={{ color: 'hsl(140,100%,7%)' }}
       >
         {label}
-        <svg className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className={`w-3.5 h-3.5 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+
+      {/* Invisible bridge — fills the gap between button bottom and panel top
+          so the hover zone is continuous and the dropdown never flickers closed */}
       {open && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 nav-glass rounded-2xl overflow-hidden z-50">
+        <div className="absolute left-0 right-0 h-3 top-full" aria-hidden="true" />
+      )}
+
+      {open && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 w-56 rounded-2xl overflow-hidden"
+          style={{
+            top: 'calc(100% + 8px)',
+            zIndex: 9999,
+            background: 'rgba(255,255,255,0.82)',
+            backdropFilter: 'blur(18px)',
+            WebkitBackdropFilter: 'blur(18px)',
+            border: '1px solid rgba(255,255,255,0.70)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+          }}
+        >
           {items.map((item, i) => (
-            <div key={i} className="px-4 py-3 hover:bg-primary/10 cursor-pointer transition-colors border-b last:border-0"
-              style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
+            <div
+              key={i}
+              className="px-4 py-3 cursor-pointer transition-colors"
+              style={{
+                borderBottom: i < items.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'hsla(130,100%,30%,0.08)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
               <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>{item.label}</p>
               <p className="text-xs mt-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>{item.desc}</p>
             </div>
@@ -92,8 +125,10 @@ export default function Landing() {
       </div>
 
       {/* ── Floating Pill Navbar ── */}
-      <div className="sticky top-0 z-50 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2">
-        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14">
+      <div className="sticky top-0 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-2"
+        style={{ zIndex: 9990 }}>
+        <nav className="nav-glass max-w-6xl mx-auto rounded-full flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14"
+          style={{ overflow: 'visible' }}>
           {/* Left: Co-brand lockup */}
           <div className="flex items-center gap-2 shrink-0">
             {/* PVO Logo */}
