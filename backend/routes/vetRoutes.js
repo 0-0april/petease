@@ -12,6 +12,147 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
+// Export appointments to CSV (all statuses, full details)
+router.get('/appointments/export', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    // Fetch all appointments with full details
+    const { data, error } = await supabase
+      .from('APPOINTMENT')
+      .select(`
+        AppointID,
+        AppointSchedDate,
+        AppointStatus,
+        CancellationReason,
+        created_at,
+        USERPETS!APPOINTMENT_UserPetID_fkey (
+          USER (
+            UserName,
+            UserAddress,
+            ACCOUNT (
+              AccEmail,
+              AccPhoneNum
+            )
+          ),
+          PET (
+            PetID,
+            PetName,
+            PetSpecie,
+            PetMarkings,
+            PetGender,
+            PetBDay
+          )
+        ),
+        SERVICES!APPOINTMENT_ServID_fkey (
+          ServType
+        ),
+        APPOINTMENTLOGS (
+          LogID,
+          LogAttendance,
+          LogNote,
+          created_at,
+          ACCOUNT (
+            AccUserName
+          )
+        )
+      `)
+      .order('AppointSchedDate', { ascending: false });
+
+    if (error) throw error;
+
+    const calculateAge = (birthday) => {
+      if (!birthday) return 'N/A';
+      const today = new Date();
+      const birthDate = new Date(birthday);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      return age > 0 ? `${age} years` : 'Less than 1 year';
+    };
+
+    // Fetch medical records per pet
+    const petIds = [...new Set(data.map(a => a.USERPETS?.PET?.PetID).filter(Boolean))];
+    let medicalByPet = {};
+    if (petIds.length > 0) {
+      // MEDICALHISTORY links to SERVICES not PET directly — fetch via ServID
+      const servIds = [...new Set(data.map(a => a.SERVICES?.ServID).filter(Boolean))];
+      if (servIds.length > 0) {
+        const { data: medData } = await supabase
+          .from('MEDICALHISTORY')
+          .select('Medicine, Description, ServID, created_at')
+          .in('ServID', servIds);
+        // Group by ServID
+        for (const m of medData || []) {
+          if (!medicalByPet[m.ServID]) medicalByPet[m.ServID] = [];
+          medicalByPet[m.ServID].push(`${m.Medicine}: ${m.Description || ''} (${new Date(m.created_at).toLocaleDateString()})`);
+        }
+      }
+    }
+
+    const escape = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+
+    const headers = [
+      'Scheduled Date',
+      'Service',
+      'Status',
+      'Patient Name',
+      'Phone Number',
+      'Email',
+      'Pet Name',
+      'Species',
+      'Markings',
+      'Pet Gender',
+      'Age',
+      'Medical Records',
+      'Activity Log',
+    ];
+
+    const rows = data.map(apt => {
+      const pet = apt.USERPETS?.PET || {};
+      const user = apt.USERPETS?.USER || {};
+      const account = user.ACCOUNT || {};
+      const servId = apt.SERVICES?.ServID;
+
+      const medRecords = medicalByPet[servId]?.join(' | ') || 'None';
+
+      const logs = (apt.APPOINTMENTLOGS || [])
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map(l => {
+          const action = l.LogAttendance === true ? 'Attended' : l.LogAttendance === false ? 'No Show' : 'Updated';
+          const by = l.ACCOUNT?.AccUserName || 'System';
+          const note = l.LogNote || '';
+          const time = new Date(l.created_at).toLocaleString();
+          return `[${time}] ${action} by ${by}${note ? ': ' + note : ''}`;
+        })
+        .join(' | ') || 'None';
+
+      return [
+        apt.AppointSchedDate?.split('T')[0] || 'N/A',
+        apt.SERVICES?.ServType || 'N/A',
+        apt.AppointStatus || 'N/A',
+        user.UserName || 'N/A',
+        account.AccPhoneNum || 'N/A',
+        account.AccEmail || 'N/A',
+        pet.PetName || 'N/A',
+        pet.PetSpecie || 'N/A',
+        pet.PetMarkings || 'N/A',
+        pet.PetGender || 'N/A',
+        calculateAge(pet.PetBDay),
+        medRecords,
+        logs,
+      ].map(escape).join(',');
+    });
+
+    const csv = [headers.map(escape).join(','), ...rows].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="appointments-${new Date().toISOString().split('T')[0]}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    console.error('Export appointments error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all appointments for vet
 router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {

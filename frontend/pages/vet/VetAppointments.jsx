@@ -188,13 +188,11 @@ const VetAppointments = () => {
 
   const handleExportCSV = async () => {
     try {
-      const completedAppointments = appointments.filter(a => a.status === 'completed' && a.attended === true);
-      const csvContent = await vetService.exportAppointmentsToCSV(completedAppointments);
-      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const blob = await vetService.exportAppointmentsToCSV();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `completed-appointments-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `appointments-${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
       showToast('CSV exported successfully.');
@@ -234,17 +232,15 @@ const VetAppointments = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Appointments Management</h1>
-          {activeTab === 'completed' && (
-            <button
-              onClick={handleExportCSV}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2 text-sm font-medium"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Export CSV</span>
-            </button>
-          )}
+          <button
+            onClick={handleExportCSV}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2 text-sm font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export CSV</span>
+          </button>
         </div>
 
         {/* Tabs */}

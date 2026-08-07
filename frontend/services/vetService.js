@@ -108,27 +108,9 @@ export const vetService = {
     return response.data;
   },
 
-  exportAppointmentsToCSV: async (appointments) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const headers = ['ID', 'Date', 'Time', 'Type', 'Patient Name', 'Pet Name', 'Status', 'Phone', 'Notes'];
-    const rows = appointments.map(apt => [
-      apt.id,
-      apt.date,
-      apt.time,
-      apt.type,
-      apt.userName,
-      apt.pets.map(p => p.name).join(', '),
-      apt.status,
-      apt.userPhone,
-      apt.notes || ''
-    ]);
-    
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    return csvContent;
+  exportAppointmentsToCSV: async () => {
+    const response = await api.get('/vet/appointments/export', { responseType: 'blob' });
+    return response.data;
   },
 
   // Services Management
