@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import Modal from '../../components/Modal';
 import { petService } from '../../services/petService';
-import { supabase } from '../../config/supabase';
 
 const EMPTY_FORM = {
   name: '',
@@ -52,24 +51,16 @@ const MyPets = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      // Upload vaccination card to Supabase Storage if a file was selected
+      // Upload vaccination card through backend if a file was selected
       let vaccinationUrl = formData.vaccinationCard || '';
       if (vaccinationFile) {
-        // Validate size (5 MB)
         if (vaccinationFile.size > 5 * 1024 * 1024) {
           showFeedback('Vaccination card file must be under 5 MB.', 'error');
           setSaving(false);
           return;
         }
         setVaccinationUploading(true);
-        const fileExt = vaccinationFile.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from('pet-vaccinationcard')
-          .upload(fileName, vaccinationFile, { contentType: vaccinationFile.type, upsert: true });
-        if (uploadError) throw new Error('Failed to upload vaccination card: ' + uploadError.message);
-        const { data: { publicUrl } } = supabase.storage.from('pet-vaccinationcard').getPublicUrl(fileName);
-        vaccinationUrl = publicUrl;
+        vaccinationUrl = await petService.uploadVaccinationCard(vaccinationFile);
         setVaccinationUploading(false);
       }
 

@@ -145,5 +145,14 @@ export const petService = {
   getMedicalHistory: async (petId) => {
     const response = await api.get(`/pets/${petId}/medical-history`);
     return response.data;
-  }
+  },
+
+  uploadVaccinationCard: async (file) => {
+    const formData = new FormData();
+    formData.append('vaccinationCard', file);
+    const response = await api.post('/pets/upload-vaccination-card', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data.url;
+  },
 };

@@ -42,6 +42,36 @@ const getUsername = async (accId) => {
   return data?.AccUserName || 'user';
 };
 
+// ── POST /api/pets/upload-vaccination-card ────────────────────────────────
+// Uploads vaccination card via backend (bypasses Supabase Storage RLS)
+router.post('/upload-vaccination-card', authenticateToken, upload.single('vaccinationCard'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file provided' });
+
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({ error: 'File must be under 5 MB' });
+    }
+
+    const fileExt = req.file.originalname.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('pet-vaccinationcard')
+      .upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('pet-vaccinationcard')
+      .getPublicUrl(fileName);
+
+    res.json({ url: publicUrl });
+  } catch (error) {
+    console.error('Vaccination card upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── GET /api/pets  (public – available pets for adoption) ──────────────────
 router.get('/', async (req, res) => {
   try {
