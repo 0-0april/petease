@@ -261,10 +261,20 @@ textarea {
 input::placeholder,
 textarea::placeholder { color: hsla(135,60%,25%,0.38) !important; }
 
-/* File input */
+/* File input — match regular inputs */
 input[type=file] {
-  background: rgba(255,255,255,0.35) !important;
-  border-color: hsla(135,40%,60%,0.28) !important;
+  background: rgba(255,255,255,0.45) !important;
+  border-color: hsla(135,40%,60%,0.30) !important;
+  color: hsl(140,100%,7%) !important;
+}
+input[type=file]::file-selector-button {
+  background: rgba(255,255,255,0.45);
+  border: 1px solid hsla(135,40%,60%,0.30);
+  color: hsl(140,100%,7%);
+  border-radius: 0.375rem;
+  padding: 0.2rem 0.65rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
 }
 
 /* Hover states */
