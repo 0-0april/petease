@@ -103,7 +103,7 @@ function LineGraph({ points }) {
 
   const options = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -133,7 +133,7 @@ function LineGraph({ points }) {
   };
 
   return (
-    <div style={{ height: '200px' }}>
+    <div className="relative w-full" style={{ height: '260px' }}>
       <Line data={data} options={options} aria-label="Active users line graph" />
     </div>
   );
