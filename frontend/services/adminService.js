@@ -181,6 +181,12 @@ export const adminService = {
     return response.data;
   },
 
+  // Invite Admin or Vet Staff
+  inviteStaff: async ({ email, password, name, role }) => {
+    const response = await api.post('/admin/invite', { email, password, name, role });
+    return response.data;
+  },
+
   // Real users from DB
   getUsers: async () => {
     const response = await api.get('/admin/users');

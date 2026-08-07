@@ -5,6 +5,65 @@ import { createNotificationsForUsers, createNotificationsForVets } from '../util
 
 const router = express.Router();
 
+// ── POST /api/admin/invite ────────────────────────────────────────────────
+// Create a new Admin or VetStaff account
+router.post('/invite', authenticateToken, authorizeRole('admin'), async (req, res) => {
+  const { email, password, name, role } = req.body;
+
+  if (!email || !password || !name || !role) {
+    return res.status(400).json({ error: 'Email, password, name, and role are required.' });
+  }
+  if (!['admin', 'vet'].includes(role)) {
+    return res.status(400).json({ error: 'Role must be admin or vet.' });
+  }
+
+  try {
+    // Check email not already taken
+    const { data: existing } = await supabase
+      .from('ACCOUNT')
+      .select('AccID')
+      .eq('AccEmail', email)
+      .single();
+
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
+
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.default.hash(password, 10);
+
+    // Generate a username from email
+    const username = email.split('@')[0] + '_' + Math.random().toString(36).slice(-4);
+
+    // Insert into ACCOUNT
+    const { data: account, error: accError } = await supabase
+      .from('ACCOUNT')
+      .insert({ AccUserName: username, AccEmail: email, AccPass: hashedPassword })
+      .select()
+      .single();
+
+    if (accError) throw accError;
+
+    // Insert into role table
+    if (role === 'admin') {
+      const { error: roleError } = await supabase
+        .from('ADMIN')
+        .insert({ AdminName: name, AccID: account.AccID });
+      if (roleError) throw roleError;
+    } else {
+      const { error: roleError } = await supabase
+        .from('VETSTAFF')
+        .insert({ StaffName: name, AccID: account.AccID });
+      if (roleError) throw roleError;
+    }
+
+    res.status(201).json({ success: true, message: `${role === 'admin' ? 'Admin' : 'Vet Staff'} account created.` });
+  } catch (error) {
+    console.error('Invite error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── GET /api/admin/users ──────────────────────────────────────────────────
 router.get('/users', authenticateToken, authorizeRole('admin'), async (req, res) => {
   try {

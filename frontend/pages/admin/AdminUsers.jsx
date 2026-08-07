@@ -22,7 +22,10 @@ const AdminUsers = () => {
   const [showSuspendModal, setShowSuspendModal]   = useState(false);
   const [suspensionReason, setSuspensionReason]   = useState('Violation of Terms');
   const [singleSuspendUser, setSingleSuspendUser] = useState(null);
-  const [submitting, setSubmitting]               = useState(false);
+  const [showInviteModal, setShowInviteModal]   = useState(false);
+  const [inviteForm, setInviteForm]             = useState({ email: '', password: '', name: '', role: 'admin' });
+  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+  const [submitting, setSubmitting]             = useState(false);
 
   useEffect(() => { fetchUsers(); }, []);
 
@@ -73,6 +76,21 @@ const AdminUsers = () => {
     setShowSuspendModal(true);
   };
 
+  const handleInviteSubmit = async (e) => {
+    e.preventDefault();
+    setInviteSubmitting(true);
+    try {
+      await adminService.inviteStaff(inviteForm);
+      showToastMsg(`${inviteForm.role === 'admin' ? 'Admin' : 'Vet Staff'} account created successfully.`);
+      setShowInviteModal(false);
+      setInviteForm({ email: '', password: '', name: '', role: 'admin' });
+    } catch (err) {
+      showToastMsg(err?.response?.data?.error || 'Failed to create account.', 'error');
+    } finally {
+      setInviteSubmitting(false);
+    }
+  };
+
   const handleSuspendSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -99,7 +117,15 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manage Users</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manage Users</h1>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
+          >
+            + Invite Admin/Vet Staff
+          </button>
+        </div>
 
         {toast && (
           <div className={`rounded-xl px-4 py-3 text-sm font-medium border ${
@@ -206,6 +232,64 @@ const AdminUsers = () => {
 
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
+
+      {/* Invite Admin / Vet Staff Modal */}
+      <Modal isOpen={showInviteModal} onClose={() => { if (!inviteSubmitting) setShowInviteModal(false); }} title="Invite Admin/Vet Staff">
+        <form onSubmit={handleInviteSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={inviteForm.name}
+              onChange={e => setInviteForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="e.g. Dr. Maria Santos"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+            <input
+              type="email"
+              value={inviteForm.email}
+              onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))}
+              placeholder="staff@shelter.com"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+            <input
+              type="password"
+              value={inviteForm.password}
+              onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))}
+              placeholder="Min. 6 characters"
+              minLength={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role <span className="text-red-500">*</span></label>
+            <select
+              value={inviteForm.role}
+              onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="admin">Admin</option>
+              <option value="vet">Vet Staff</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            disabled={inviteSubmitting}
+            className="w-full bg-primary text-white rounded-lg py-2.5 hover:bg-primary-dark font-medium text-sm disabled:opacity-60"
+          >
+            {inviteSubmitting ? 'Creating account…' : 'Create Account'}
+          </button>
+        </form>
+      </Modal>
 
       {/* Suspend Confirmation Modal */}
       <Modal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} title="Suspend User(s)">
