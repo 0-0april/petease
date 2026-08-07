@@ -317,18 +317,38 @@ const MyPets = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Pet Image <span className="text-red-500">*</span></label>
+
+            {/* Show existing/preview image when editing or after file selection */}
             {imagePreview && (
-              <div className="mb-2">
-                <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                <img src={imagePreview} alt="Preview" className="w-8 h-8 object-cover rounded shrink-0" />
+                <span className="text-xs text-green-700 flex-1 truncate">
+                  {imageFile ? imageFile.name : 'Current pet image'}
+                </span>
+                <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium shrink-0">Remove</button>
               </div>
             )}
-            <input 
-              type="file" 
+
+            {/* Styled clickable file input */}
+            <label
+              htmlFor="pet-image-input"
+              className="flex items-center gap-2 w-full px-3 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 cursor-pointer hover:border-primary hover:text-primary hover:bg-green-50 transition-colors"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              {imageFile ? 'Replace image…' : imagePreview ? 'Replace pet image…' : 'Click to upload pet image…'}
+            </label>
+            <input
+              id="pet-image-input"
+              type="file"
               accept="image/*"
+              className="sr-only"
               onChange={handleImageChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               required={!editingPet && !imagePreview}
             />
+            <p className="text-xs text-gray-400 mt-1">Accepted: JPG, PNG, GIF · Max 5 MB</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -349,11 +369,11 @@ const MyPets = () => {
 
             {/* Show newly selected file name */}
             {vaccinationFile && (
-              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                <svg className="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-xs text-blue-700 flex-1 truncate">{vaccinationFile.name}</span>
+                <span className="text-xs text-green-700 flex-1 truncate">{vaccinationFile.name}</span>
                 <button type="button" onClick={() => setVaccinationFile(null)}
                   className="text-xs text-red-500 hover:text-red-700 font-medium shrink-0">Remove</button>
               </div>
