@@ -140,6 +140,7 @@ const MyPets = () => {
     });
     setImageFile(null);
     setImagePreview(pet.image || null);
+    setVaccinationFile(null);
     setShowModal(true);
   };
 
@@ -177,7 +178,7 @@ const MyPets = () => {
             <p className="text-gray-500 mt-1">Register and manage your pets.</p>
           </div>
           <button
-            onClick={() => { setShowModal(true); setEditingPet(null); setFormData(EMPTY_FORM); }}
+            onClick={() => { setShowModal(true); setEditingPet(null); setFormData(EMPTY_FORM); setImageFile(null); setImagePreview(null); setVaccinationFile(null); }}
             className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark font-medium"
           >
             + Register Pet
@@ -225,6 +226,21 @@ const MyPets = () => {
                     <p className="text-xs text-gray-400">
                       Born: {new Date(pet.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
+                  )}
+                  {pet.vaccinationCard && (
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <a
+                        href={pet.vaccinationCard}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-green-700 underline font-medium"
+                      >
+                        View Vaccination Card
+                      </a>
+                    </div>
                   )}
                   <div className="mt-4 flex space-x-2">
                     <button
