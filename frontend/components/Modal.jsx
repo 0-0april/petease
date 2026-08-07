@@ -16,10 +16,12 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div className="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+      style={{ zIndex: 99999 }}>
       <div className="flex min-h-screen items-center justify-center px-4 py-6">
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose} aria-hidden="true" />
-        <div className="relative glass-card max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose}
+          aria-hidden="true" style={{ zIndex: 99999 }} />
+        <div className="relative glass-card max-w-md w-full p-6" style={{ zIndex: 100000 }}>
           <div className="flex justify-between items-center mb-5">
             <h3 id="modal-title" className="heading-dark text-lg">{title}</h3>
             <button onClick={onClose}

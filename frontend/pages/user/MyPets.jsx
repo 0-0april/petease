@@ -387,7 +387,8 @@ const MyPets = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+          style={{ zIndex: 99999 }}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Remove Pet</h3>
             <p className="text-sm text-gray-600 mb-5">

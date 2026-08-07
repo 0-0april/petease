@@ -306,3 +306,11 @@ input:focus, select:focus, textarea:focus {
 
 /* Inline close button on modals */
 .hover\:bg-gray-100:hover { background: rgba(255,255,255,0.38) !important; }
+
+/* ─── Modal stacking guarantee ───────────────────────────────────── */
+/* backdrop-filter on .bg-white creates stacking contexts that can   */
+/* visually trap siblings. Force modal root above everything.        */
+[role="dialog"] {
+  isolation: isolate;
+  z-index: 99999 !important;
+}
