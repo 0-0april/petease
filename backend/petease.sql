@@ -73,6 +73,7 @@ CREATE TABLE public.PET (
   PetAvailable boolean NOT NULL DEFAULT true,
   PetRegType text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  PetVaccinationCardFile text,
   CONSTRAINT PET_pkey PRIMARY KEY (PetID)
 );
 CREATE TABLE public.USERPETS (
@@ -104,6 +105,7 @@ CREATE TABLE public.APPOINTMENT (
   AppointSchedDate timestamp with time zone NOT NULL,
   AppointStatus USER-DEFINED NOT NULL DEFAULT 'Pending'::appoint_status,
   created_at timestamp with time zone DEFAULT now(),
+  CancellationReason text,
   CONSTRAINT APPOINTMENT_pkey PRIMARY KEY (AppointID),
   CONSTRAINT APPOINTMENT_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID),
   CONSTRAINT APPOINTMENT_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID)

@@ -94,7 +94,7 @@ router.get('/my-pets', authenticateToken, async (req, res) => {
         PET (
           PetID, PetName, PetBDay, PetSpecie, PetBreed,
           PetMarkings, PetGender, PetDetails, PetImg,
-          PetAvailable, PetRegType
+          PetAvailable, PetRegType, PetVaccinationCardFile
         )
       `)
       .eq('UserID', userId);
@@ -150,7 +150,7 @@ router.get('/:id', async (req, res) => {
 
 // ── POST /api/pets  (auth required) ──────────────────────────────────────
 router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
-  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, petRegType } = req.body;
+  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, petRegType, vaccinationCard } = req.body;
 
   try {
     const username = await getUsername(req.user.accId);
@@ -172,6 +172,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
         PetDetails: petDetails,
         PetImg: imageUrl,
         PetRegType: petRegType,
+        PetVaccinationCardFile: vaccinationCard || null,
       })
       .select()
       .single();
@@ -196,7 +197,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
 // ── PUT /api/pets/:id  (auth required) ───────────────────────────────────
 router.put('/:id', authenticateToken, upload.single('image'), async (req, res) => {
-  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg } = req.body;
+  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, vaccinationCard } = req.body;
 
   try {
     const username = await getUsername(req.user.accId);
@@ -206,18 +207,25 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
       imageUrl = await uploadToSupabase(req.file, 'pet-images', username);
     }
 
+    // Build update payload — only overwrite vaccination card if a new one was provided
+    const updatePayload = {
+      PetName: petName,
+      PetBDay: petBDay,
+      PetSpecie: petSpecie,
+      PetBreed: petBreed,
+      PetMarkings: petMarkings,
+      PetGender: petGender,
+      PetDetails: petDetails,
+      PetImg: imageUrl,
+    };
+
+    if (vaccinationCard !== undefined) {
+      updatePayload.PetVaccinationCardFile = vaccinationCard || null;
+    }
+
     const { data: pet, error } = await supabase
       .from('PET')
-      .update({
-        PetName: petName,
-        PetBDay: petBDay,
-        PetSpecie: petSpecie,
-        PetBreed: petBreed,
-        PetMarkings: petMarkings,
-        PetGender: petGender,
-        PetDetails: petDetails,
-        PetImg: imageUrl,
-      })
+      .update(updatePayload)
       .eq('PetID', req.params.id)
       .select()
       .single();

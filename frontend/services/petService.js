@@ -92,7 +92,8 @@ export const petService = {
       status: pet.PetAvailable ? 'available' : 'adopted',
       ownerId: pet.UserID,
       ownerUsername: pet.owner_username,
-      registrationType: pet.PetRegType === 'Adoption' ? 'adoption' : pet.PetRegType === 'Both' ? 'both' : 'appointment'
+      registrationType: pet.PetRegType === 'Adoption' ? 'adoption' : pet.PetRegType === 'Both' ? 'both' : 'appointment',
+      vaccinationCard: pet.PetVaccinationCardFile || ''
     }));
   },
 
