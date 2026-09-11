@@ -1,90 +1,62 @@
-import { supabase } from '../_lib/supabase.js';
-import { getUser } from '../_lib/auth.js';
-import multer from 'multer';
+const { supabase } = require('../_lib/supabase');
+const { getUser } = require('../_lib/auth');
+const { parseMultipart } = require('../_lib/parseMultipart');
 
-export const config = { api: { bodyParser: false } };
+module.exports.config = { api: { bodyParser: false } };
 
-const upload = multer({ storage: multer.memoryStorage() });
-
-const runMiddleware = (req, res, fn) =>
-  new Promise((resolve, reject) => fn(req, res, (result) => (result instanceof Error ? reject(result) : resolve(result))));
-
-const getUsername = async (accId) => {
-  const { data } = await supabase.from('ACCOUNT').select('AccUserName').eq('AccID', accId).single();
-  return data?.AccUserName || 'user';
-};
-
-const getUserId = async (accId) => {
-  const { data } = await supabase.from('USER').select('UserID').eq('AccID', accId).single();
-  return data?.UserID || null;
-};
-
-const uploadToSupabase = async (file, bucket, username) => {
+async function uploadToSupabase(file, bucket, username) {
   const fileExt = file.originalname.split('.').pop();
   const originalName = file.originalname.replace(/\.[^/.]+$/, '');
   const fileName = `${username}_${originalName}.${fileExt}`;
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(fileName, file.buffer, { contentType: file.mimetype, upsert: true });
+  const { error } = await supabase.storage.from(bucket).upload(fileName, file.buffer, { contentType: file.mimetype, upsert: true });
   if (error) throw error;
   return fileName;
-};
+}
 
-export default async function handler(req, res) {
-  // GET /api/pets — public, returns available adoption pets
+async function getUsername(accId) {
+  const { data } = await supabase.from('ACCOUNT').select('AccUserName').eq('AccID', accId).single();
+  return data?.AccUserName || 'user';
+}
+
+async function getUserId(accId) {
+  const { data } = await supabase.from('USER').select('UserID').eq('AccID', accId).single();
+  return data?.UserID || null;
+}
+
+module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      const { data: userpets, error } = await supabase
-        .from('USERPETS')
-        .select(`
-          UserID,
-          PET ( PetID, PetName, PetBDay, PetSpecie, PetBreed, PetMarkings, PetGender, PetDetails, PetImg, PetAvailable, PetRegType, created_at ),
-          USER ( UserID, UserName, ACCOUNT ( AccUserName ) )
-        `)
-        .eq('PET.PetAvailable', true)
-        .eq('PET.PetRegType', 'Adoption');
-
+      const { data: userpets, error } = await supabase.from('USERPETS').select(`
+        UserID,
+        PET ( PetID, PetName, PetBDay, PetSpecie, PetBreed, PetMarkings, PetGender, PetDetails, PetImg, PetAvailable, PetRegType, created_at ),
+        USER ( UserID, UserName, ACCOUNT ( AccUserName ) )
+      `).eq('PET.PetAvailable', true).eq('PET.PetRegType', 'Adoption');
       if (error) throw error;
-
-      const pets = (userpets || [])
-        .filter(row => row.PET)
-        .map(row => ({
-          ...row.PET,
-          ownerId: row.UserID,
-          owner_name: row.USER?.UserName || null,
-          owner_username: row.USER?.ACCOUNT?.AccUserName || null,
-        }));
-
-      return res.json(pets);
+      return res.json((userpets || []).filter(r => r.PET).map(r => ({
+        ...r.PET, ownerId: r.UserID, owner_name: r.USER?.UserName || null, owner_username: r.USER?.ACCOUNT?.AccUserName || null,
+      })));
     } catch (error) {
       return res.status(503).json({ error: 'Pets service temporarily unavailable', details: error.message });
     }
   }
 
-  // POST /api/pets — auth required
   if (req.method === 'POST') {
     const user = getUser(req, res);
     if (!user) return;
 
-    await runMiddleware(req, res, upload.single('image'));
-
-    const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, petRegType, vaccinationCard } = req.body;
-
     try {
+      const { fields, files } = await parseMultipart(req);
+      const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, petRegType, vaccinationCard } = fields;
+
       const username = await getUsername(user.accId);
       let imageUrl = petImg || null;
-      if (req.file) imageUrl = await uploadToSupabase(req.file, 'pet-images', username);
+      if (files.image) imageUrl = await uploadToSupabase(files.image, 'pet-images', username);
 
-      const { data: pet, error: petError } = await supabase
-        .from('PET')
-        .insert({
-          PetName: petName, PetBDay: petBDay, PetSpecie: petSpecie, PetBreed: petBreed,
-          PetMarkings: petMarkings, PetGender: petGender, PetDetails: petDetails,
-          PetImg: imageUrl, PetRegType: petRegType, PetVaccinationCardFile: vaccinationCard || null,
-        })
-        .select()
-        .single();
-
+      const { data: pet, error: petError } = await supabase.from('PET').insert({
+        PetName: petName, PetBDay: petBDay, PetSpecie: petSpecie, PetBreed: petBreed,
+        PetMarkings: petMarkings, PetGender: petGender, PetDetails: petDetails,
+        PetImg: imageUrl, PetRegType: petRegType, PetVaccinationCardFile: vaccinationCard || null,
+      }).select().single();
       if (petError) throw petError;
 
       const userId = await getUserId(user.accId);
@@ -101,4 +73,4 @@ export default async function handler(req, res) {
   }
 
   res.status(405).json({ error: 'Method not allowed' });
-}
+};

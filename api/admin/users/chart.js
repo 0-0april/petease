@@ -1,9 +1,8 @@
-import { supabase } from '../../_lib/supabase.js';
-import { getUserWithRole } from '../../_lib/auth.js';
+const { supabase } = require('../../_lib/supabase');
+const { getUserWithRole } = require('../../_lib/auth');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
   const user = getUserWithRole(req, res, 'admin');
   if (!user) return;
 
@@ -14,4 +13,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};

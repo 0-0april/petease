@@ -1,21 +1,15 @@
-import bcrypt from 'bcryptjs';
-import { supabase } from '../_lib/supabase.js';
-import { getUserWithRole } from '../_lib/auth.js';
+const bcrypt = require('bcryptjs');
+const { supabase } = require('../_lib/supabase');
+const { getUserWithRole } = require('../_lib/auth');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   const user = getUserWithRole(req, res, 'admin');
   if (!user) return;
 
   const { email, password, name, role } = req.body;
-
-  if (!email || !password || !name || !role) {
-    return res.status(400).json({ error: 'Email, password, name, and role are required.' });
-  }
-  if (!['admin', 'vet'].includes(role)) {
-    return res.status(400).json({ error: 'Role must be admin or vet.' });
-  }
+  if (!email || !password || !name || !role) return res.status(400).json({ error: 'Email, password, name, and role are required.' });
+  if (!['admin', 'vet'].includes(role)) return res.status(400).json({ error: 'Role must be admin or vet.' });
 
   try {
     const { data: existing } = await supabase.from('ACCOUNT').select('AccID').eq('AccEmail', email).single();
@@ -23,9 +17,7 @@ export default async function handler(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const username = email.split('@')[0] + '_' + Math.random().toString(36).slice(-4);
-
-    const { data: account, error: accError } = await supabase
-      .from('ACCOUNT').insert({ AccUserName: username, AccEmail: email, AccPass: hashedPassword }).select().single();
+    const { data: account, error: accError } = await supabase.from('ACCOUNT').insert({ AccUserName: username, AccEmail: email, AccPass: hashedPassword }).select().single();
     if (accError) throw accError;
 
     if (role === 'admin') {
@@ -35,9 +27,8 @@ export default async function handler(req, res) {
       const { error } = await supabase.from('VETSTAFF').insert({ StaffName: name, AccID: account.AccID });
       if (error) throw error;
     }
-
     res.status(201).json({ success: true, message: `${role === 'admin' ? 'Admin' : 'Vet Staff'} account created.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};

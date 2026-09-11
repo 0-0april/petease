@@ -1,10 +1,6 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-/**
- * Verifies the Bearer token from the Authorization header.
- * Returns the decoded payload or sends a 401/403 response.
- */
-export function getUser(req, res) {
+function getUser(req, res) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -21,10 +17,7 @@ export function getUser(req, res) {
   }
 }
 
-/**
- * Like getUser, but also checks that the user has one of the allowed roles.
- */
-export function getUserWithRole(req, res, ...roles) {
+function getUserWithRole(req, res, ...roles) {
   const user = getUser(req, res);
   if (!user) return null;
 
@@ -35,3 +28,5 @@ export function getUserWithRole(req, res, ...roles) {
 
   return user;
 }
+
+module.exports = { getUser, getUserWithRole };
