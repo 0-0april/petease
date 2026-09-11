@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "PetEase - Pet Adoption & Veterinary Appointment System",
   "scripts": {
-    "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
