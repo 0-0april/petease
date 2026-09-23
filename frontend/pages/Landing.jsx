@@ -34,7 +34,7 @@ const stats = [
   { value:'500+',   label:'Pets Adopted' },
   { value:'1,200+', label:'Registered Users' },
   { value:'300+',   label:'Appointments Booked' },
-  { value:'50+',    label:'Vet Services' },
+  { value:'10+',    label:'Vet Services' },
 ];
 
 const steps = [

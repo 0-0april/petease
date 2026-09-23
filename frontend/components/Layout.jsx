@@ -200,7 +200,7 @@ export default function Layout({ children }) {
         )}
       </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Warning banner */}
         {user?.accStatus === 'Warning' && !warnDismissed && (
           <div className="mb-4 flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium"
