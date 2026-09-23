@@ -8,8 +8,9 @@ import { messageService } from '../services/messageService';
 import { appointmentService } from '../services/appointmentService';
 import CoBrandLockup from './CoBrandLockup';
 
-let pvoLogo;
+let pvoLogo, peteaseLogo;
 try { pvoLogo = new URL('../data/pvo-logo.png', import.meta.url).href; } catch { pvoLogo = null; }
+try { peteaseLogo = new URL('../data/petease-logo.png', import.meta.url).href; } catch { peteaseLogo = null; }
 
 const CONV_SEEN_KEY = 'messages_seen_snapshot';
 const APPT_SEEN_KEY = 'appointments_seen_ids';
@@ -221,7 +222,11 @@ export default function Layout({ children }) {
 
           {/* PetEase info */}
           <div>
-            <p className="text-base font-black" style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</p>
+            {peteaseLogo ? (
+              <img src={peteaseLogo} alt="PetEase" className="h-10 w-auto object-contain mb-2" />
+            ) : (
+              <p className="text-base font-black" style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</p>
+            )}
             <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
               Pet Adoption &amp; Veterinary Appointment System
             </p>
