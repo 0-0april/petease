@@ -604,3 +604,5 @@ Please implement the following across the site:
 
 ### 7. Favicon / Document `<head>` Icon
 - Set `petease-logo.png` (or a cropped/simplified version of it) as the site favicon, referenced in the `<head>` via a `<link rel="icon">` tag, so it shows in the browser tab.
+
+in the user/Appointments.jsx, in the book new appointment modal, in the step where the selection of pets happens, make sure it just display the pet owned bye the current user and the PetRegType is Appointment, do not display/exclude the pet that is registered as for adoption

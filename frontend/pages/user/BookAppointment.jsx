@@ -52,7 +52,11 @@ const BookAppointment = () => {
   const fetchMyPets = async () => {
     try {
       const data = await petService.getMyPets();
-      setMyPets(data);
+      // Filter to only show pets registered for appointments (exclude adoption-only pets)
+      const appointmentPets = data.filter(pet => 
+        pet.registrationType === 'appointment' || pet.registrationType === 'both'
+      );
+      setMyPets(appointmentPets);
     } catch (error) {
       console.error('Error fetching pets:', error);
     } finally {
