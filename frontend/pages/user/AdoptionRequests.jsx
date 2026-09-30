@@ -347,7 +347,7 @@ const AdoptionRequests = () => {
                       )}
                       {req.status === 'approved' && (
                         <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm text-blue-800">
-                          Your request was approved. Please visit the Provincial Veterinary Office with the owner to sign the adoption waiver.
+                          Your request was approved. Please visit the Provincial Veterinary Office with the owner to sign the adoption waiver. The office is open on weekdays, working hours
                         </div>
                       )}
                       {req.status === 'completed' && (
