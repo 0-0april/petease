@@ -194,13 +194,16 @@ export default function Register() {
             <Field label="Phone" icon={ICONS.phone} type="tel"     name="phone"    value={form.phone}    onChange={e => set('phone',    e.target.value)} placeholder="+1 (555) 000-0000" required />
             <Field label="Address"     icon={ICONS.pin}   textarea        name="address"  value={form.address}  onChange={e => set('address',  e.target.value)} placeholder="123 Main St, City, State" required />
 
-            <div className="flex items-center justify-between pt-3">
+            <div className="flex items-center justify-center gap-4 pt-3">
               <button type="submit" disabled={loading} className="btn-pay">
                 {loading ? 'Saving…' : 'Register'}
               </button>
-              <p className="mt-6 text-sm" style={{ color:'hsla(140,100%,7%,0.48)' }}>
-                <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
-                  style={{ color:'hsl(130,100%,30%)' }}>
+              <p className="text-sm" style={{ color: 'hsla(140,100%,7%,0.48)' }}>
+                <Link
+                  to="/login"
+                  className="font-semibold hover:opacity-80 transition-opacity"
+                  style={{ color: 'hsl(130,100%,30%)' }}
+                >
                   Login
                 </Link>
               </p>
