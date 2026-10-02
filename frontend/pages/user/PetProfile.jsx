@@ -115,14 +115,14 @@ const PetProfile = () => {
                       onClick={() => { setAdoptDone(false); setAdoptMessage(''); setShowAdoptModal(true); }}
                       className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark font-medium"
                     >
-                      Request Adoption
+                      Adopt
                     </button>
                   )}
                   <button
                     onClick={() => setShowMessageModal(true)}
                     className="border border-primary text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white font-medium"
                   >
-                    Message Owner
+                    Message
                   </button>
                 </>
               )}
@@ -131,9 +131,9 @@ const PetProfile = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Medical History</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">History</h2>
           {medicalHistory.length === 0 ? (
-            <p className="text-gray-600">No medical history available</p>
+            <p className="text-gray-600">No history</p>
           ) : (
             <div className="space-y-4">
               {medicalHistory.map((record) => (
@@ -148,21 +148,21 @@ const PetProfile = () => {
         </div>
       </div>
 
-      <Modal isOpen={showMessageModal} onClose={() => setShowMessageModal(false)} title="Message Pet Owner">
+      <Modal isOpen={showMessageModal} onClose={() => setShowMessageModal(false)} title="Message">
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           rows="4"
-          placeholder="Type your message..."
+          placeholder="Message…"
         />
         <button onClick={handleSendMessage} className="w-full mt-4 bg-primary text-white py-2 rounded-md hover:bg-primary-dark">
-          Send Message
+          Send
         </button>
       </Modal>
 
       {/* Adoption Request Modal */}
-      <Modal isOpen={showAdoptModal} onClose={() => !adoptLoading && setShowAdoptModal(false)} title="Request Adoption">
+      <Modal isOpen={showAdoptModal} onClose={() => !adoptLoading && setShowAdoptModal(false)} title="Adopt">
         {adoptDone ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -170,13 +170,13 @@ const PetProfile = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="font-semibold text-gray-900 mb-1">Request Sent!</p>
-            <p className="text-sm text-gray-500 mb-4">Your adoption request for <span className="font-medium">{pet.name}</span> has been sent to the owner.</p>
+            <p className="font-semibold text-gray-900 mb-1">Sent</p>
+            <p className="text-sm text-gray-500 mb-4">Request sent to owner.</p>
             <button
               onClick={() => setShowAdoptModal(false)}
               className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark font-medium"
             >
-              Done
+              Close
             </button>
           </div>
         ) : (
@@ -189,13 +189,13 @@ const PetProfile = () => {
               </div>
             </div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Message to owner <span className="text-gray-400 font-normal">(optional)</span>
+              Message (optional)
             </label>
             <textarea
               value={adoptMessage}
               onChange={e => setAdoptMessage(e.target.value)}
               rows={4}
-              placeholder="Introduce yourself and tell the owner why you'd be a great fit for this pet..."
+              placeholder="Why are you a good fit…"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
             <div className="flex space-x-3 mt-4">
@@ -211,7 +211,7 @@ const PetProfile = () => {
                 disabled={adoptLoading}
                 className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-60 font-medium text-sm"
               >
-                {adoptLoading ? 'Sending...' : 'Send Request'}
+                {adoptLoading ? 'Sending…' : 'Send'}
               </button>
             </div>
           </>

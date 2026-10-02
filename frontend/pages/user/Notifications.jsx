@@ -69,7 +69,7 @@ const Notifications = () => {
                       onClick={() => handleMarkAsRead(notification.id)}
                       className="text-primary hover:text-primary-dark text-sm"
                     >
-                      Mark as read
+                      Mark read
                     </button>
                   )}
                 </div>

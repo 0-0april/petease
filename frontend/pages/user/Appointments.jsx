@@ -30,10 +30,7 @@ const CancelModal = ({ onConfirm, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="glass-card w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Cancel Appointment</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Please select a reason for cancellation. This helps us improve our scheduling.
-        </p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cancel</h3>
         <div className="space-y-2 mb-3">
           {CANCEL_REASONS.map(r => (
             <button key={r} onClick={() => toggle(r)}
@@ -51,23 +48,23 @@ const CancelModal = ({ onConfirm, onClose }) => {
                 ? 'border-red-400 bg-red-50 text-red-700 font-medium'
                 : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
             }`}>
-            {selected === '__other__' && <span className="mr-2">✓</span>}Other reason...
+            {selected === '__other__' && <span className="mr-2">✓</span>}Other…
           </button>
         </div>
         {selected === '__other__' && (
           <textarea value={custom} onChange={e => setCustom(e.target.value)} rows={3}
-            placeholder="Write your reason here..."
+            placeholder="Reason…"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-3"
             autoFocus />
         )}
         <div className="flex space-x-3 mt-1">
           <button onClick={onClose}
             className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
-            Keep It
+            Keep
           </button>
           <button onClick={() => onConfirm(finalReason)} disabled={!finalReason}
             className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium">
-            Confirm Cancellation
+            Confirm
           </button>
         </div>
       </div>
@@ -134,13 +131,10 @@ const Appointments = () => {
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Appointments</h1>
-            <p className="text-gray-500 mt-1">View and manage your veterinary appointments.</p>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
           <Link to="/book-appointment"
             className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark font-medium text-sm">
-            + New Appointment
+            + New
           </Link>
         </div>
 
@@ -157,9 +151,9 @@ const Appointments = () => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <p className="text-gray-600 font-medium mb-2">No appointments yet</p>
+            <p className="text-gray-600 font-medium mb-2">No appointments</p>
             <Link to="/book-appointment" className="text-primary hover:underline text-sm">
-              Book your first appointment
+              Book now
             </Link>
           </div>
         ) : (

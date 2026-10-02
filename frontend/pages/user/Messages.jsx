@@ -230,7 +230,7 @@ export default function Messages() {
   const latestAnn = announcements[0];
   const annPreview = latestAnn
     ? latestAnn.content?.slice(0, 60) + (latestAnn.content?.length > 60 ? '…' : '')
-    : 'No announcements yet';
+    : 'No announcements';
   const annMeta = latestAnn
     ? new Date(latestAnn.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '';
@@ -242,7 +242,7 @@ export default function Messages() {
     <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.10)' }}>
       {messages.length === 0 ? (
         <p className="text-center text-sm py-8" style={{ color: 'hsla(140,100%,7%,0.40)' }}>
-          No messages yet. Say hello!
+          No messages
         </p>
       ) : messages.map(msg => (
         <div
@@ -297,7 +297,7 @@ export default function Messages() {
               d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search conversations…"
+            placeholder="Search…"
             className="w-full pl-9 pr-3 py-2 rounded-xl text-sm" />
         </div>
       </div>
@@ -315,11 +315,11 @@ export default function Messages() {
         />
         {filteredConversations.length === 0 && search ? (
           <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-            No conversations match "{search}"
+            No match
           </p>
         ) : filteredConversations.length === 0 ? (
           <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-            No conversations yet. Start one from a pet profile.
+            No conversations
           </p>
         ) : filteredConversations
             .sort((a, b) => new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0))
@@ -445,7 +445,7 @@ export default function Messages() {
                   <div className="flex flex-col items-center justify-center h-full text-center py-12">
                     <MegaphoneIcon className="w-12 h-12 mb-4" style={{ color: 'hsla(140,100%,7%,0.20)' }} />
                     <p className="text-sm font-medium" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
-                      No announcements yet
+                      No announcements
                     </p>
                   </div>
                 ) : announcements.map(ann => (
@@ -505,7 +505,7 @@ export default function Messages() {
               {messages.length > 0 && selectedMsgIds.length === 0 && (
                 <div className="px-4 py-1.5 text-center">
                   <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.32)' }}>
-                    Tap messages to select them for a report
+                    Tap to select for report
                   </p>
                 </div>
               )}
@@ -516,7 +516,7 @@ export default function Messages() {
                     type="text"
                     value={newMessage}
                     onChange={e => setNewMessage(e.target.value)}
-                    placeholder="Type a message…"
+                    placeholder="Message…"
                     className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
                   />
                   <button type="submit" disabled={sending || !newMessage.trim()} className="btn-pay shrink-0"
@@ -594,20 +594,20 @@ export default function Messages() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1" style={{ color: 'hsla(140,100%,7%,0.60)' }}>
-                      Description (optional)
+                      Details (opt.)
                     </label>
                     <textarea
                       value={reportDesc}
                       onChange={e => setReportDesc(e.target.value)}
                       rows={3}
-                      placeholder="Describe the issue…"
+                      placeholder="Issue…"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300"
                     />
                   </div>
                   <button type="submit" disabled={reportSending}
                     className="w-full py-2 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                     style={{ background: 'hsl(0,65%,50%)' }}>
-                    {reportSending ? 'Submitting…' : 'Submit Report'}
+                    {reportSending ? 'Submitting…' : 'Submit'}
                   </button>
                 </form>
               </>

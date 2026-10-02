@@ -5,7 +5,7 @@ import Layout from '../../components/Layout';
 import { petService } from '../../services/petService';
 import { appointmentService } from '../../services/appointmentService';
 
-const STEPS = ['Select Pets', 'Appointment Type', 'Choose Date'];
+const STEPS = ['Pets', 'Type', 'Date'];
 
 const formatAvailability = (service) => {
   if (service.specificDate) {
@@ -167,7 +167,7 @@ const BookAppointment = () => {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Book Appointment</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Book</h1>
 
         {/* Step indicator */}
         <div className="flex items-center mb-8">
@@ -204,18 +204,16 @@ const BookAppointment = () => {
         {/* Step 1 — Select Pets */}
         {step === 1 && (
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Select Your Pets</h2>
-            <p className="text-sm text-gray-500 mb-5">Choose one or more pets to include in this appointment.</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-5">Select Pets</h2>
 
             {loadingPets ? (
-              <div className="text-center py-10 text-gray-500">Loading your pets...</div>
+              <div className="text-center py-10 text-gray-500">Loading…</div>
             ) : myPets.length === 0 ? (
               <div className="text-center py-10">
                 <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                <p className="text-gray-600 font-medium">No pets registered yet</p>
-                <p className="text-sm text-gray-500 mt-1">Go to My Pets to register a pet first.</p>
+                <p className="text-gray-600 font-medium">No pets</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -257,8 +255,7 @@ const BookAppointment = () => {
             {selectedPets.length > 0 && (
               <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                 <p className="text-sm text-primary font-medium">
-                  {selectedPets.length} pet{selectedPets.length > 1 ? 's' : ''} selected:&nbsp;
-                  {selectedPetObjects.map(p => p.name).join(', ')}
+                  {selectedPets.length} selected
                 </p>
               </div>
             )}
@@ -268,7 +265,7 @@ const BookAppointment = () => {
               disabled={selectedPets.length === 0}
               className="w-full mt-6 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
             >
-              Next: Choose Appointment Type
+              Next
             </button>
           </div>
         )}
@@ -276,18 +273,16 @@ const BookAppointment = () => {
         {/* Step 2 — Appointment Type (from DB) */}
         {step === 2 && (
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Select a Service</h2>
-            <p className="text-sm text-gray-500 mb-5">Choose the veterinary service for your pet(s).</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-5">Select Service</h2>
 
             {loadingServices ? (
-              <div className="text-center py-10 text-gray-400">Loading services...</div>
+              <div className="text-center py-10 text-gray-400">Loading…</div>
             ) : services.length === 0 ? (
               <div className="text-center py-10 bg-gray-50 rounded-xl">
                 <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <p className="text-gray-600 font-medium">No services available</p>
-                <p className="text-sm text-gray-400 mt-1">Please check back later or contact the clinic.</p>
+                <p className="text-gray-600 font-medium">No services</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -335,7 +330,7 @@ const BookAppointment = () => {
                           {/* Slots */}
                           {service.slots != null && (
                             <p className="text-xs text-gray-400 mt-1.5">
-                              {service.slots} slot{service.slots !== 1 ? 's' : ''} available per day
+                              {service.slots} slots/day
                             </p>
                           )}
                         </div>
@@ -355,7 +350,7 @@ const BookAppointment = () => {
                 disabled={!selectedService}
                 className="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
               >
-                Next: Choose Date
+                Next
               </button>
             </div>
           </div>
@@ -364,15 +359,7 @@ const BookAppointment = () => {
         {/* Step 3 — Calendar */}
         {step === 3 && (
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">Choose a Date</h2>
-            <p className="text-sm text-gray-500 mb-1">
-              Select an available date for <span className="font-medium text-gray-700">{selectedService?.name}</span>.
-            </p>
-            {selectedService && (
-              <p className="text-xs text-gray-400 mb-5">
-                Available: {formatAvailability(selectedService)}
-              </p>
-            )}
+            <h2 className="text-xl font-semibold text-gray-900 mb-5">Choose Date</h2>
 
             {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
@@ -422,7 +409,7 @@ const BookAppointment = () => {
             {selectedDate && (
               <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                 <p className="text-sm text-primary font-medium">
-                  Selected: {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
             )}
