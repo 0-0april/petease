@@ -269,13 +269,13 @@ export default function Login() {
               <button type="submit" disabled={loading} className="btn-pay">
                 {loading ? 'Loading…' : 'Login'}
               </button>
+              <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+                <Link to="/register" className="font-semibold hover:opacity-80 transition-opacity"
+                  style={{ color:'hsl(130,100%,30%)' }}>
+                  Register
+                </Link>
+              </p>
             </div>
-            <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
-              <Link to="/register" className="font-semibold hover:opacity-80 transition-opacity"
-                style={{ color:'hsl(130,100%,30%)' }}>
-                Register
-              </Link>
-            </p>
           </form>
 
           {/* <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>

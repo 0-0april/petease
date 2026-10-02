@@ -198,13 +198,13 @@ export default function Register() {
               <button type="submit" disabled={loading} className="btn-pay">
                 {loading ? 'Saving…' : 'Register'}
               </button>
+              <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+                <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
+                  style={{ color:'hsl(130,100%,30%)' }}>
+                  Login
+                </Link>
+              </p>
             </div>
-            <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
-              <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
-                style={{ color:'hsl(130,100%,30%)' }}>
-                Login
-              </Link>
-            </p>
           </form>
 
           {/* <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
