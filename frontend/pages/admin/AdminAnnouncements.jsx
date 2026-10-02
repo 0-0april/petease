@@ -156,6 +156,7 @@ const AdminAnnouncements = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
+
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Announcements</h1>
@@ -296,13 +297,14 @@ const AdminAnnouncements = () => {
             <Pagination currentPage={vetPage} totalPages={vetTotalPages} onPageChange={setVetPage} />
           </div>
         )}
+
       </div>
 
-      {/* System Create/Edit Modal */}
+      {/* ── System Create / Edit Modal ── */}
       <Modal
         isOpen={showSysModal}
         onClose={() => setShowSysModal(false)}
-        title={editingSysAnn ? 'Edit Announcement' : 'Create Announcement'}
+        title={editingSysAnn ? 'Edit' : 'Create'}
       >
         <form onSubmit={handleSysSubmit} className="space-y-4">
           <div>
@@ -349,32 +351,62 @@ const AdminAnnouncements = () => {
         </form>
       </Modal>
 
-      {/* Vet Edit Modal */}
+      {/* ── Vet Edit & Approve Modal ── */}
       <Modal isOpen={showVetEditModal} onClose={() => setShowVetEditModal(false)} title="Edit & Approve">
         <form onSubmit={handleVetEditSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-            <input required className="w-full border border-gray-300 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" value={vetEditData.title} onChange={e => setVetEditData({ ...vetEditData, title: e.target.value })} />
+            <input
+              required
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              value={vetEditData.title}
+              onChange={e => setVetEditData({ ...vetEditData, title: e.target.value })}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select className="w-full border border-gray-300 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" value={vetEditData.type} onChange={e => setVetEditData({ ...vetEditData, type: e.target.value })}>
+            <select
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              value={vetEditData.type}
+              onChange={e => setVetEditData({ ...vetEditData, type: e.target.value })}
+            >
               {ANNOUNCE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-            <textarea required className="w-full border border-gray-300 p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary" rows={4} value={vetEditData.content} onChange={e => setVetEditData({ ...vetEditData, content: e.target.value })} />
+            <textarea
+              required
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              rows={4}
+              value={vetEditData.content}
+              onChange={e => setVetEditData({ ...vetEditData, content: e.target.value })}
+            />
           </div>
-          <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark">Update & Approve</button>
-
-      {/* Vet Reject Modal */}
-      <Modal isOpen={showVetRejectModal} onClose={() => setShowVetRejectModal(false)} title="Reject">
-        <form onSubmit={handleVetReject} className="space-y-4">
-          <button type="submit" className="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700">Confirm</button>
-          <button type="button" onClick={() => setShowVetRejectModal(false)} className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200">Cancel</button>
+          <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark">
+            Update & Approve
+          </button>
         </form>
       </Modal>
+
+      {/* ── Vet Reject Modal ── */}
+      <Modal isOpen={showVetRejectModal} onClose={() => setShowVetRejectModal(false)} title="Reject">
+        <form onSubmit={handleVetReject} className="space-y-3">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowVetRejectModal(false)}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="flex-1 bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700">
+              Confirm
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </AdminLayout>
   );
 };
