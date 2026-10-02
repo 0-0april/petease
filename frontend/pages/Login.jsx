@@ -265,19 +265,25 @@ export default function Login() {
               placeholder="••••••••" required autoComplete="current-password" />
 
             {/* Footer row: Login button */}
-            <div className="flex items-center justify-end pt-3">
+            <div className="flex items-center justify-between pt-3">
               <button type="submit" disabled={loading} className="btn-pay">
                 {loading ? 'Loading…' : 'Login'}
               </button>
             </div>
+            <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+              <Link to="/register" className="font-semibold hover:opacity-80 transition-opacity"
+                style={{ color:'hsl(130,100%,30%)' }}>
+                Register
+              </Link>
+            </p>
           </form>
 
-          <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+          {/* <p className="mt-8 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
             <Link to="/register" className="font-semibold hover:opacity-80 transition-opacity"
               style={{ color:'hsl(130,100%,30%)' }}>
               Register
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>

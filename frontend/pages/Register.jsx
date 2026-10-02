@@ -199,14 +199,20 @@ export default function Register() {
                 {loading ? 'Saving…' : 'Register'}
               </button>
             </div>
+            <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+              <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
+                style={{ color:'hsl(130,100%,30%)' }}>
+                Login
+              </Link>
+            </p>
           </form>
 
-          <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
+          {/* <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
             <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
               style={{ color:'hsl(130,100%,30%)' }}>
               Login
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>
