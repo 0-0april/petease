@@ -122,21 +122,21 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
                 <div>
                   {adoptStep === null && (
                     <button onClick={() => setAdoptStep('form')} className="w-full bg-primary text-white py-2.5 rounded-lg hover:bg-primary-dark font-medium text-sm">
-                      Request Adoption
+                      Adopt
                     </button>
                   )}
                   {adoptStep === 'form' && (
                     <div className="border border-gray-200 rounded-xl p-4 space-y-3">
-                      <p className="text-sm font-medium text-gray-700">Message to owner <span className="text-gray-400 font-normal">(optional)</span></p>
+                      <p className="text-sm font-medium text-gray-700">Message (optional)</p>
                       <textarea value={adoptMsg} onChange={e => setAdoptMsg(e.target.value)} rows={3}
-                        placeholder="Introduce yourself and explain why you'd be a great fit..."
+                        placeholder="Why are you a good fit…"
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                       <div className="flex space-x-2">
                         <button onClick={() => setAdoptStep(null)} disabled={adoptLoading}
                           className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancel</button>
                         <button onClick={handleAdopt} disabled={adoptLoading}
                           className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-60 text-sm font-medium">
-                          {adoptLoading ? 'Sending...' : 'Send Request'}
+                          {adoptLoading ? 'Sending…' : 'Send'}
                         </button>
                       </div>
                     </div>
@@ -146,8 +146,7 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
                       <svg className="w-8 h-8 text-primary mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <p className="text-sm font-semibold text-green-800">Adoption request sent!</p>
-                      <p className="text-xs text-green-600 mt-1">The owner will review your request.</p>
+                      <p className="text-sm font-semibold text-green-800">Sent</p>
                     </div>
                   )}
                 </div>
@@ -155,29 +154,28 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
 
               {msgStep === null && (
                 <button onClick={() => setMsgStep('form')} className="w-full border border-primary text-primary py-2.5 rounded-lg hover:bg-green-50 font-medium text-sm">
-                  Message Owner
+                  Message
                 </button>
               )}
               {msgStep === 'form' && (
                 <div className="border border-gray-200 rounded-xl p-4 space-y-3">
-                  <p className="text-sm font-medium text-gray-700">Send a message to the owner</p>
                   <textarea value={msgContent} onChange={e => setMsgContent(e.target.value)} rows={3}
-                    placeholder="Ask about the pet, arrange a visit..."
+                    placeholder="Message…"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                   <div className="flex space-x-2">
                     <button onClick={() => setMsgStep(null)} disabled={msgLoading}
                       className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">Cancel</button>
                     <button onClick={handleMessage} disabled={msgLoading || !msgContent.trim()}
                       className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-60 text-sm font-medium">
-                      {msgLoading ? 'Sending...' : 'Send Message'}
+                      {msgLoading ? 'Sending…' : 'Send'}
                     </button>
                   </div>
                 </div>
               )}
               {msgStep === 'done' && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                  <p className="text-sm font-semibold text-blue-800">Message sent!</p>
-                  <button onClick={() => navigate('/messages')} className="text-xs text-blue-600 underline mt-1">View in Messages</button>
+                  <p className="text-sm font-semibold text-blue-800">Sent</p>
+                  <button onClick={() => navigate('/messages')} className="text-xs text-blue-600 underline mt-1">View</button>
                 </div>
               )}
             </div>
@@ -255,7 +253,7 @@ const PetCard = ({ pet, onClick }) => {
           )}        </div>
         <div className="mt-2 w-full py-2 rounded-full text-sm font-semibold text-center text-white transition-all duration-150"
           style={{ background: 'hsl(135,95%,18%)' }}>
-          View Profile
+          View
         </div>
       </div>
     </div>
@@ -348,12 +346,8 @@ const BrowsePets = () => {
             style={{ backgroundImage: 'radial-gradient(hsla(135,95%,18%,0.30) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
           <div className="relative">
             <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: 'hsl(140,100%,7%)' }}>
-              Welcome, {user?.username || user?.name || 'there'}
+              Welcome
             </h1>
-            <p className="text-sm sm:text-base max-w-md mx-auto font-light"
-              style={{ color: 'hsla(140,100%,7%,0.58)', lineHeight: '1.75' }}>
-              Browse adorable pets looking for a loving home.
-            </p>
           </div>
         </div>
       )}
@@ -364,7 +358,7 @@ const BrowsePets = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name or breed..."
+            placeholder="Search…"
             className="pl-9 pr-9 py-2.5 w-full border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white shadow-sm" />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -376,11 +370,11 @@ const BrowsePets = () => {
         </div>
         <select value={filter} onChange={e => setFilter(e.target.value)}
           className="px-4 py-2.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white shadow-sm">
-          <option value="all">All Types</option>
+          <option value="all">All</option>
           <option value="dog">Dogs</option>
           <option value="cat">Cats</option>
           <option value="bird">Birds</option>
-          <option value="other">Others</option>
+          <option value="other">Other</option>
         </select>
       </div>
 
@@ -396,8 +390,7 @@ const BrowsePets = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
-          <p className="font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>No pets found</p>
-          <p className="text-sm mt-1" style={{ color: 'hsla(140,100%,7%,0.45)' }}>Try a different name, breed, or type.</p>
+          <p className="font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>No pets</p>
         </div>
       ) : (
         <div>

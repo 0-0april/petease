@@ -294,8 +294,8 @@ export default function Landing() {
               PetEase connects pet owners, adopters, and veterinary staff in one seamless platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/register" className="btn-pay text-center" style={{ padding:'14px 36px' }}>Start Adopting</Link>
-              <Link to="/login" className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
+              <Link to="/register" className="btn-pay text-center" style={{ padding:'14px 36px' }}>Adopt</Link>
+              <Link to="/login" className="btn-outline text-center" style={{ padding:'13px 36px' }}>Login</Link>
             </div>
           </div>
         </div>
@@ -329,13 +329,6 @@ export default function Landing() {
       {/* ── Features ── */}
       <section className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="heading-dark text-4xl mb-4">Everything You Need</h2>
-            <p className="font-light max-w-xl mx-auto"
-              style={{ color:'hsla(140,100%,7%,0.55)', lineHeight:'1.75' }}>
-              A complete platform for pet adoption and veterinary care management.
-            </p>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <div key={i} className="glass-inner p-6 transition-all hover:shadow-glass">
@@ -360,12 +353,6 @@ export default function Landing() {
       {/* ── How It Works ── */}
       <section id="how-it-works" className="relative z-10 py-24 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="heading-dark text-4xl mb-4">How It Works</h2>
-            <p className="font-light" style={{ color:'hsla(140,100%,7%,0.55)' }}>
-              Get started in just a few simple steps.
-            </p>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((s, i) => (
               <div key={i} className="text-center">
@@ -394,12 +381,7 @@ export default function Landing() {
               style={{ background: 'hsla(130,100%,30%,0.14)', color: 'hsl(140,100%,7%)' }}>
               About PetEase
             </span>
-            <h2 className="heading-dark text-4xl mb-4">Our Partner Office</h2>
-            <p className="font-light max-w-xl mx-auto"
-              style={{ color: 'hsla(140,100%,7%,0.55)', lineHeight: '1.75' }}>
-              PetEase is built in official partnership with the Provincial Veterinary Office of Lanao del Sur —
-              the government agency responsible for animal health and welfare across the province.
-            </p>
+            <h2 className="heading-dark text-4xl mb-4">Partners</h2>
           </div>
 
           {/* PVO Identity Card */}
@@ -432,7 +414,7 @@ export default function Landing() {
                 </div>
                 <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
                   className="btn-outline" style={{ padding: '9px 22px', fontSize: '0.8rem' }}>
-                  Visit Facebook Page ↗
+                  Facebook ↗
                 </a>
               </div>
 
@@ -467,11 +449,7 @@ export default function Landing() {
 
           {/* Programs & Services */}
           <div className="text-center mb-10">
-            <h3 className="heading-dark text-3xl mb-3">Programs &amp; Services</h3>
-            <p className="font-light max-w-xl mx-auto"
-              style={{ color: 'hsla(140,100%,7%,0.55)', lineHeight: '1.75' }}>
-              Free and subsidized programs run by the PVO for communities across Lanao del Sur.
-            </p>
+            <h3 className="heading-dark text-3xl mb-8">Services</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
@@ -528,14 +506,10 @@ export default function Landing() {
       {/* ── CTA ── */}
       <section className="relative z-10 py-24 px-4">
         <div className="max-w-3xl mx-auto glass-card text-center px-8 py-16">
-          <h2 className="heading-dark text-4xl sm:text-5xl mb-4">Ready to Find Your Pet?</h2>
-          <p className="text-lg font-light mb-10"
-            style={{ color:'hsla(140,100%,7%,0.55)' }}>
-            Join hundreds of pet owners and adopters already using PetEase.
-          </p>
+          <h2 className="heading-dark text-4xl sm:text-5xl mb-10">Find a Pet</h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="btn-pay text-center"  style={{ padding:'14px 36px' }}>Create Free Account</Link>
-            <Link to="/login"    className="btn-outline text-center" style={{ padding:'13px 36px' }}>Sign In</Link>
+            <Link to="/register" className="btn-pay text-center"  style={{ padding:'14px 36px' }}>Register</Link>
+            <Link to="/login"    className="btn-outline text-center" style={{ padding:'13px 36px' }}>Login</Link>
           </div>
         </div>
       </section>

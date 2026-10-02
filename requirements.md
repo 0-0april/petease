@@ -607,3 +607,46 @@ Please implement the following across the site:
 
 in the user/Appointments.jsx, in the book new appointment modal, in the step where the selection of pets happens, make sure it just display the pet owned bye the current user and the PetRegType is Appointment, do not display/exclude the pet that is registered as for adoption
 
+
+
+## Goal
+Make the UI copy across this project minimal. Replace long instructional sentences, helper text, and descriptive button labels with 1-2 word labels that name the action or step. Example: "Next: Choose Service" becomes "Next". No functionality changes.
+
+## Phase 1: Audit
+**Input**: The whole project's source, including components, pages, templates, and any i18n/translation/string files.
+**Task**: Find every user-facing string and classify it:
+
+| Type | Examples | Action |
+|------|----------|--------|
+| Button / link label | "Next: Choose Service", "Click here to continue" | Shorten to 1-2 words like just "Next" |
+| Step / section title | "Step 2: Choose your preferred service" | Shorten to 1-2 words (e.g. "Service") |
+| Instructional text | "Please select an option below to proceed" | Remove |
+| Helper / hint text, tooltips, subtitles | "This will help us find the best match" | Remove |
+| Placeholders | "Enter your full name here" | Shorten to the field name (e.g. "Name") |
+| Error / validation / legal / confirmation messages | "Invalid email address" | Do NOT change; list under "Flagged" |
+
+**Output**: `./copy-audit.md` with a table of `file:line | current text | proposed text (or REMOVE) | type`, plus a "Flagged" section for anything you are unsure about.
+**Done when**: Every user-facing string in the project appears in the table or the Flagged list.
+
+## Phase 2: Apply
+**Input**: `./copy-audit.md`
+**Task**: Apply every proposed change from the table in the source files.
+- Use the verb or noun that names the action or step, not a sentence ("Next", "Back", "Save", "Service", "Payment", "Confirm").
+- Use the same word for the same action everywhere. If one button says "Next", don't use "Continue" for the same action elsewhere.
+- Where text is removed, also remove the now-empty wrapper elements and any styling or spacing that only existed for that text.
+- Edit i18n/translation files too, not just components.
+**Output**: Modified source files.
+**Done when**: No entries marked REMOVE or shortened remain unapplied in the source.
+
+## Phase 3: Verify
+**Input**: Modified project.
+**Task**: Run the project's build, linter, type check, and test suite. Fix any failure caused by your changes, such as tests asserting on old text. Update those assertions to the new text.
+**Output**: `./copy-changes-summary.md` listing: number of strings shortened, number removed, any Flagged items left for me to decide, and any test assertions updated.
+**Done when**: Build and tests pass with the same result as before your changes.
+
+## Constraints
+- Change only user-facing text. Do not touch logic, routes, component names, IDs, CSS class names, i18n keys, or API calls.
+- Do not edit error, validation, legal, or confirmation messages. Put them in Flagged.
+- Do not invent new copy beyond 1-2 word labels, and do not add new UI elements.
+- If a string's purpose is unclear, leave it unchanged and list it in Flagged.
+- If an element becomes icon-only or empty, keep its accessible label (aria-label / alt) so it is still announced by screen readers.

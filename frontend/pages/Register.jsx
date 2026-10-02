@@ -148,11 +148,7 @@ export default function Register() {
 
         {/* Right: form */}
         <div className="flex-1 px-8 py-10 lg:px-12 overflow-y-auto" style={{ maxHeight:'92vh' }}>
-          <h1 className="heading-dark text-3xl sm:text-4xl mb-1">Create account</h1>
-          <p className="text-sm font-light tracking-wide mb-8"
-            style={{ color:'hsla(140,100%,7%,0.50)' }}>
-            fill in your details below
-          </p>
+          <h1 className="heading-dark text-3xl sm:text-4xl mb-8">Create account</h1>
 
           {error && (
             <div className="mb-6 rounded-2xl px-4 py-3 text-sm border"
@@ -173,7 +169,7 @@ export default function Register() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google
+            Google
           </button>
 
           {/* Divider */}
@@ -184,7 +180,7 @@ export default function Register() {
             <div className="relative flex justify-center">
               <span className="px-3 text-xs tracking-wider"
                 style={{ color:'hsla(140,100%,7%,0.38)' }}>
-                or register with email
+                or
               </span>
             </div>
           </div>
@@ -192,30 +188,23 @@ export default function Register() {
           {/* Form fields */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <Field label="Username"    icon={ICONS.user}  type="text"     name="username" value={form.username} onChange={e => set('username', e.target.value)} placeholder="johndoe" required />
-            <Field label="Full Name"   icon={ICONS.user}  type="text"     name="name"     value={form.name}     onChange={e => set('name',     e.target.value)} placeholder="John Doe" required />
-            <Field label="Email Address" icon={ICONS.email} type="email"  name="email"    value={form.email}    onChange={e => { set('email', e.target.value); setEmailError(EMAIL_REGEX.test(e.target.value) || !e.target.value ? '' : 'Please enter a valid email address.'); }} error={emailError} placeholder="you@example.com" required autoComplete="email" />
+            <Field label="Name"   icon={ICONS.user}  type="text"     name="name"     value={form.name}     onChange={e => set('name',     e.target.value)} placeholder="John Doe" required />
+            <Field label="Email" icon={ICONS.email} type="email"  name="email"    value={form.email}    onChange={e => { set('email', e.target.value); setEmailError(EMAIL_REGEX.test(e.target.value) || !e.target.value ? '' : 'Invalid email'); }} error={emailError} placeholder="you@example.com" required autoComplete="email" />
             <Field label="Password"    icon={ICONS.lock}  type="password" name="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" required minLength={6} autoComplete="new-password" />
-            <Field label="Phone Number" icon={ICONS.phone} type="tel"     name="phone"    value={form.phone}    onChange={e => set('phone',    e.target.value)} placeholder="+1 (555) 000-0000" required />
+            <Field label="Phone" icon={ICONS.phone} type="tel"     name="phone"    value={form.phone}    onChange={e => set('phone',    e.target.value)} placeholder="+1 (555) 000-0000" required />
             <Field label="Address"     icon={ICONS.pin}   textarea        name="address"  value={form.address}  onChange={e => set('address',  e.target.value)} placeholder="123 Main St, City, State" required />
 
             <div className="flex items-center justify-between pt-3">
-              <div>
-                <p className="label-caps">Join</p>
-                <p className="text-lg font-bold mt-0.5" style={{ color:'hsl(130,100%,30%)' }}>
-                  PetEase
-                </p>
-              </div>
               <button type="submit" disabled={loading} className="btn-pay">
-                {loading ? 'Creating…' : 'Register'}
+                {loading ? 'Saving…' : 'Register'}
               </button>
             </div>
           </form>
 
           <p className="mt-6 text-sm text-center" style={{ color:'hsla(140,100%,7%,0.48)' }}>
-            Already have an account?{' '}
             <Link to="/login" className="font-semibold hover:opacity-80 transition-opacity"
               style={{ color:'hsl(130,100%,30%)' }}>
-              Sign in
+              Login
             </Link>
           </p>
         </div>

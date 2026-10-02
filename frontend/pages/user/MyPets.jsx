@@ -166,13 +166,12 @@ const MyPets = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Pets</h1>
-            <p className="text-gray-500 mt-1">Register and manage your pets.</p>
           </div>
           <button
             onClick={() => { setShowModal(true); setEditingPet(null); setFormData(EMPTY_FORM); setImageFile(null); setImagePreview(null); setVaccinationFile(null); }}
             className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-dark font-medium"
           >
-            + Register Pet
+            + Pet
           </button>
         </div>
 
@@ -189,8 +188,7 @@ const MyPets = () => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <p className="text-gray-600 font-medium">No pets registered yet</p>
-            <p className="text-sm text-gray-400 mt-1">Click "Register Pet" to add your first pet.</p>
+            <p className="text-gray-600 font-medium">No pets</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
