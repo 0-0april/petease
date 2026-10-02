@@ -47,16 +47,13 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Complete Adoption</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Finalize the adoption of <span className="font-medium text-gray-700">{adoption.petName}</span> by{' '}
-          <span className="font-medium text-gray-700">{adoption.adopterName}</span>.
-        </p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Complete</h3>
 
         {/* Parties info */}
         <div className="grid grid-cols-2 gap-3 mb-5">
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs text-gray-400 mb-1">Adopter</p>
+
             <p className="text-sm font-medium text-gray-900">{adoption.adopterName}</p>
             <p className="text-xs text-gray-500">{adoption.adopterEmail}</p>
             <p className="text-xs text-gray-500">{adoption.adopterPhone}</p>
@@ -71,7 +68,7 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
         {/* Waiver */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Waiver Document <span className="text-red-500">*</span>
+            Waiver <span className="text-red-500">*</span>
           </label>
           <input
             type="file"
@@ -96,25 +93,25 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
         {/* Medical record */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Service Performed <span className="text-gray-400 font-normal">(optional)</span>
+            Service (opt.)
           </label>
           <input
             type="text"
             value={service}
             onChange={e => setService(e.target.value)}
-            placeholder="e.g. General health check, Deworming, Vaccination..."
+            placeholder="Health check, Deworming…"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Medical Notes <span className="text-gray-400 font-normal">(optional)</span>
+            Notes (opt.)
           </label>
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
             rows={3}
-            placeholder="Notes about the pet's condition or services rendered during the meetup..."
+            placeholder="Notes…"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
         </div>
@@ -132,7 +129,7 @@ const CompleteModal = ({ adoption, onConfirm, onClose }) => {
             disabled={!waiverFile || loading}
             className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
           >
-            {loading ? 'Uploading...' : 'Mark as Completed'}
+            {loading ? 'Uploading…' : 'Complete'}
           </button>
         </div>
       </div>
@@ -187,8 +184,7 @@ const VetAdoptions = () => {
     <VetLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Adoption Management</h1>
-          <p className="text-gray-500 mt-1">Approved adoptions awaiting vet processing and waiver signing.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Adoptions</h1>
         </div>
 
         {successId && (
@@ -205,8 +201,7 @@ const VetAdoptions = () => {
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-gray-600 font-medium">No approved adoptions yet</p>
-            <p className="text-sm text-gray-400 mt-1">Approved adoption requests will appear here for processing.</p>
+            <p className="text-gray-600 font-medium">No adoptions</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -221,10 +216,10 @@ const VetAdoptions = () => {
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-600 mb-2">
-                      <span><span className="text-gray-400">Adopter:</span> {adoption.adopterName}</span>
-                      <span><span className="text-gray-400">Email:</span> {adoption.adopterEmail}</span>
-                      <span><span className="text-gray-400">Phone:</span> {adoption.adopterPhone}</span>
-                      <span><span className="text-gray-400">Submitted:</span> {formatDate(adoption.createdAt)}</span>
+                      <span>{adoption.adopterName}</span>
+                      <span>{adoption.adopterEmail}</span>
+                      <span>{adoption.adopterPhone}</span>
+                      <span>{formatDate(adoption.createdAt)}</span>
                     </div>
                     {adoption.message && (
                       <p className="text-sm text-gray-500 italic bg-gray-50 rounded-lg px-3 py-2">"{adoption.message}"</p>
@@ -242,7 +237,7 @@ const VetAdoptions = () => {
                       onClick={() => setSelectedAdoption(adoption)}
                       className="flex-shrink-0 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
                     >
-                      Complete Adoption
+                      Complete
                     </button>
                   )}
                 </div>

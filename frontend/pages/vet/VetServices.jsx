@@ -128,10 +128,7 @@ const VetServices = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Services Management</h1>
-            <p className="text-gray-500 mt-1 text-sm">
-              Manage veterinary services and their availability.
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">Services</h1>
           </div>
           <button
             onClick={openCreate}
@@ -157,8 +154,7 @@ const VetServices = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p className="text-gray-600 font-medium">No services yet</p>
-            <p className="text-sm text-gray-400 mt-1">Create your first service to get started.</p>
+            <p className="text-gray-600 font-medium">No services</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -212,7 +208,7 @@ const VetServices = () => {
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Spay/Neuter, Consultation, Vaccination"
+              placeholder="Spay/Neuter, Consultation…"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
@@ -224,7 +220,7 @@ const VetServices = () => {
             <textarea
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Brief description of the service..."
+              placeholder="Description…"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               rows={2}
             />
@@ -233,7 +229,7 @@ const VetServices = () => {
           {/* Availability — Days */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Available Days <span className="text-gray-400 font-normal text-xs">(select one or more)</span>
+              Days <span className="text-gray-400 font-normal text-xs">(one or more)</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {DAY_OPTIONS.map(day => {
@@ -275,7 +271,7 @@ const VetServices = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Specific Date{' '}
-              <span className="text-gray-400 font-normal text-xs">(disables day selection)</span>
+              <span className="text-gray-400 font-normal text-xs">(disables days)</span>
             </label>
             <input
               type="date"
@@ -311,7 +307,7 @@ const VetServices = () => {
 
           {formData.notifyUsers && (
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-xs text-blue-800">
-              An announcement will be submitted to admin for review and published once approved.
+              Announcement submitted to admin for review.
             </div>
           )}
 
@@ -329,7 +325,7 @@ const VetServices = () => {
               disabled={!isFormValid || submitting}
               className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark text-sm font-medium disabled:opacity-60"
             >
-              {submitting ? 'Saving…' : editing ? 'Save Changes' : 'Create Service'}
+              {submitting ? 'Saving…' : editing ? 'Save' : 'Create'}
             </button>
           </div>
         </form>

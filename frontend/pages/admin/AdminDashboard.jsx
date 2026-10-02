@@ -26,9 +26,9 @@ ChartJS.register(
 );
 
 const FILTER_OPTIONS = [
-  { value: 'week',  label: 'This Week'  },
-  { value: 'month', label: 'This Month' },
-  { value: 'year',  label: 'This Year'  },
+  { value: 'week',  label: 'Week'  },
+  { value: 'month', label: 'Month' },
+  { value: 'year',  label: 'Year'  },
 ];
 
 function buildChartPoints(rawUsers, filter) {
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800">Active Users Over Time</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Active Users</h2>
               <p className="text-xs text-gray-400 mt-1">
                 {loading ? 'Loading…' : `${totalInRange} active user${totalInRange !== 1 ? 's' : ''} logged in during selected period`}
               </p>

@@ -164,13 +164,13 @@ const AdminAnnouncements = () => {
               onClick={() => setActiveTab('system')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'system' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              System Announcements
+              System
             </button>
             <button
               onClick={() => setActiveTab('vet')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'vet' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              Vet Submissions
+              Submissions
             </button>
           </div>
         </div>
@@ -192,14 +192,14 @@ const AdminAnnouncements = () => {
                 onClick={openCreateModal}
                 className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark font-medium"
               >
-                Create Announcement
+                + Create
               </button>
             </div>
 
             {sysLoading ? (
               <p className="text-gray-400 text-center py-10 text-sm">Loading…</p>
             ) : sysAnnouncements.length === 0 ? (
-              <p className="text-gray-500 text-center py-10">No system announcements yet.</p>
+              <p className="text-gray-500 text-center py-10">No announcements.</p>
             ) : (
               sysAnnouncements.map(ann => (
                 <div key={ann.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
@@ -244,7 +244,7 @@ const AdminAnnouncements = () => {
         {activeTab === 'vet' && (
           <div className="space-y-4">
             {vetAnnouncements.length === 0 ? (
-              <p className="text-gray-500 text-center py-10">No pending vet submissions.</p>
+              <p className="text-gray-500 text-center py-10">No pending submissions.</p>
             ) : (
               vetAnnouncements.map(ann => (
                 <div key={ann.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
@@ -313,7 +313,7 @@ const AdminAnnouncements = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               value={sysFormData.title}
               onChange={e => setSysFormData({ ...sysFormData, title: e.target.value })}
-              placeholder="Announcement title"
+              placeholder="Title…"
             />
           </div>
           <div>
@@ -336,7 +336,7 @@ const AdminAnnouncements = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               value={sysFormData.content}
               onChange={e => setSysFormData({ ...sysFormData, content: e.target.value })}
-              placeholder="Announcement message…"
+              placeholder="Message…"
             />
           </div>
           <button
@@ -350,7 +350,7 @@ const AdminAnnouncements = () => {
       </Modal>
 
       {/* Vet Edit Modal */}
-      <Modal isOpen={showVetEditModal} onClose={() => setShowVetEditModal(false)} title="Edit & Approve Vet Submission">
+      <Modal isOpen={showVetEditModal} onClose={() => setShowVetEditModal(false)} title="Edit & Approve">
         <form onSubmit={handleVetEditSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -367,16 +367,11 @@ const AdminAnnouncements = () => {
             <textarea required className="w-full border border-gray-300 p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary" rows={4} value={vetEditData.content} onChange={e => setVetEditData({ ...vetEditData, content: e.target.value })} />
           </div>
           <button type="submit" className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark">Update & Approve</button>
-        </form>
-      </Modal>
 
       {/* Vet Reject Modal */}
-      <Modal isOpen={showVetRejectModal} onClose={() => setShowVetRejectModal(false)} title="Reject Vet Submission">
+      <Modal isOpen={showVetRejectModal} onClose={() => setShowVetRejectModal(false)} title="Reject">
         <form onSubmit={handleVetReject} className="space-y-4">
-          <p className="text-sm text-gray-600">
-            This will permanently remove <strong>{selectedVetAnn?.title}</strong> from the pending submissions.
-          </p>
-          <button type="submit" className="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700">Confirm Reject</button>
+          <button type="submit" className="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700">Confirm</button>
           <button type="button" onClick={() => setShowVetRejectModal(false)} className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200">Cancel</button>
         </form>
       </Modal>

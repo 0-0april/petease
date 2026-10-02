@@ -77,7 +77,7 @@ const AdminReports = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manage Reports</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports</h1>
 
         {toast && (
           <div className={`rounded-xl px-4 py-3 text-sm font-medium border ${
@@ -145,12 +145,12 @@ const AdminReports = () => {
       </div>
 
       {/* Review Modal */}
-      <Modal isOpen={showReviewModal} onClose={() => { setShowReviewModal(false); setPendingAction(null); }} title="Review Report">
+      <Modal isOpen={showReviewModal} onClose={() => { setShowReviewModal(false); setPendingAction(null); }} title="Review">
         {selectedReport && (
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 border border-gray-200 rounded-lg space-y-3">
               <div>
-                <p className="text-xs text-gray-500">Reported User</p>
+                <p className="text-xs text-gray-500">Reported</p>
                 <p className="text-sm font-semibold text-gray-900">{selectedReport.reportedUserName}</p>
               </div>
               <div>
@@ -163,13 +163,13 @@ const AdminReports = () => {
               </div>
               {selectedReport.description && (
                 <div>
-                  <p className="text-xs text-gray-500">Description</p>
+                  <p className="text-xs text-gray-500">Details</p>
                   <p className="text-sm text-gray-800">{selectedReport.description}</p>
                 </div>
               )}
               {selectedReport.messageLog && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Message Log</p>
+                  <p className="text-xs text-gray-500 mb-1">Messages</p>
                   <pre className="text-xs text-gray-700 bg-white border border-gray-200 rounded p-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
                     {selectedReport.messageLog}
                   </pre>
@@ -179,7 +179,6 @@ const AdminReports = () => {
 
             {!pendingAction ? (
               <>
-                <p className="text-sm font-medium text-gray-700">Take Action:</p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setPendingAction('Resolved')}
@@ -203,11 +202,6 @@ const AdminReports = () => {
               </>
             ) : (
               <div className="border border-gray-200 rounded-lg p-4 space-y-3">
-                <p className="text-sm text-gray-700">
-                  {pendingAction === 'Resolved' && <>Are you sure you want to <span className="font-semibold text-red-600">suspend {selectedReport.reportedUserName}</span>?</>}
-                  {pendingAction === 'Warning'  && <>Are you sure you want to <span className="font-semibold text-yellow-600">send a warning to {selectedReport.reportedUserName}</span>?</>}
-                  {pendingAction === 'Closed'   && <>Are you sure you want to <span className="font-semibold text-gray-600">dismiss this report</span>?</>}
-                </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleUpdateStatus(pendingAction)}

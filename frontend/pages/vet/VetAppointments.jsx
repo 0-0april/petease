@@ -231,7 +231,7 @@ const VetAppointments = () => {
     <VetLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Appointments Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Appointments</h1>
           <button
             onClick={handleExportCSV}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2 text-sm font-medium"
@@ -246,9 +246,9 @@ const VetAppointments = () => {
         {/* Tabs */}
         <div className="flex bg-gray-100 rounded-lg p-1 space-x-1">
           {[
-            { value: 'pending', label: 'Pending Appointments' },
-            { value: 'confirmed', label: 'Confirmed Appointments' },
-            { value: 'completed', label: 'Completed Appointments' },
+            { value: 'pending',   label: 'Pending'   },
+            { value: 'confirmed', label: 'Confirmed' },
+            { value: 'completed', label: 'Completed' },
           ].map(tab => (
             <button
               key={tab.value}
@@ -298,7 +298,7 @@ const VetAppointments = () => {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by user name..."
+              placeholder="Search…"
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]"
             />
           )}
@@ -307,8 +307,8 @@ const VetAppointments = () => {
             onChange={e => setSortOrder(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="desc">Newest First</option>
-            <option value="asc">Oldest First</option>
+            <option value="desc">Newest</option>
+            <option value="asc">Oldest</option>
           </select>
           {(filterDate || searchQuery) && (
             <button
@@ -411,7 +411,7 @@ const VetAppointments = () => {
                           onClick={() => setAttendanceModal(apt)}
                           className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
                         >
-                          Mark Attendance
+                          Attendance
                         </button>
                       )}
                     </div>
@@ -537,13 +537,9 @@ const VetAppointments = () => {
       </Modal>
 
       {/* Cancel Modal */}
-      <Modal isOpen={!!cancelModal} onClose={() => setCancelModal(null)} title="Cancel Appointment">
+      <Modal isOpen={!!cancelModal} onClose={() => setCancelModal(null)} title="Cancel">
         {cancelModal && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-700">
-              Cancel appointment for <span className="font-semibold">{cancelModal.userName}</span> on{' '}
-              <span className="font-semibold">{cancelModal.date}</span>?
-            </p>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Reason <span className="text-red-500">*</span>
@@ -552,7 +548,7 @@ const VetAppointments = () => {
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
                 rows={3}
-                placeholder="Enter cancellation reason..."
+                placeholder="Reason…"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
@@ -568,7 +564,7 @@ const VetAppointments = () => {
                 disabled={!cancelReason.trim()}
                 className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
               >
-                Cancel Appointment
+                Confirm
               </button>
             </div>
           </div>
@@ -576,18 +572,9 @@ const VetAppointments = () => {
       </Modal>
 
       {/* Attendance Modal */}
-      <Modal isOpen={!!attendanceModal} onClose={() => setAttendanceModal(null)} title="Mark Attendance">
+      <Modal isOpen={!!attendanceModal} onClose={() => setAttendanceModal(null)} title="Attendance">
         {attendanceModal && (
           <div className="space-y-4">
-            <p className="text-gray-700">
-              Mark attendance for <span className="font-semibold">{attendanceModal.userName}</span>'s appointment on{' '}
-              <span className="font-semibold">{attendanceModal.date}</span>
-            </p>
-            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-800">
-              If marked as "Show", a medical record will be automatically created for{' '}
-              <span className="font-medium">{attendanceModal.pets.map(p => p.name).join(', ')}</span> with the service:{' '}
-              <span className="font-medium">{attendanceModal.serviceType || formatServiceType(attendanceModal.type)}</span>.
-            </div>
             <div className="flex space-x-3 pt-2">
               <button
                 onClick={() => setAttendanceModal(null)}

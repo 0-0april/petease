@@ -75,14 +75,14 @@ const VetAttendance = () => {
     <VetLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Attendance Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Attendance</h1>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">All Appointments</option>
-            <option value="pending">Pending Attendance</option>
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
             <option value="attended">Attended</option>
             <option value="no-show">No Show</option>
           </select>
@@ -115,7 +115,7 @@ const VetAttendance = () => {
                 {filteredAppointments.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-6 py-10 text-center text-gray-400 text-sm">
-                      No appointments found for this filter.
+                      No appointments.
                     </td>
                   </tr>
                 ) : filteredAppointments.map(appointment => (

@@ -516,7 +516,7 @@ const VetDashboard = () => {
               Appointments — <span className="capitalize">{filter}</span>
               <span className="ml-2 text-sm font-normal text-gray-500">({filtered.length} records)</span>
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">Click any row to view full details</p>
+            <p className="text-xs text-gray-400 mt-0.5">Click a row to view details</p>
           </div>
           {loading ? (
             <div className="p-8 text-center text-gray-400">Loading...</div>

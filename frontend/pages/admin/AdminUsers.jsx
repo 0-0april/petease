@@ -118,12 +118,12 @@ const AdminUsers = () => {
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manage Users</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Users</h1>
           <button
             onClick={() => setShowInviteModal(true)}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
           >
-            + Invite Admin/Vet Staff
+            + Invite Staff
           </button>
         </div>
 
@@ -137,18 +137,18 @@ const AdminUsers = () => {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row justify-between items-end gap-4">
           <div className="w-full sm:w-1/3">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Show users inactive since</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Inactive since</label>
             <select
               value={lastLoginFilter}
               onChange={e => { setLastLoginFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Users</option>
-              <option value="1">More than 1 day ago</option>
-              <option value="7">More than 7 days ago</option>
-              <option value="30">More than 30 days ago</option>
-              <option value="1-year">More than 1 year ago</option>
-              <option value="2-year">More than 2 years ago</option>
+              <option value="all">All</option>
+              <option value="1">&gt; 1 day</option>
+              <option value="7">&gt; 7 days</option>
+              <option value="30">&gt; 30 days</option>
+              <option value="1-year">&gt; 1 year</option>
+              <option value="2-year">&gt; 2 years</option>
             </select>
           </div>
 
@@ -234,15 +234,15 @@ const AdminUsers = () => {
       </div>
 
       {/* Invite Admin / Vet Staff Modal */}
-      <Modal isOpen={showInviteModal} onClose={() => { if (!inviteSubmitting) setShowInviteModal(false); }} title="Invite Admin/Vet Staff">
+      <Modal isOpen={showInviteModal} onClose={() => { if (!inviteSubmitting) setShowInviteModal(false); }} title="Invite Staff">
         <form onSubmit={handleInviteSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={inviteForm.name}
               onChange={e => setInviteForm(f => ({ ...f, name: e.target.value }))}
-              placeholder="e.g. Dr. Maria Santos"
+              placeholder="Dr. Maria Santos"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
@@ -264,7 +264,7 @@ const AdminUsers = () => {
               type="password"
               value={inviteForm.password}
               onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 6 chars"
               minLength={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               required
@@ -286,19 +286,14 @@ const AdminUsers = () => {
             disabled={inviteSubmitting}
             className="w-full bg-primary text-white rounded-lg py-2.5 hover:bg-primary-dark font-medium text-sm disabled:opacity-60"
           >
-            {inviteSubmitting ? 'Creating account…' : 'Create Account'}
+            {inviteSubmitting ? 'Creating…' : 'Create'}
           </button>
         </form>
       </Modal>
 
       {/* Suspend Confirmation Modal */}
-      <Modal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} title="Suspend User(s)">
+      <Modal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} title="Suspend">
         <form onSubmit={handleSuspendSubmit} className="space-y-4">
-          <p className="text-sm text-gray-600">
-            {singleSuspendUser
-              ? `You are about to suspend ${singleSuspendUser.UserName}. Please select a reason:`
-              : `You are about to suspend ${selectedIds.length} user(s). Please select a reason:`}
-          </p>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
             <select
@@ -319,7 +314,7 @@ const AdminUsers = () => {
             disabled={submitting}
             className="w-full bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 font-medium disabled:opacity-60"
           >
-            {submitting ? 'Suspending…' : 'Confirm Suspension'}
+            {submitting ? 'Suspending…' : 'Confirm'}
           </button>
         </form>
       </Modal>
