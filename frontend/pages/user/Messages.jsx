@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { messageService } from '../../services/messageService';
@@ -113,6 +113,9 @@ export default function Messages() {
   // Mobile: 'list' | 'chat' — controls which panel is visible on small screens
   const [mobilePanel, setMobilePanel] = useState('list');
 
+  const chatBottomRef  = useRef(null);   // sentinel at bottom of bubble list
+  const justOpenedRef  = useRef(false);  // true only on the initial load of a conversation
+
   // Report modal
   const [showReport,    setShowReport]    = useState(false);
   const [reportReason,  setReportReason]  = useState('Inappropriate Behavior');
@@ -143,7 +146,7 @@ export default function Messages() {
   }, [location.state, conversations]);
   useEffect(() => {
     if (selectedUser) {
-      fetchMessages(selectedUser.id);
+      fetchMessages(selectedUser.id, true); // initial load → scroll to bottom
     }
     setSelectedMsgIds([]);
   }, [selectedUser]);
@@ -162,12 +165,26 @@ export default function Messages() {
     try { setAnnouncements(await messageService.getAnnouncements()); }
     catch (e) { console.error('announcements:', e); }
   };
-  const fetchMessages = async (userId) => {
+  const fetchMessages = useCallback(async (userId, isInitial = false) => {
     try {
       const data = await messageService.getMessages(userId);
-      setMessages(data);
+      if (isInitial) {
+        // First open: replace everything and scroll to bottom
+        setMessages(data);
+        // Defer so the DOM has painted the new messages before scrolling
+        setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
+        justOpenedRef.current = false;
+      } else {
+        // Poll: only append messages we haven't seen yet — avoids layout jump
+        setMessages(prev => {
+          if (!prev.length) return data;
+          const existingIds = new Set(prev.map(m => m.id));
+          const incoming = data.filter(m => !existingIds.has(m.id));
+          return incoming.length ? [...prev, ...incoming] : prev;
+        });
+      }
     } catch (e) { console.error('messages:', e); }
-  };
+  }, []);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -176,7 +193,7 @@ export default function Messages() {
     try {
       await messageService.sendMessage(selectedUser.id, newMessage.trim());
       setNewMessage('');
-      fetchMessages(selectedUser.id);
+      await fetchMessages(selectedUser.id, true); // scroll to bottom after send
       fetchConversations();
     } catch { alert('Failed to send message.'); }
     finally { setSending(false); }
@@ -298,6 +315,8 @@ export default function Messages() {
           )}
         </div>
       ))}
+      {/* Sentinel — scrolled into view on conversation open and after sending */}
+      <div ref={chatBottomRef} />
     </div>
   );
 
