@@ -262,185 +262,7 @@ export default function Messages() {
 
   const view = announcementOpen ? 'announcements' : selectedUser ? 'chat' : 'empty';
 
-  /* ── Shared: message bubble list ───────────────────────────── */
-  const MessageBubbles = () => (
-    <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.10)' }}>
-      {messages.length === 0 ? (
-        <p className="text-center text-sm py-8" style={{ color: 'hsla(140,100%,7%,0.40)' }}>
-          No messages
-        </p>
-      ) : messages.map(msg => (
-        <div
-          key={msg.id}
-          onClick={() => toggleMsgSelect(msg.id)}
-          className={`flex ${msg.isSent ? 'justify-end' : 'justify-start'} cursor-pointer`}
-        >
-          {!msg.isSent && selectedMsgIds.includes(msg.id) && (
-            <div className="flex items-center mr-2 self-center">
-              <div className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-400 flex items-center justify-center">
-                <CheckIcon />
-              </div>
-            </div>
-          )}
-          <div className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm transition-all ${
-            msg.isSent ? 'rounded-br-sm text-white' : 'glass-inner rounded-bl-sm'
-          } ${selectedMsgIds.includes(msg.id) ? 'ring-2 ring-red-400 ring-offset-1' : ''}`}
-            style={msg.isSent
-              ? { background: selectedMsgIds.includes(msg.id) ? 'hsl(130,80%,22%)' : 'hsl(130,100%,28%)' }
-              : { color: 'hsl(140,100%,7%)' }
-            }>
-            <p className="break-words">{msg.content}</p>
-            <p className="text-xs mt-1"
-              style={{ color: msg.isSent ? 'rgba(255,255,255,0.55)' : 'hsla(140,100%,7%,0.40)' }}>
-              {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-            </p>
-          </div>
-          {msg.isSent && selectedMsgIds.includes(msg.id) && (
-            <div className="flex items-center ml-2 self-center">
-              <div className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-400 flex items-center justify-center">
-                <CheckIcon />
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  /* ── Sidebar content ─────────────────────────────────────────── */
-  const SidebarContent = () => (
-    <>
-      {/* Header */}
-      <div className="p-4 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
-        <h2 className="heading-dark text-base mb-3">Messages</h2>
-        <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-            style={{ color: 'hsla(140,100%,7%,0.38)' }}
-            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search…"
-            className="w-full pl-9 pr-3 py-2 rounded-xl text-sm" />
-        </div>
-      </div>
-
-      {/* Thread list */}
-      <div className="flex-1 overflow-y-auto">
-        <ThreadRow
-          selected={announcementOpen}
-          onClick={openAnnouncements}
-          avatar={<AnnouncementAvatar />}
-          name="Announcements"
-          preview={annPreview}
-          meta={annMeta}
-          pinned
-        />
-        {filteredConversations.length === 0 && search ? (
-          <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-            No match
-          </p>
-        ) : filteredConversations.length === 0 ? (
-          <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-            No conversations
-          </p>
-        ) : filteredConversations
-            .sort((a, b) => new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0))
-            .map(conv => (
-              <ThreadRow
-                key={conv.id}
-                selected={selectedUser?.id === conv.user.id}
-                onClick={() => openConversation(conv.user)}
-                avatar={<UserAvatar name={conv.user.name} />}
-                name={conv.user.name}
-                preview={conv.lastMessage || ''}
-                meta={conv.lastMessageTime
-                  ? new Date(conv.lastMessageTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  : ''}
-              />
-            ))
-        }
-      </div>
-    </>
-  );
-
-  /* ── Chat / Announcements panel header (back button on mobile) ── */
-  const PanelHeader = () => {
-    if (view === 'announcements') {
-      return (
-        <div className="p-4 shrink-0 flex items-center gap-3"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
-          {/* Back arrow — mobile only */}
-          <button onClick={goBackToList} className="sm:hidden mr-1 text-gray-500 hover:text-gray-700"
-            aria-label="Back to conversations">
-            <BackIcon />
-          </button>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: 'hsla(42,90%,55%,0.18)' }}>
-            <MegaphoneIcon className="w-4 h-4" style={{ color: 'hsl(38,65%,42%)' }} />
-          </div>
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide" style={{ color: 'hsl(140,100%,7%)' }}>
-              Announcements
-            </p>
-            <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.45)' }}>
-              official broadcast · read only
-            </p>
-          </div>
-        </div>
-      );
-    }
-    if (view === 'chat') {
-      return (
-        <div className="p-4 shrink-0 flex items-center gap-3"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
-          <button onClick={goBackToList} className="sm:hidden mr-1 text-gray-500 hover:text-gray-700"
-            aria-label="Back to conversations">
-            <BackIcon />
-          </button>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-            style={{ background: 'hsla(130,100%,30%,0.13)' }}>
-            <span className="text-sm font-semibold" style={{ color: 'hsl(130,100%,28%)' }}>
-              {selectedUser.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <p className="text-sm font-bold uppercase tracking-wide flex-1 truncate"
-            style={{ color: 'hsl(140,100%,7%)' }}>
-            {selectedUser.name}
-          </p>
-          {selectedMsgIds.length > 0 && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Trash — only shown when ALL selected are sent by me */}
-              {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
-                <button
-                  onClick={() => selectedMsgIds.length === 1
-                    ? setDeleteConfirmId(selectedMsgIds[0])
-                    : setDeleteConfirmId('__multi__')
-                  }
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
-                  style={{ color: 'hsla(0,70%,45%,0.90)' }}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                  <span className="hidden xs:inline">Delete</span>
-                </button>
-              )}
-              <button
-                onClick={() => { setShowReport(true); setReportDone(false); }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
-                style={{ color: 'hsla(0,70%,50%,0.85)' }}
-              >
-                <FlagIcon className="w-4 h-4" />
-                <span className="hidden xs:inline">Report</span>
-                <span>({selectedMsgIds.length})</span>
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
+  /* ── Sidebar JSX is inlined at the call site below ─────────── */
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
@@ -468,7 +290,53 @@ export default function Messages() {
           `}
           style={{ borderRight: '1px solid rgba(255,255,255,0.35)' }}
         >
-          <SidebarContent />
+          {/* Sidebar header */}
+          <div className="p-4 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
+            <h2 className="heading-dark text-base mb-3">Messages</h2>
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: 'hsla(140,100%,7%,0.38)' }}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search…"
+                className="w-full pl-9 pr-3 py-2 rounded-xl text-sm" />
+            </div>
+          </div>
+          {/* Thread list */}
+          <div className="flex-1 overflow-y-auto">
+            <ThreadRow
+              selected={announcementOpen}
+              onClick={openAnnouncements}
+              avatar={<AnnouncementAvatar />}
+              name="Announcements"
+              preview={annPreview}
+              meta={annMeta}
+              pinned
+            />
+            {filteredConversations.length === 0 && search ? (
+              <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>No match</p>
+            ) : filteredConversations.length === 0 ? (
+              <p className="p-4 text-center text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>No conversations</p>
+            ) : filteredConversations
+                .sort((a, b) => new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0))
+                .map(conv => (
+                  <ThreadRow
+                    key={conv.id}
+                    selected={selectedUser?.id === conv.user.id}
+                    onClick={() => openConversation(conv.user)}
+                    avatar={<UserAvatar name={conv.user.name} />}
+                    name={conv.user.name}
+                    preview={conv.lastMessage || ''}
+                    meta={conv.lastMessageTime
+                      ? new Date(conv.lastMessageTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      : ''}
+                  />
+                ))
+            }
+          </div>
         </div>
 
         {/* ── Main panel ── */}
@@ -482,7 +350,26 @@ export default function Messages() {
           {/* Announcements feed */}
           {view === 'announcements' && (
             <>
-              <PanelHeader />
+              {/* Announcements header */}
+              <div className="p-4 shrink-0 flex items-center gap-3"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
+                <button onClick={goBackToList} className="sm:hidden mr-1 text-gray-500 hover:text-gray-700"
+                  aria-label="Back to conversations">
+                  <BackIcon />
+                </button>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'hsla(42,90%,55%,0.18)' }}>
+                  <MegaphoneIcon className="w-4 h-4" style={{ color: 'hsl(38,65%,42%)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-wide" style={{ color: 'hsl(140,100%,7%)' }}>
+                    Announcements
+                  </p>
+                  <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.45)' }}>
+                    official broadcast · read only
+                  </p>
+                </div>
+              </div>
               <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4"
                 style={{ background: 'rgba(255,255,255,0.10)' }}>
                 {announcements.length === 0 ? (
@@ -544,8 +431,93 @@ export default function Messages() {
           {/* Chat */}
           {view === 'chat' && (
             <>
-              <PanelHeader />
-              <MessageBubbles />
+              {/* Chat header */}
+              <div className="p-4 shrink-0 flex items-center gap-3"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.35)' }}>
+                <button onClick={goBackToList} className="sm:hidden mr-1 text-gray-500 hover:text-gray-700"
+                  aria-label="Back to conversations">
+                  <BackIcon />
+                </button>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'hsla(130,100%,30%,0.13)' }}>
+                  <span className="text-sm font-semibold" style={{ color: 'hsl(130,100%,28%)' }}>
+                    {selectedUser.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-sm font-bold uppercase tracking-wide flex-1 truncate"
+                  style={{ color: 'hsl(140,100%,7%)' }}>
+                  {selectedUser.name}
+                </p>
+                {selectedMsgIds.length > 0 && (
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
+                      <button
+                        onClick={() => selectedMsgIds.length === 1
+                          ? setDeleteConfirmId(selectedMsgIds[0])
+                          : setDeleteConfirmId('__multi__')
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                        style={{ color: 'hsla(0,70%,45%,0.90)' }}
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                        <span className="hidden xs:inline">Delete</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setShowReport(true); setReportDone(false); }}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                      style={{ color: 'hsla(0,70%,50%,0.85)' }}
+                    >
+                      <FlagIcon className="w-4 h-4" />
+                      <span className="hidden xs:inline">Report</span>
+                      <span>({selectedMsgIds.length})</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              {/* Bubble list — inlined so the DOM node is stable across re-renders
+                  and the browser never resets scrollTop */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.10)' }}>
+                {messages.length === 0 ? (
+                  <p className="text-center text-sm py-8" style={{ color: 'hsla(140,100%,7%,0.40)' }}>
+                    No messages
+                  </p>
+                ) : messages.map(msg => (
+                  <div
+                    key={msg.id}
+                    onClick={() => toggleMsgSelect(msg.id)}
+                    className={`flex ${msg.isSent ? 'justify-end' : 'justify-start'} cursor-pointer`}
+                  >
+                    {!msg.isSent && selectedMsgIds.includes(msg.id) && (
+                      <div className="flex items-center mr-2 self-center">
+                        <div className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-400 flex items-center justify-center">
+                          <CheckIcon />
+                        </div>
+                      </div>
+                    )}
+                    <div className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm transition-all ${
+                      msg.isSent ? 'rounded-br-sm text-white' : 'glass-inner rounded-bl-sm'
+                    } ${selectedMsgIds.includes(msg.id) ? 'ring-2 ring-red-400 ring-offset-1' : ''}`}
+                      style={msg.isSent
+                        ? { background: selectedMsgIds.includes(msg.id) ? 'hsl(130,80%,22%)' : 'hsl(130,100%,28%)' }
+                        : { color: 'hsl(140,100%,7%)' }
+                      }>
+                      <p className="break-words">{msg.content}</p>
+                      <p className="text-xs mt-1"
+                        style={{ color: msg.isSent ? 'rgba(255,255,255,0.55)' : 'hsla(140,100%,7%,0.40)' }}>
+                        {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    {msg.isSent && selectedMsgIds.includes(msg.id) && (
+                      <div className="flex items-center ml-2 self-center">
+                        <div className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-400 flex items-center justify-center">
+                          <CheckIcon />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
               {messages.length > 0 && selectedMsgIds.length === 0 && (
                 <div className="px-4 py-1.5 text-center">
                   <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.32)' }}>
