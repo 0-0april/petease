@@ -24,5 +24,9 @@ export const appointmentService = {
   getAvailableDates: async (serviceId) => {
     const response = await api.get(`/appointments/available-dates/${serviceId}`);
     return response.data;
-  }
+  },
+
+  softDeleteAppointment: async (appointmentId) => {
+    await api.patch(`/appointments/${appointmentId}/soft-delete`);
+  },
 };

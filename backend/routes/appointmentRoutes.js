@@ -110,6 +110,7 @@ router.get('/', authenticateToken, async (req, res) => {
         AppointDateCreated,
         AppointSchedDate,
         AppointStatus,
+        CancellationReason,
         USERPETS!inner (
           UserPetID,
           UserID,
@@ -133,8 +134,10 @@ router.get('/', authenticateToken, async (req, res) => {
     }
     console.log('✅ Found appointments:', data?.length || 0);
 
-    // Transform data
-    const appointments = data.map(apt => ({
+    // Transform data — exclude soft-deleted rows
+    const appointments = data
+      .filter(apt => apt.CancellationReason !== '__deleted__')
+      .map(apt => ({
       id: apt.AppointID,
       type: normalizeAppointmentType(apt.SERVICES?.ServType),
       serviceType: apt.SERVICES?.ServType,
@@ -199,6 +202,44 @@ router.patch('/:id/cancel', authenticateToken, async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Cancel appointment error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Soft-delete appointment (sets CancellationReason = '__deleted__', keeps status Cancelled)
+router.patch('/:id/soft-delete', authenticateToken, async (req, res) => {
+  try {
+    const { data: userData, error: userError } = await supabase
+      .from('USER')
+      .select('UserID')
+      .eq('AccID', req.user.accId)
+      .single();
+
+    if (userError) throw userError;
+
+    // Verify ownership
+    const { data: appointment, error: findError } = await supabase
+      .from('APPOINTMENT')
+      .select('AppointID, USERPETS!inner(UserID)')
+      .eq('AppointID', req.params.id)
+      .eq('USERPETS.UserID', userData.UserID)
+      .single();
+
+    if (findError || !appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    const { data, error } = await supabase
+      .from('APPOINTMENT')
+      .update({ AppointStatus: 'Cancelled', CancellationReason: '__deleted__' })
+      .eq('AppointID', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Soft-delete appointment error:', error);
     res.status(500).json({ error: error.message });
   }
 });

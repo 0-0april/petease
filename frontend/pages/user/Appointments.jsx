@@ -2,10 +2,25 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
+import Pagination from '../../components/Pagination';
 import { appointmentService } from '../../services/appointmentService';
 import { useBadge } from '../../contexts/BadgeContext';
 
+const PAGE_SIZE = 10;
+
 const SEEN_KEY = 'appointments_seen_ids';
+
+const STATUS_STYLES = {
+  confirmed: 'bg-green-100 text-green-800',
+  completed: 'bg-blue-100 text-blue-800',
+  cancelled: 'bg-red-100 text-red-800',
+  pending:   'bg-yellow-100 text-yellow-800',
+};
+
+const getSeenIds = () => {
+  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
+  catch { return new Set(); }
+};
 
 const CANCEL_REASONS = [
   'I have a scheduling conflict',
@@ -16,11 +31,6 @@ const CANCEL_REASONS = [
   'Personal emergency or family obligation',
 ];
 
-const getSeenIds = () => {
-  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
-  catch { return new Set(); }
-};
-
 const CancelModal = ({ onConfirm, onClose }) => {
   const [selected, setSelected] = useState('');
   const [custom, setCustom] = useState('');
@@ -30,7 +40,7 @@ const CancelModal = ({ onConfirm, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="glass-card w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cancel</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Cancel Appointment</h3>
         <div className="space-y-2 mb-3">
           {CANCEL_REASONS.map(r => (
             <button key={r} onClick={() => toggle(r)}
@@ -72,11 +82,33 @@ const CancelModal = ({ onConfirm, onClose }) => {
   );
 };
 
+const ConfirmModal = ({ message, onConfirm, onClose }) => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="glass-card w-full max-w-sm p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm</h3>
+      <p className="text-sm text-gray-600 mb-5">{message}</p>
+      <div className="flex space-x-3">
+        <button onClick={onClose}
+          className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+          Cancel
+        </button>
+        <button onClick={onConfirm}
+          className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 text-sm font-medium">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null); // array of ids
   const { notify, clear } = useBadge();
 
   useEffect(() => {
@@ -92,11 +124,9 @@ const Appointments = () => {
       const unseen = data.filter(a =>
         (a.status === 'pending' || a.status === 'confirmed') && !seen.has(String(a.id))
       ).length;
-      // Mark all current as seen now that user is on the page
       const allIds = data.map(a => String(a.id));
       localStorage.setItem(SEEN_KEY, JSON.stringify(allIds));
       notify('/appointments', unseen);
-      // immediately clear since user is viewing
       clear('/appointments');
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -105,31 +135,67 @@ const Appointments = () => {
     }
   };
 
+  const showFeedback = (msg, type = 'success') => {
+    setFeedback({ msg, type });
+    setTimeout(() => setFeedback(null), 3000);
+  };
+
   const handleCancelConfirmed = async (reason) => {
     try {
       await appointmentService.cancelAppointment(cancelTarget, reason);
       setCancelTarget(null);
-      setFeedback('Appointment cancelled successfully.');
-      setTimeout(() => setFeedback(null), 3000);
+      showFeedback('Appointment cancelled.');
       fetchAppointments();
     } catch {
-      setFeedback('Failed to cancel appointment. Please try again.');
-      setTimeout(() => setFeedback(null), 3000);
+      showFeedback('Failed to cancel appointment.', 'error');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await Promise.all(deleteTarget.map(id => appointmentService.softDeleteAppointment(id)));
+      setSelectedIds([]);
+      setDeleteTarget(null);
+      showFeedback(`${deleteTarget.length} appointment${deleteTarget.length > 1 ? 's' : ''} removed.`);
+      fetchAppointments();
+    } catch {
+      showFeedback('Failed to delete.', 'error');
+      setDeleteTarget(null);
     }
   };
 
   const formatDate = (dateStr) =>
-    new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+      weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+    });
 
   const typeLabel = (type) => {
     if (type === 'anti-rabies') return 'Anti-Rabies Vaccine';
     if (type === 'spay') return 'Spay / Neuter';
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    return type ? type.charAt(0).toUpperCase() + type.slice(1) : '—';
   };
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(appointments.length / PAGE_SIZE));
+  const pageRows   = appointments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Select helpers (page-scoped)
+  const allPageSelected = pageRows.length > 0 && pageRows.every(r => selectedIds.includes(r.id));
+  const toggleSelectAll = (e) => {
+    const ids = pageRows.map(r => r.id);
+    setSelectedIds(e.target.checked
+      ? [...new Set([...selectedIds, ...ids])]
+      : selectedIds.filter(id => !ids.includes(id))
+    );
+  };
+  const toggleSelect = (id) =>
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
           <Link to="/book-appointment"
@@ -139,65 +205,138 @@ const Appointments = () => {
         </div>
 
         {feedback && (
-          <div className="px-4 py-3 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200">
-            {feedback}
+          <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${
+            feedback.type === 'error'
+              ? 'bg-red-50 text-red-700 border-red-200'
+              : 'bg-green-50 text-green-700 border-green-200'
+          }`}>
+            {feedback.msg}
+          </div>
+        )}
+
+        {/* Bulk delete toolbar */}
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDeleteTarget(selectedIds)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete Selected ({selectedIds.length})
+            </button>
+            <button onClick={() => setSelectedIds([])}
+              className="text-sm text-gray-500 hover:text-gray-700">
+              Clear
+            </button>
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading...</div>
+          <div className="text-center py-12 text-gray-400">Loading…</div>
         ) : appointments.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <p className="text-gray-600 font-medium mb-2">No appointments</p>
-            <Link to="/book-appointment" className="text-primary hover:underline text-sm">
-              Book now
-            </Link>
+            <Link to="/book-appointment" className="text-primary hover:underline text-sm">Book now</Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            {appointments.map(appointment => (
-              <div key={appointment.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900">{typeLabel(appointment.type)}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        appointment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                        appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Date: <span className="font-medium text-gray-800">{formatDate(appointment.date)}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Pets: <span className="font-medium text-gray-800">{appointment.pets?.map(p => p.name).join(', ')}</span>
-                    </p>
-                  </div>
-                  {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
-                    <button onClick={() => setCancelTarget(appointment.id)}
-                      className="border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 text-sm font-medium flex-shrink-0">
-                      Cancel
-                    </button>
-                  )}
-                </div>
+          <>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 w-10 text-center">
+                        <input type="checkbox"
+                          className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                          checked={allPageSelected}
+                          onChange={toggleSelectAll} />
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scheduled</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {pageRows.map(appointment => (
+                      <tr key={appointment.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 text-center">
+                          <input type="checkbox"
+                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                            checked={selectedIds.includes(appointment.id)}
+                            onChange={() => toggleSelect(appointment.id)} />
+                        </td>
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                          {appointment.pets?.map(p => p.name).join(', ') || '—'}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-600">
+                          {typeLabel(appointment.type)}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                          {formatDate(appointment.date)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+                              <button
+                                onClick={() => setCancelTarget(appointment.id)}
+                                className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 font-medium">
+                                Cancel
+                              </button>
+                            )}
+                            {(appointment.status === 'cancelled' || appointment.status === 'completed') && (
+                              <button
+                                onClick={() => setDeleteTarget([appointment.id])}
+                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                                title="Remove from list"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
+            </div>
+
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          </>
         )}
       </div>
 
-      {/* Cancel reason modal */}
       {cancelTarget && (
         <CancelModal
           onConfirm={handleCancelConfirmed}
           onClose={() => setCancelTarget(null)}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmModal
+          message={`Remove ${deleteTarget.length} appointment${deleteTarget.length > 1 ? 's' : ''} from your list? This cannot be undone.`}
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setDeleteTarget(null)}
         />
       )}
     </Layout>

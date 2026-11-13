@@ -1,6 +1,7 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { createNotificationsForAdmins } from '../utils/notificationHelper.js';
 
 const router = express.Router();
 
@@ -82,6 +83,17 @@ router.post('/report', authenticateToken, async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Notify all admins about the new report
+    try {
+      await createNotificationsForAdmins({
+        title: 'New user report submitted',
+        message: `A report was submitted: "${reason}". Please review it in the Reports tab.`,
+        type: 'report',
+      });
+    } catch (notifErr) {
+      console.error('Failed to notify admins of report:', notifErr);
+    }
 
     res.status(201).json(data);
   } catch (error) {

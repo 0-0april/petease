@@ -90,3 +90,38 @@ export const createNotificationsForVets = async ({ title, message, type }) => {
 
   return data;
 };
+
+// Notify all admin accounts
+export const createNotificationsForAdmins = async ({ title, message, type }) => {
+  const { data: adminAccounts, error } = await supabase
+    .from('ADMIN')
+    .select('AccID');
+
+  if (error) {
+    console.error('Fetch admin accounts error:', error);
+    return [];
+  }
+
+  const rows = (adminAccounts || [])
+    .filter(a => a.AccID)
+    .map(a => ({
+      AccID: a.AccID,
+      NotifTitle: title,
+      NotifMessage: message,
+      NotifType: type
+    }));
+
+  if (rows.length === 0) return [];
+
+  const { data, error: insertError } = await supabase
+    .from('NOTIFICATION')
+    .insert(rows)
+    .select();
+
+  if (insertError) {
+    console.error('Create admin notifications error:', insertError);
+    return [];
+  }
+
+  return data;
+};

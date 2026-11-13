@@ -202,41 +202,64 @@ const AdminAnnouncements = () => {
             ) : sysAnnouncements.length === 0 ? (
               <p className="text-gray-500 text-center py-10">No announcements.</p>
             ) : (
-              sysAnnouncements.map(ann => (
-                <div key={ann.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="text-base font-bold text-gray-900">{ann.title}</h3>
-                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_STYLES[ann.type] || 'bg-gray-100 text-gray-700'}`}>
-                          {ann.type}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-700 mt-1">{ann.content}</p>
-                      <p className="text-xs text-gray-400 mt-2">
-                        By {ann.createdBy} · {new Date(ann.createdAt).toLocaleString()}
-                        {ann.updatedAt && ann.updatedAt !== ann.createdAt && (
-                          <> · Updated {new Date(ann.updatedAt).toLocaleString()}</>
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        onClick={() => openEditModal(ann)}
-                        className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-sm hover:bg-blue-200 font-medium"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleSysDelete(ann.id)}
-                        className="bg-red-100 text-red-700 px-3 py-1.5 rounded text-sm hover:bg-red-200 font-medium"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Content</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posted By</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {sysAnnouncements.map(ann => (
+                        <tr key={ann.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[180px] truncate">
+                            {ann.title}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_STYLES[ann.type] || 'bg-gray-100 text-gray-700'}`}>
+                              {ann.type}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                            <p className="line-clamp-2">{ann.content}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{ann.createdBy}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            {new Date(ann.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {ann.updatedAt && ann.updatedAt !== ann.createdAt && (
+                              <p className="text-xs text-gray-400">
+                                Updated {new Date(ann.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => openEditModal(ann)}
+                                className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleSysDelete(ann.id)}
+                                className="px-3 py-1.5 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))
+              </div>
             )}
           </div>
         )}
@@ -247,51 +270,73 @@ const AdminAnnouncements = () => {
             {vetAnnouncements.length === 0 ? (
               <p className="text-gray-500 text-center py-10">No pending submissions.</p>
             ) : (
-              vetAnnouncements.map(ann => (
-                <div key={ann.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="text-base font-bold text-gray-900">{ann.title}</h3>
-                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_STYLES[ann.type] || 'bg-gray-100 text-gray-700'}`}>
-                          {ann.type}
-                        </span>
-                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-yellow-100 text-yellow-800">
-                          Pending
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-700 mt-1">{ann.content}</p>
-                      <p className="text-xs text-gray-400 mt-2">
-                        Submitted {new Date(ann.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        onClick={() => handleVetApprove(ann.id)}
-                        className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700 font-medium"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedVetAnn(ann);
-                          setVetEditData({ title: ann.title, content: ann.content, type: ann.type || 'General' });
-                          setShowVetEditModal(true);
-                        }}
-                        className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 font-medium"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => { setSelectedVetAnn(ann); setShowVetRejectModal(true); }}
-                        className="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700 font-medium"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Content</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {vetAnnouncements.map(ann => (
+                        <tr key={ann.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[160px] truncate">
+                            {ann.title}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_STYLES[ann.type] || 'bg-gray-100 text-gray-700'}`}>
+                              {ann.type}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                            <p className="line-clamp-2">{ann.content}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            {new Date(ann.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-yellow-100 text-yellow-800">
+                              Pending
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleVetApprove(ann.id)}
+                                className="px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedVetAnn(ann);
+                                  setVetEditData({ title: ann.title, content: ann.content, type: ann.type || 'General' });
+                                  setShowVetEditModal(true);
+                                }}
+                                className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => { setSelectedVetAnn(ann); setShowVetRejectModal(true); }}
+                                className="px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))
+              </div>
             )}
 
             <Pagination currentPage={vetPage} totalPages={vetTotalPages} onPageChange={setVetPage} />

@@ -674,3 +674,39 @@ adoptions (user panel)
 Messages (user panel)
 - Fix the bouncing/jumping scroll: remove the movement so the view stays where the user stops scrolling.
 - Clicking a chat bubble shows a delete (trash) icon to the left of the report icon, same behavior as report. Deleting requires a confirmation dialog.
+
+
+Implement these changes per panel.
+
+USER PANEL
+
+Browse Pets
+- In the View Pet modal (viewing another user's adoptable pet): when Adopt is clicked and the user sends a message, deliver it to the pet's owner. Reuse the existing Message button's send function.
+
+My Pets
+- Add/Edit Pet: remove "Both" from Registration Type (keep Adoption and Appointment).
+
+Adoption
+- Remove the trash-bin icon from the Actions column; keep other actions.
+
+Notifications
+- Show every change relevant to the user (adoption and appointment updates, announcements, messages).
+- On click, navigate to the matching tab: announcement → Messages/Announcements, adoption update → Adoption, appointment change → Appointment.
+
+Appointment
+- Keep the current fields, but use the Admin Appointment page's layout/pagination template.
+- Allow selecting one or multiple rows to delete, with a confirmation dialog.
+- Soft delete: set AdoptIsDeleted = TRUE. Show only rows where AdoptIsDeleted = FALSE.
+
+ADMIN PANEL
+
+Announcement
+- Keep current fields; use the Admin Appointment layout/pagination template.
+
+Notifications
+- When a user submits a report, notify the admin; on click, open the Reports tab.
+
+VET STAFF PANEL
+
+Adoption, Services
+- Keep current fields; use the Admin Appointment layout/pagination template.

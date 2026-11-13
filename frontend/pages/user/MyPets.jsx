@@ -213,10 +213,10 @@ const MyPets = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">{pet.breed} · {pet.species || pet.type} · {pet.gender}</p>
-                  {pet.color && <p className="text-xs text-gray-400 mt-0.5">Color: {pet.color}</p>}
+                  {pet.color && <p className="text-xs text-gray-400 mt-0.5">{pet.color}</p>}
                   {pet.birthday && (
                     <p className="text-xs text-gray-400">
-                      Born: {new Date(pet.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      {new Date(pet.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   )}
                   {pet.vaccinationCard && (
@@ -308,7 +308,6 @@ const MyPets = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="adoption">For Adoption</option>
                 <option value="appointment">For Appointment Only</option>
-                <option value="both">Both (Adoption & Appointment)</option>
               </select>
             </div>
           </div>

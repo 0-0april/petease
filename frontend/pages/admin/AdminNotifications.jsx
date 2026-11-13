@@ -1,10 +1,12 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
 import { adminService } from '../../services/adminService';
+import { notificationService } from '../../services/notificationService';
 
 const AdminNotifications = () => {
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -14,30 +16,54 @@ const AdminNotifications = () => {
 
     const fetchNotifications = async () => {
         try {
-            const [reportsData, announcementsData] = await Promise.all([
+            // Fetch both constructed feed items AND persisted NOTIFICATION rows for admins
+            const [reportsData, announcementsData, persistedNotifs] = await Promise.all([
                 adminService.getAllReports(1, 100, 'pending'),
                 adminService.getAllAnnouncements(1, 100, 'pending'),
+                notificationService.getNotifications(),
             ]);
 
             const reportNotifs = reportsData.reports.map(r => ({
                 id: `report-${r.id}`,
                 type: 'report',
-                title: 'Report',
+                title: 'User Report',
                 message: `${r.reportedBy} reported ${r.reportedUserName}: "${r.reason}"`,
                 link: '/admin/reports',
                 createdAt: r.createdAt,
+                isRead: false,
             }));
 
             const announcementNotifs = announcementsData.announcements.map(a => ({
                 id: `announcement-${a.id}`,
                 type: 'announcement',
-                title: 'Announcement',
+                title: 'Vet Announcement Submission',
                 message: `"${a.title}" submitted by ${a.createdBy} — awaiting your review.`,
                 link: '/admin/announcements',
                 createdAt: a.createdAt,
+                isRead: false,
             }));
 
-            const all = [...reportNotifs, ...announcementNotifs].sort(
+            // Persisted notifications from the NOTIFICATION table targeted at this admin
+            const dbNotifs = persistedNotifs
+                .filter(n => n.type === 'report')
+                .map(n => ({
+                    id: `db-${n.id}`,
+                    type: n.type,
+                    title: n.title,
+                    message: n.message,
+                    link: '/admin/reports',
+                    createdAt: n.createdAt,
+                    isRead: n.isRead,
+                    dbId: n.id,
+                }));
+
+            // Merge — deduplicate: prefer DB row over constructed row for same report
+            const dbReportTimes = new Set(dbNotifs.map(n => n.createdAt));
+            const filteredConstructed = [...reportNotifs, ...announcementNotifs].filter(
+                n => !(n.type === 'report' && dbReportTimes.has(n.createdAt))
+            );
+
+            const all = [...dbNotifs, ...filteredConstructed].sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
             );
 
@@ -47,6 +73,17 @@ const AdminNotifications = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleClick = async (notif) => {
+        // Mark DB notification as read if applicable
+        if (notif.dbId && !notif.isRead) {
+            try { await notificationService.markAsRead(notif.dbId); } catch {}
+            setNotifications(prev =>
+                prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n)
+            );
+        }
+        navigate(notif.link);
     };
 
     const TYPE_STYLES = {
@@ -72,14 +109,23 @@ const AdminNotifications = () => {
         },
     };
 
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
     return (
         <AdminLayout>
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+                        {unreadCount > 0 && (
+                            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                                {unreadCount} new
+                            </span>
+                        )}
+                    </div>
                     {notifications.length > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                            {notifications.length} pending
+                        <span className="text-sm text-gray-500">
+                            {notifications.length} total
                         </span>
                     )}
                 </div>
@@ -96,30 +142,36 @@ const AdminNotifications = () => {
                 ) : (
                     <div className="space-y-3">
                         {notifications.map(notif => {
-                            const style = TYPE_STYLES[notif.type];
+                            const style = TYPE_STYLES[notif.type] || TYPE_STYLES.announcement;
                             return (
-                                <Link
+                                <button
                                     key={notif.id}
-                                    to={notif.link}
-                                    className={`flex items-start space-x-4 bg-white rounded-xl shadow-sm border-l-4 ${style.border} border border-gray-100 p-4 hover:shadow-md transition-shadow`}
+                                    onClick={() => handleClick(notif)}
+                                    className={`w-full text-left flex items-start space-x-4 bg-white rounded-xl shadow-sm border-l-4 ${style.border} border border-gray-100 p-4 hover:shadow-md transition-shadow ${!notif.isRead ? 'ring-1 ring-inset ring-primary/10' : ''}`}
                                 >
                                     <div className="flex-shrink-0 mt-0.5">{style.icon}</div>
-                                    <div className="flex-1 min-w-0">
+                                    <div className="flex-1 min-w-0 text-left">
                                         <div className="flex items-center space-x-2 mb-1">
                                             <p className="text-sm font-semibold text-gray-900">{notif.title}</p>
                                             <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${style.badge}`}>
                                                 {notif.type === 'report' ? 'Report' : 'Announcement'}
                                             </span>
+                                            {!notif.isRead && (
+                                                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                                            )}
                                         </div>
                                         <p className="text-sm text-gray-600">{notif.message}</p>
                                         <p className="text-xs text-gray-400 mt-1">
-                                            {new Date(notif.createdAt).toLocaleString()}
+                                            {new Date(notif.createdAt).toLocaleString('en-US', {
+                                                month: 'short', day: 'numeric', year: 'numeric',
+                                                hour: '2-digit', minute: '2-digit',
+                                            })}
                                         </p>
                                     </div>
                                     <svg className="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
-                                </Link>
+                                </button>
                             );
                         })}
                     </div>

@@ -59,6 +59,14 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
     setAdoptLoading(true);
     try {
       await adoptionService.requestAdoption(pet.id, adoptMsg.trim());
+      // Also deliver the adoption message to the owner if one was written
+      if (adoptMsg.trim() && pet.ownerId) {
+        try {
+          await messageService.sendMessage(pet.ownerId, adoptMsg.trim());
+        } catch {
+          // non-critical — adoption request already submitted
+        }
+      }
       setAdoptStep('done');
     } catch {
       alert('Failed to send adoption request. Please try again.');
