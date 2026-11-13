@@ -120,6 +120,7 @@ router.get('/my-requests', authenticateToken, async (req, res) => {
         )
       `)
       .eq('UserID', user.UserID)
+      .eq('AdoptIsDeleted', false)
       .order('AdoptReqDate', { ascending: false });
 
     if (error) throw error;
@@ -169,6 +170,7 @@ router.get('/incoming', authenticateToken, async (req, res) => {
         )
       `)
       .in('UserPetsID', userPetIds)
+      .eq('AdoptIsDeleted', false)
       .order('AdoptReqDate', { ascending: false });
 
     if (error) throw error;
@@ -267,6 +269,59 @@ router.put('/:id/complete', authenticateToken, async (req, res) => {
       null
     );
     res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── DELETE /api/adoptions/:id  (soft delete — sets AdoptIsDeleted = true) ──
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const user = await getUserInfo(req.user.accId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { data, error } = await supabase
+      .from('ADOPTION')
+      .update({ AdoptIsDeleted: true })
+      .eq('AdoptID', req.params.id)
+      // Only allow users to soft-delete their own records
+      .eq('UserID', user.UserID)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Adoption not found or not owned by you' });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── DELETE /api/adoptions/incoming/:id  (soft delete for pet owner — incoming request) ──
+router.delete('/incoming/:id', authenticateToken, async (req, res) => {
+  try {
+    const user = await getUserInfo(req.user.accId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Verify the adoption belongs to a pet owned by the current user
+    const { data: adoption } = await supabase
+      .from('ADOPTION')
+      .select('AdoptID, USERPETS!ADOPTION_UserPetsID_fkey(UserID)')
+      .eq('AdoptID', req.params.id)
+      .single();
+
+    if (!adoption) return res.status(404).json({ error: 'Adoption not found' });
+    if (adoption.USERPETS?.UserID !== user.UserID)
+      return res.status(403).json({ error: 'Not authorised' });
+
+    const { error } = await supabase
+      .from('ADOPTION')
+      .update({ AdoptIsDeleted: true })
+      .eq('AdoptID', req.params.id);
+
+    if (error) throw error;
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

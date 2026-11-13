@@ -44,5 +44,9 @@ export const messageService = {
   reportUser: async ({ reportedUserId, reason, description, messageLog }) => {
     const response = await api.post('/users/report', { reportedUserId, reason, description, messageLog });
     return response.data;
-  }
+  },
+
+  deleteMessage: async (messageId) => {
+    await api.delete(`/messages/${messageId}`);
+  },
 };

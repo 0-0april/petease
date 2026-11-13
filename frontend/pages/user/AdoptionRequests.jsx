@@ -2,9 +2,12 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
+import Pagination from '../../components/Pagination';
 import { adoptionService } from '../../services/adoptionService';
 import { petService } from '../../services/petService';
 import { useBadge } from '../../contexts/BadgeContext';
+
+const PAGE_SIZE = 10;
 
 const STATUS_STYLES = {
   pending:   'bg-yellow-100 text-yellow-800',
@@ -68,10 +71,10 @@ const RejectModal = ({ request, onConfirm, onClose }) => {
   );
 };
 
-const ConfirmModal = ({ message, onConfirm, onClose }) => (
+const ConfirmModal = ({ message, onConfirm, onClose, confirmLabel = 'Confirm', danger = false }) => (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div className="glass-card w-full max-w-sm p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Action</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm</h3>
       <p className="text-sm text-gray-600 mb-5">{message}</p>
       <div className="flex space-x-3">
         <button onClick={onClose}
@@ -79,8 +82,8 @@ const ConfirmModal = ({ message, onConfirm, onClose }) => (
           Cancel
         </button>
         <button onClick={onConfirm}
-          className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark text-sm font-medium">
-          Confirm
+          className={`flex-1 py-2 rounded-lg text-sm font-medium text-white ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-dark'}`}>
+          {confirmLabel}
         </button>
       </div>
     </div>
@@ -103,9 +106,16 @@ const AdoptionRequests = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+  // Pagination
+  const [incomingPage, setIncomingPage] = useState(1);
+  const [sentPage, setSentPage] = useState(1);
+
+  // Multi-select delete
+  const [selectedIncoming, setSelectedIncoming] = useState([]);
+  const [selectedSent, setSelectedSent] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { ids, tab }
+
+  useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -118,7 +128,6 @@ const AdoptionRequests = () => {
       setIncoming(inc);
       setSent(snt);
       setPets(allPets);
-      // Save seen pending IDs so the poller won't re-badge them
       const pendingIds = inc.filter(r => r.status === 'pending').map(r => String(r.id));
       localStorage.setItem(ADOPT_SEEN_KEY, JSON.stringify(pendingIds));
       clear('/adoption-requests');
@@ -146,9 +155,7 @@ const AdoptionRequests = () => {
       setApproveTarget(null);
       showFeedback('Adoption request approved.');
       await fetchAll();
-    } finally {
-      setActionLoading(null);
-    }
+    } finally { setActionLoading(null); }
   };
 
   const handleRejectConfirm = async (reason) => {
@@ -158,9 +165,7 @@ const AdoptionRequests = () => {
       setRejectTarget(null);
       showFeedback('Adoption request rejected.');
       await fetchAll();
-    } finally {
-      setActionLoading(null);
-    }
+    } finally { setActionLoading(null); }
   };
 
   const handleCancel = async () => {
@@ -170,35 +175,77 @@ const AdoptionRequests = () => {
       setCancelTarget(null);
       showFeedback('Adoption request cancelled.');
       await fetchAll();
-    } finally {
-      setActionLoading(null);
+    } finally { setActionLoading(null); }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      const { ids, tab } = deleteTarget;
+      if (tab === 'incoming') {
+        await Promise.all(ids.map(id => adoptionService.softDeleteIncoming(id)));
+        setSelectedIncoming([]);
+      } else {
+        await Promise.all(ids.map(id => adoptionService.softDeleteSent(id)));
+        setSelectedSent([]);
+      }
+      setDeleteTarget(null);
+      showFeedback(`${ids.length} record${ids.length > 1 ? 's' : ''} deleted.`);
+      await fetchAll();
+    } catch {
+      showFeedback('Failed to delete.', 'error');
+      setDeleteTarget(null);
     }
   };
 
   const formatDate = (iso) =>
     new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-  const openChat = (userId) => {
-    navigate('/messages', { state: { userId } });
+  const openChat = (userId) => navigate('/messages', { state: { userId } });
+
+  // Pagination helpers
+  const paginateIncoming = () => {
+    const total = Math.max(1, Math.ceil(incoming.length / PAGE_SIZE));
+    const page  = incoming.slice((incomingPage - 1) * PAGE_SIZE, incomingPage * PAGE_SIZE);
+    return { page, total };
+  };
+  const paginateSent = () => {
+    const total = Math.max(1, Math.ceil(sent.length / PAGE_SIZE));
+    const page  = sent.slice((sentPage - 1) * PAGE_SIZE, sentPage * PAGE_SIZE);
+    return { page, total };
+  };
+
+  // Select-all helpers (operates on current page only)
+  const toggleAllIncoming = (e, pageRows) => {
+    const ids = pageRows.map(r => r.id);
+    setSelectedIncoming(e.target.checked ? [...new Set([...selectedIncoming, ...ids])] : selectedIncoming.filter(id => !ids.includes(id)));
+  };
+  const toggleAllSent = (e, pageRows) => {
+    const ids = pageRows.map(r => r.id);
+    setSelectedSent(e.target.checked ? [...new Set([...selectedSent, ...ids])] : selectedSent.filter(id => !ids.includes(id)));
   };
 
   const pendingIncoming = incoming.filter(r => r.status === 'pending').length;
+  const { page: incomingRows, total: incomingTotalPages } = paginateIncoming();
+  const { page: sentRows,     total: sentTotalPages }     = paginateSent();
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Adoptions</h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Adoptions</h1>
 
         {feedback && (
-          <div className={`mb-4 px-4 py-3 rounded-lg text-sm font-medium ${
-            feedback.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+          <div className={`px-4 py-3 rounded-lg text-sm font-medium ${
+            feedback.type === 'error'
+              ? 'bg-red-50 text-red-700 border border-red-200'
+              : 'bg-green-50 text-green-700 border border-green-200'
           }`}>
             {feedback.msg}
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
+        <div className="flex space-x-1 bg-gray-100 rounded-xl p-1 w-fit">
           <button onClick={() => setActiveTab('incoming')}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
               activeTab === 'incoming' ? 'bg-white text-primary shadow' : 'text-gray-600 hover:text-gray-900'
@@ -221,159 +268,274 @@ const AdoptionRequests = () => {
         {loading ? (
           <div className="text-center py-16 text-gray-400">Loading...</div>
         ) : activeTab === 'incoming' ? (
-          /* RECEIVED tab — shows pet image, pet name, adopter name */
-          incoming.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-              <p className="text-gray-600 font-medium">No requests</p>
+          /* ── RECEIVED TAB ── */
+          <div className="space-y-4">
+            {/* Toolbar */}
+            {selectedIncoming.length > 0 && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setDeleteTarget({ ids: selectedIncoming, tab: 'incoming' })}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Selected ({selectedIncoming.length})
+                </button>
+                <button onClick={() => setSelectedIncoming([])}
+                  className="text-sm text-gray-500 hover:text-gray-700">
+                  Clear
+                </button>
+              </div>
+            )}
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 w-10 text-center">
+                        <input type="checkbox"
+                          className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                          checked={incomingRows.length > 0 && incomingRows.every(r => selectedIncoming.includes(r.id))}
+                          onChange={e => toggleAllIncoming(e, incomingRows)} />
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Adopter</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {incomingRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-10 text-center text-gray-400 text-sm">No requests.</td>
+                      </tr>
+                    ) : incomingRows.map(req => (
+                      <tr key={req.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 text-center">
+                          <input type="checkbox"
+                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                            checked={selectedIncoming.includes(req.id)}
+                            onChange={() => setSelectedIncoming(prev =>
+                              prev.includes(req.id) ? prev.filter(x => x !== req.id) : [...prev, req.id]
+                            )} />
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-3">
+                            <img src={getPetImage(req.petId)} alt={req.petName}
+                              className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                            <span className="text-sm font-medium text-gray-900">{req.petName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <button onClick={() => openChat(req.adopterId)}
+                            className="text-sm font-medium text-primary hover:underline">
+                            {req.adopterName}
+                          </button>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500">
+                          <div>{req.adopterEmail}</div>
+                          <div className="text-xs text-gray-400">{req.adopterPhone}</div>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                          {formatDate(req.createdAt)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLES[req.status] || ''}`}>
+                            {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                          </span>
+                          {req.status === 'rejected' && req.rejectionReason && (
+                            <p className="text-xs text-red-600 mt-1 max-w-[160px] truncate" title={req.rejectionReason}>
+                              {req.rejectionReason}
+                            </p>
+                          )}
+                          {req.status === 'approved' && (
+                            <p className="text-xs text-blue-600 mt-1">Awaiting waiver visit</p>
+                          )}
+                          {req.status === 'completed' && (
+                            <p className="text-xs text-green-600 mt-1">✓ Completed by vet</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            {req.status === 'pending' && (
+                              <>
+                                <button onClick={() => setApproveTarget(req.id)} disabled={!!actionLoading}
+                                  className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium">
+                                  {actionLoading === req.id + '-approve' ? '…' : 'Approve'}
+                                </button>
+                                <button onClick={() => setRejectTarget(req)} disabled={!!actionLoading}
+                                  className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium">
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                            {req.status === 'completed' && req.waiverUrl && (
+                              <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer" download
+                                className="px-3 py-1.5 bg-green-700 text-white text-xs rounded-lg hover:bg-green-800 font-semibold">
+                                Waiver
+                              </a>
+                            )}
+                            {!['pending'].includes(req.status) && (
+                              <button
+                                onClick={() => setDeleteTarget({ ids: [req.id], tab: 'incoming' })}
+                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                                title="Delete record"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {incoming.map(req => (
-                <div key={req.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                  <div className="flex items-start gap-4">
-                    {/* Pet image */}
-                    <img src={getPetImage(req.petId)} alt={req.petName}
-                      className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-0.5">
-                        <span className="font-semibold text-gray-900">{req.petName}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[req.status]}`}>
-                          {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        <button
-                          onClick={() => openChat(req.adopterId)}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {req.adopterName}
-                        </button>
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{req.adopterEmail} · {req.adopterPhone} · {formatDate(req.createdAt)}</p>
-                      {req.message && req.status !== 'completed' && (
-                        <p className="mt-2 text-sm text-gray-600 italic bg-gray-50 rounded-lg px-3 py-2">"{req.message}"</p>
-                      )}
-                      {req.status === 'rejected' && req.rejectionReason && (
-                        <div className="mt-2 bg-red-50 rounded-lg px-3 py-2 text-sm text-red-700">
-                          {req.rejectionReason}
-                        </div>
-                      )}
-                      {req.status === 'approved' && (
-                        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm text-blue-800">
-                          Adoption approved. Both parties must visit the Provincial Veterinary Office to sign the waiver.
-                        </div>
-                      )}
-                      {req.status === 'completed' && (
-                        <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                          <p className="text-sm text-green-800 font-medium">✓ Adoption completed by vet staff.</p>
-                        </div>
-                      )}
-                    </div>
-                    {req.status === 'pending' && (
-                      <div className="flex flex-col space-y-2 flex-shrink-0">
-                        <button onClick={() => setApproveTarget(req.id)} disabled={!!actionLoading}
-                          className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium">
-                          {actionLoading === req.id + '-approve' ? 'Approving…' : 'Approve'}
-                        </button>
-                        <button onClick={() => setRejectTarget(req)} disabled={!!actionLoading}
-                          className="px-4 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium">
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                    {req.status === 'completed' && req.waiverUrl && (
-                      <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer"
-                        download
-                        className="flex-shrink-0 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
-                        Waiver
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+            <Pagination currentPage={incomingPage} totalPages={incomingTotalPages} onPageChange={setIncomingPage} />
+          </div>
         ) : (
-          /* SENT tab — shows pet image, pet name, owner name */
-          sent.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-              <p className="text-gray-600 font-medium">No applications</p>
+          /* ── SENT TAB ── */
+          <div className="space-y-4">
+            {/* Toolbar */}
+            {selectedSent.length > 0 && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setDeleteTarget({ ids: selectedSent, tab: 'sent' })}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Selected ({selectedSent.length})
+                </button>
+                <button onClick={() => setSelectedSent([])}
+                  className="text-sm text-gray-500 hover:text-gray-700">
+                  Clear
+                </button>
+              </div>
+            )}
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 w-10 text-center">
+                        <input type="checkbox"
+                          className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                          checked={sentRows.length > 0 && sentRows.every(r => selectedSent.includes(r.id))}
+                          onChange={e => toggleAllSent(e, sentRows)} />
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {sentRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No applications.</td>
+                      </tr>
+                    ) : sentRows.map(req => (
+                      <tr key={req.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 text-center">
+                          <input type="checkbox"
+                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                            checked={selectedSent.includes(req.id)}
+                            onChange={() => setSelectedSent(prev =>
+                              prev.includes(req.id) ? prev.filter(x => x !== req.id) : [...prev, req.id]
+                            )} />
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-3">
+                            <img src={getPetImage(req.petId)} alt={req.petName}
+                              className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                            <span className="text-sm font-medium text-gray-900">{req.petName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <button onClick={() => openChat(req.ownerId)}
+                            className="text-sm font-medium text-primary hover:underline">
+                            {req.ownerName || 'Pet Owner'}
+                          </button>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                          {formatDate(req.createdAt)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLES[req.status] || ''}`}>
+                            {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                          </span>
+                          {req.status === 'rejected' && req.rejectionReason && (
+                            <p className="text-xs text-red-600 mt-1 max-w-[160px] truncate" title={req.rejectionReason}>
+                              {req.rejectionReason}
+                            </p>
+                          )}
+                          {req.status === 'approved' && (
+                            <p className="text-xs text-blue-600 mt-1">Visit PVO to sign waiver</p>
+                          )}
+                          {req.status === 'completed' && (
+                            <p className="text-xs text-green-600 mt-1">✓ Congratulations!</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            {req.status === 'pending' && (
+                              <button onClick={() => setCancelTarget(req.id)} disabled={!!actionLoading}
+                                className="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium">
+                                {actionLoading === req.id + '-cancel' ? '…' : 'Cancel'}
+                              </button>
+                            )}
+                            {req.status === 'completed' && req.waiverUrl && (
+                              <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer" download
+                                className="px-3 py-1.5 bg-green-700 text-white text-xs rounded-lg hover:bg-green-800 font-semibold">
+                                Waiver
+                              </a>
+                            )}
+                            {!['pending'].includes(req.status) && (
+                              <button
+                                onClick={() => setDeleteTarget({ ids: [req.id], tab: 'sent' })}
+                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                                title="Delete record"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {sent.map(req => (
-                <div key={req.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                  <div className="flex items-start gap-4">
-                    {/* Pet image */}
-                    <img src={getPetImage(req.petId)} alt={req.petName}
-                      className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-0.5">
-                        <span className="font-semibold text-gray-900">{req.petName}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[req.status]}`}>
-                          {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        <button
-                          onClick={() => openChat(req.ownerId)}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {req.ownerName || 'Pet Owner'}
-                        </button>
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{formatDate(req.createdAt)}</p>
-                      {req.message && req.status !== 'completed' && (
-                        <p className="mt-2 text-sm text-gray-600 italic bg-gray-50 rounded-lg px-3 py-2">"{req.message}"</p>
-                      )}
-                      {req.status === 'rejected' && req.rejectionReason && (
-                        <div className="mt-2 bg-red-50 rounded-lg px-3 py-2 text-sm text-red-700">
-                          {req.rejectionReason}
-                        </div>
-                      )}
-                      {req.status === 'cancelled' && !pets.find(p => p.id === req.petId) && (
-                        <div className="mt-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600">
-                          Already adopted.
-                        </div>
-                      )}
-                      {req.status === 'approved' && (
-                        <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm text-blue-800">
-                          Your request was approved. Please visit the Provincial Veterinary Office with the owner to sign the adoption waiver. The office is open on weekdays, working hours
-                        </div>
-                      )}
-                      {req.status === 'completed' && (
-                        <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                          <p className="text-sm text-green-800 font-medium">✓ Adoption completed. Congratulations on your new pet!</p>
-                        </div>
-                      )}
-                    </div>
-                    {req.status === 'pending' && (
-                      <button onClick={() => setCancelTarget(req.id)} disabled={!!actionLoading}
-                        className="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium flex-shrink-0">
-                        {actionLoading === req.id + '-cancel' ? 'Cancelling…' : 'Cancel'}
-                      </button>
-                    )}
-                    {req.status === 'completed' && req.waiverUrl && (
-                      <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer"
-                        download
-                        className="flex-shrink-0 px-4 py-2 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">
-                        Waiver
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+            <Pagination currentPage={sentPage} totalPages={sentTotalPages} onPageChange={setSentPage} />
+          </div>
         )}
       </div>
 
+      {/* Modals */}
       {rejectTarget && (
         <RejectModal request={rejectTarget} onConfirm={handleRejectConfirm} onClose={() => setRejectTarget(null)} />
       )}
       {approveTarget && (
         <ConfirmModal
-          message={`Approve this adoption request? The adopter will be notified to visit the Provincial Veterinary Office.`}
+          message="Approve this adoption request? The adopter will be notified to visit the Provincial Veterinary Office."
           onConfirm={handleApprove}
           onClose={() => setApproveTarget(null)}
         />
@@ -383,6 +545,15 @@ const AdoptionRequests = () => {
           message="Are you sure you want to cancel this adoption request?"
           onConfirm={handleCancel}
           onClose={() => setCancelTarget(null)}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmModal
+          message={`Delete ${deleteTarget.ids.length} record${deleteTarget.ids.length > 1 ? 's' : ''}? This will hide ${deleteTarget.ids.length > 1 ? 'them' : 'it'} from your list.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setDeleteTarget(null)}
         />
       )}
     </Layout>

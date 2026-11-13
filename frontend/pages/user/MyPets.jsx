@@ -204,9 +204,12 @@ const MyPets = () => {
                     <h3 className="text-lg font-semibold text-gray-900">{pet.name}</h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       pet.registrationType === 'adoption' ? 'bg-green-100 text-green-700' : 
+                      pet.registrationType === 'both' ? 'bg-purple-100 text-purple-700' :
                       'bg-blue-100 text-blue-700'
                     }`}>
-                      {pet.registrationType === 'adoption' ? 'For Adoption' : 'For Appointment'}
+                      {pet.registrationType === 'adoption' ? 'For Adoption' : 
+                       pet.registrationType === 'both' ? 'Adoption & Appointment' :
+                       'For Appointment'}
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">{pet.breed} · {pet.species || pet.type} · {pet.gender}</p>
@@ -304,7 +307,8 @@ const MyPets = () => {
               <select value={formData.registrationType} onChange={e => field('registrationType', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="adoption">For Adoption</option>
-                <option value="appointment">For Appointment</option>
+                <option value="appointment">For Appointment Only</option>
+                <option value="both">Both (Adoption & Appointment)</option>
               </select>
             </div>
           </div>

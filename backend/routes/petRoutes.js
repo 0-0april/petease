@@ -82,7 +82,7 @@ router.get('/', async (req, res) => {
         PET (
           PetID, PetName, PetBDay, PetSpecie, PetBreed,
           PetMarkings, PetGender, PetDetails, PetImg,
-          PetAvailable, PetRegType, created_at
+          PetAvailable, PetRegType, PetVaccinationCardFile, created_at
         ),
         USER (
           UserID, UserName,
@@ -90,7 +90,7 @@ router.get('/', async (req, res) => {
         )
       `)
       .eq('PET.PetAvailable', true)
-      .eq('PET.PetRegType', 'Adoption');
+      .in('PET.PetRegType', ['Adoption', 'Both']);
 
     if (error) throw error;
 
@@ -227,7 +227,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
 // ── PUT /api/pets/:id  (auth required) ───────────────────────────────────
 router.put('/:id', authenticateToken, upload.single('image'), async (req, res) => {
-  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, vaccinationCard } = req.body;
+  const { petName, petBDay, petSpecie, petBreed, petMarkings, petGender, petDetails, petImg, petRegType, vaccinationCard } = req.body;
 
   try {
     const username = await getUsername(req.user.accId);
@@ -248,6 +248,10 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
       PetDetails: petDetails,
       PetImg: imageUrl,
     };
+
+    if (petRegType) {
+      updatePayload.PetRegType = petRegType;
+    }
 
     if (vaccinationCard !== undefined) {
       updatePayload.PetVaccinationCardFile = vaccinationCard || null;

@@ -105,6 +105,35 @@ router.get('/conversations', authenticateToken, async (req, res) => {
   }
 });
 
+// Delete a message (only sender can delete their own message)
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const sender = await getUserInfo(req.user.accId);
+    if (!sender) return res.status(404).json({ error: 'User not found' });
+
+    // Confirm message belongs to this sender before deleting
+    const { data: msg } = await supabase
+      .from('MESSAGES')
+      .select('MessID, MessFrom')
+      .eq('MessID', req.params.id)
+      .single();
+
+    if (!msg) return res.status(404).json({ error: 'Message not found' });
+    if (msg.MessFrom !== sender.UserID) return res.status(403).json({ error: 'Not authorised' });
+
+    const { error } = await supabase
+      .from('MESSAGES')
+      .delete()
+      .eq('MessID', req.params.id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete message error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get messages with a specific user
 router.get('/with/:userId', authenticateToken, async (req, res) => {
   try {

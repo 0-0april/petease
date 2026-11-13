@@ -88,5 +88,13 @@ export const adoptionService = {
         createdAt: req.AdoptReqDate
       };
     });
-  }
+  },
+
+  softDeleteSent: async (adoptionId) => {
+    await api.delete(`/adoptions/${adoptionId}`);
+  },
+
+  softDeleteIncoming: async (adoptionId) => {
+    await api.delete(`/adoptions/incoming/${adoptionId}`);
+  },
 };

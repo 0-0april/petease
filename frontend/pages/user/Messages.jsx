@@ -28,6 +28,13 @@ const FlagIcon = ({ className, style }) => (
   </svg>
 );
 
+const TrashIcon = ({ className, style }) => (
+  <svg className={className || 'w-4 h-4'} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
 const BackIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -107,6 +114,7 @@ export default function Messages() {
   const [mobilePanel, setMobilePanel] = useState('list');
 
   const messagesEndRef = useRef(null);
+  const isFirstLoad = useRef(true);
 
   // Report modal
   const [showReport,    setShowReport]    = useState(false);
@@ -115,6 +123,9 @@ export default function Messages() {
   const [reportSending, setReportSending] = useState(false);
   const [reportDone,    setReportDone]    = useState(false);
   const [selectedMsgIds, setSelectedMsgIds] = useState([]);
+
+  // Delete message confirmation
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   /* ── data fetching ───────────────────────────────────────────── */
   useEffect(() => { fetchConversations(); fetchAnnouncements(); }, []);
@@ -134,12 +145,12 @@ export default function Messages() {
     }
   }, [location.state, conversations]);
   useEffect(() => {
-    if (selectedUser) fetchMessages(selectedUser.id);
+    if (selectedUser) {
+      isFirstLoad.current = true;
+      fetchMessages(selectedUser.id);
+    }
     setSelectedMsgIds([]);
   }, [selectedUser]);
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   const fetchConversations = async () => {
     try {
@@ -156,8 +167,15 @@ export default function Messages() {
     catch (e) { console.error('announcements:', e); }
   };
   const fetchMessages = async (userId) => {
-    try { setMessages(await messageService.getMessages(userId)); }
-    catch (e) { console.error('messages:', e); }
+    try {
+      const data = await messageService.getMessages(userId);
+      setMessages(data);
+      if (isFirstLoad.current) {
+        isFirstLoad.current = false;
+        // defer so the DOM has painted
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
+      }
+    } catch (e) { console.error('messages:', e); }
   };
 
   const handleSendMessage = async (e) => {
@@ -167,6 +185,7 @@ export default function Messages() {
     try {
       await messageService.sendMessage(selectedUser.id, newMessage.trim());
       setNewMessage('');
+      isFirstLoad.current = true;
       fetchMessages(selectedUser.id);
       fetchConversations();
     } catch { alert('Failed to send message.'); }
@@ -205,6 +224,16 @@ export default function Messages() {
 
   const toggleMsgSelect = (id) =>
     setSelectedMsgIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const handleDeleteMessage = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await messageService.deleteMessage(deleteConfirmId);
+      setMessages(prev => prev.filter(m => m.id !== deleteConfirmId));
+      setSelectedMsgIds(prev => prev.filter(x => x !== deleteConfirmId));
+    } catch { alert('Failed to delete message.'); }
+    finally { setDeleteConfirmId(null); }
+  };
 
   const openAnnouncements = () => {
     setAnnouncementOpen(true);
@@ -386,15 +415,31 @@ export default function Messages() {
             {selectedUser.name}
           </p>
           {selectedMsgIds.length > 0 && (
-            <button
-              onClick={() => { setShowReport(true); setReportDone(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
-              style={{ color: 'hsla(0,70%,50%,0.85)' }}
-            >
-              <FlagIcon className="w-4 h-4" />
-              <span className="hidden xs:inline">Report</span>
-              <span>({selectedMsgIds.length})</span>
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Trash — only shown when ALL selected are sent by me */}
+              {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
+                <button
+                  onClick={() => selectedMsgIds.length === 1
+                    ? setDeleteConfirmId(selectedMsgIds[0])
+                    : setDeleteConfirmId('__multi__')
+                  }
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                  style={{ color: 'hsla(0,70%,45%,0.90)' }}
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  <span className="hidden xs:inline">Delete</span>
+                </button>
+              )}
+              <button
+                onClick={() => { setShowReport(true); setReportDone(false); }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                style={{ color: 'hsla(0,70%,50%,0.85)' }}
+              >
+                <FlagIcon className="w-4 h-4" />
+                <span className="hidden xs:inline">Report</span>
+                <span>({selectedMsgIds.length})</span>
+              </button>
+            </div>
           )}
         </div>
       );
@@ -505,7 +550,7 @@ export default function Messages() {
               {messages.length > 0 && selectedMsgIds.length === 0 && (
                 <div className="px-4 py-1.5 text-center">
                   <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.32)' }}>
-                    Tap to select for report
+                    Tap a bubble to select for delete or report
                   </p>
                 </div>
               )}
@@ -546,6 +591,51 @@ export default function Messages() {
           )}
         </div>
       </div>
+
+      {/* ── Delete confirmation ── */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.35)' }}
+          onClick={() => setDeleteConfirmId(null)}>
+          <div
+            className="glass-card w-full max-w-sm p-6 space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="text-sm font-bold" style={{ color: 'hsl(140,100%,7%)' }}>
+              Delete {deleteConfirmId === '__multi__' ? `${selectedMsgIds.length} messages` : 'this message'}?
+            </p>
+            <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+              This will permanently remove {deleteConfirmId === '__multi__' ? 'them' : 'it'} from the conversation.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 py-2 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (deleteConfirmId === '__multi__') {
+                    try {
+                      await Promise.all(selectedMsgIds.map(id => messageService.deleteMessage(id)));
+                      setMessages(prev => prev.filter(m => !selectedMsgIds.includes(m.id)));
+                      setSelectedMsgIds([]);
+                    } catch { alert('Failed to delete messages.'); }
+                    finally { setDeleteConfirmId(null); }
+                  } else {
+                    handleDeleteMessage();
+                  }
+                }}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ background: 'hsl(0,65%,50%)' }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Report modal ── */}
       {showReport && selectedUser && (

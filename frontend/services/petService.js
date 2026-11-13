@@ -50,6 +50,7 @@ export const petService = {
       ownerName: pet.owner_name,
       ownerUsername: pet.owner_username,
       createdAt: pet.created_at,
+      vaccinationCard: pet.PetVaccinationCardFile || '',
     }));
   },
 

@@ -93,6 +93,7 @@ CREATE TABLE public.ADOPTION (
   AdoptStatus USER-DEFINED NOT NULL DEFAULT 'Pending'::adopt_status,
   AdoptionWaiver text,
   created_at timestamp with time zone DEFAULT now(),
+  AdoptIsDeleted boolean NOT NULL DEFAULT false,
   CONSTRAINT ADOPTION_pkey PRIMARY KEY (AdoptID),
   CONSTRAINT ADOPTION_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID),
   CONSTRAINT ADOPTION_UserPetsID_fkey FOREIGN KEY (UserPetsID) REFERENCES public.USERPETS(UserPetID)

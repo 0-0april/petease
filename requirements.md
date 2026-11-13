@@ -650,3 +650,27 @@ Make the UI copy across this project minimal. Replace long instructional sentenc
 - Do not invent new copy beyond 1-2 word labels, and do not add new UI elements.
 - If a string's purpose is unclear, leave it unchanged and list it in Flagged.
 - If an element becomes icon-only or empty, keep its accessible label (aria-label / alt) so it is still announced by screen readers.
+
+
+login
+- show/hide pass
+invite staff container (admin panel)
+- show/hide pass
+
+my pets (user panel)
+- Editing a pet's registration type must sync system-wide. E.g., Adoption → Appointment-only: hide from Browse tab, show in "Book New Appointment" pet selection.
+
+Browse Pet (user panel)
+- In the view-pet modal, add a "View vaccination card" link (reuse My Pets' hyperlink style) when a card was uploaded.
+
+adoptions (user panel)
+(Sent + Received)
+- keeping the current displayed info, convert both to the same layout/template as the ADMIN panel's appointment pagination
+- Allow selecting one or multiple rows to delete, with a confirmation dialog.
+- Delete = soft delete: set AdoptIsDeleted = TRUE.
+- Show only rows where AdoptIsDeleted = FALSE.
+
+
+Messages (user panel)
+- Fix the bouncing/jumping scroll: remove the movement so the view stays where the user stops scrolling.
+- Clicking a chat bubble shows a delete (trash) icon to the left of the report icon, same behavior as report. Deleting requires a confirmation dialog.
