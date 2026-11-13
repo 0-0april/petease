@@ -113,9 +113,6 @@ export default function Messages() {
   // Mobile: 'list' | 'chat' — controls which panel is visible on small screens
   const [mobilePanel, setMobilePanel] = useState('list');
 
-  const messagesEndRef = useRef(null);
-  const isFirstLoad = useRef(true);
-
   // Report modal
   const [showReport,    setShowReport]    = useState(false);
   const [reportReason,  setReportReason]  = useState('Inappropriate Behavior');
@@ -146,7 +143,6 @@ export default function Messages() {
   }, [location.state, conversations]);
   useEffect(() => {
     if (selectedUser) {
-      isFirstLoad.current = true;
       fetchMessages(selectedUser.id);
     }
     setSelectedMsgIds([]);
@@ -170,11 +166,6 @@ export default function Messages() {
     try {
       const data = await messageService.getMessages(userId);
       setMessages(data);
-      if (isFirstLoad.current) {
-        isFirstLoad.current = false;
-        // defer so the DOM has painted
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
-      }
     } catch (e) { console.error('messages:', e); }
   };
 
@@ -185,7 +176,6 @@ export default function Messages() {
     try {
       await messageService.sendMessage(selectedUser.id, newMessage.trim());
       setNewMessage('');
-      isFirstLoad.current = true;
       fetchMessages(selectedUser.id);
       fetchConversations();
     } catch { alert('Failed to send message.'); }
@@ -308,7 +298,6 @@ export default function Messages() {
           )}
         </div>
       ))}
-      <div ref={messagesEndRef} />
     </div>
   );
 
