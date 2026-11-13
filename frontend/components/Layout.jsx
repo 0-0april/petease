@@ -44,7 +44,7 @@ const Badge = ({ count }) => {
   );
 };
 
-export default function Layout({ children }) {
+export default function Layout({ children, fullscreen = false }) {
   const { user, logout } = useAuth();
   const { notify, clear, getCount } = useBadge();
   const navigate = useNavigate();
@@ -201,79 +201,92 @@ export default function Layout({ children }) {
         )}
       </div>
 
-      <main className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Warning banner */}
-        {user?.accStatus === 'Warning' && !warnDismissed && (
-          <div className="mb-4 flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium"
-            style={{ background: 'hsla(45,100%,51%,0.18)', border: '1px solid hsla(45,100%,51%,0.45)', color: 'hsl(35,90%,30%)' }}>
-            <span>⚠️ Your account has received a warning from the admin due to a report. Please review our community guidelines to avoid further action.</span>
-            <button onClick={() => setWarnDismissed(true)}
-              className="shrink-0 ml-2 text-lg leading-none hover:opacity-60 transition-opacity"
-              aria-label="Dismiss warning">×</button>
-          </div>
-        )}
-        {children}
-      </main>
-
-      {/* ── Footer ── */}
-      <footer className="relative z-10 mt-12 border-t px-4 py-8 sm:px-6 lg:px-8"
-        style={{ borderColor: 'rgba(255,255,255,0.50)' }}>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-
-          {/* PetEase info */}
-          <div>
-            {peteaseLogo ? (
-              <img src={peteaseLogo} alt="PetEase" className="h-10 w-auto object-contain mb-2" />
-            ) : (
-              <p className="text-base font-black" style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</p>
-            )}
-            <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
-              Pet Adoption &amp; Veterinary Appointment System
-            </p>
-          </div>
-
-          {/* In Partnership With */}
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'hsla(140,100%,7%,0.45)' }}>
-              In Partnership With
-            </p>
-            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              {pvoLogo ? (
-                <img src={pvoLogo} alt="PVO Lanao del Sur"
-                  style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-lg shadow-sm">🏛️</div>
-              )}
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>
-                  Provincial Veterinary Office
-                </p>
-                <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.50)' }}>Lanao del Sur, Philippines</p>
-              </div>
-            </a>
-            <div className="text-xs mt-1 space-y-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
-              <p>📍 Capitol Compound, Marawi City, Lanao del Sur</p>
-              <p>📞 [Office contact — to be provided]</p>
-              <p>🕐 Mon – Fri, 8:00 AM – 5:00 PM</p>
-            </div>
-          </div>
-
-          {/* Links */}
-          <div className="flex flex-col gap-1 text-sm">
-            <Link to="/browse-pets" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Browse Pets</Link>
-            <Link to="/appointments" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Appointments</Link>
-            <Link to="/notifications" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Notifications</Link>
-            <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
-              className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
-              PVO Facebook Page ↗
-            </a>
-          </div>
+      {fullscreen ? (
+        /* Full-screen slot — fills everything below the navbar, no padding, no footer */
+        <div className="relative z-20 flex flex-col overflow-hidden"
+          style={{
+            height: 'calc(100vh - 56px)',
+            /* Use dvh where supported so mobile browser chrome is excluded */
+          }}>
+          {children}
         </div>
-        <p className="text-center text-xs mt-8 font-light" style={{ color: 'hsla(140,100%,7%,0.35)' }}>
-          © {new Date().getFullYear()} PetEase · In partnership with the Provincial Veterinary Office – Lanao del Sur
-        </p>
-      </footer>
+      ) : (
+        <>
+          <main className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Warning banner */}
+            {user?.accStatus === 'Warning' && !warnDismissed && (
+              <div className="mb-4 flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium"
+                style={{ background: 'hsla(45,100%,51%,0.18)', border: '1px solid hsla(45,100%,51%,0.45)', color: 'hsl(35,90%,30%)' }}>
+                <span>⚠️ Your account has received a warning from the admin due to a report. Please review our community guidelines to avoid further action.</span>
+                <button onClick={() => setWarnDismissed(true)}
+                  className="shrink-0 ml-2 text-lg leading-none hover:opacity-60 transition-opacity"
+                  aria-label="Dismiss warning">×</button>
+              </div>
+            )}
+            {children}
+          </main>
+
+          {/* ── Footer ── */}
+          <footer className="relative z-10 mt-12 border-t px-4 py-8 sm:px-6 lg:px-8"
+            style={{ borderColor: 'rgba(255,255,255,0.50)' }}>
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+              {/* PetEase info */}
+              <div>
+                {peteaseLogo ? (
+                  <img src={peteaseLogo} alt="PetEase" className="h-10 w-auto object-contain mb-2" />
+                ) : (
+                  <p className="text-base font-black" style={{ color: 'hsl(140,100%,7%)' }}>🐾 PetEase</p>
+                )}
+                <p className="text-xs mt-1 font-light" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
+                  Pet Adoption &amp; Veterinary Appointment System
+                </p>
+              </div>
+
+              {/* In Partnership With */}
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'hsla(140,100%,7%,0.45)' }}>
+                  In Partnership With
+                </p>
+                <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                  {pvoLogo ? (
+                    <img src={pvoLogo} alt="PVO Lanao del Sur"
+                      style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-lg shadow-sm">🏛️</div>
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: 'hsl(140,100%,7%)' }}>
+                      Provincial Veterinary Office
+                    </p>
+                    <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.50)' }}>Lanao del Sur, Philippines</p>
+                  </div>
+                </a>
+                <div className="text-xs mt-1 space-y-0.5" style={{ color: 'hsla(140,100%,7%,0.50)' }}>
+                  <p>📍 Capitol Compound, Marawi City, Lanao del Sur</p>
+                  <p>📞 [Office contact — to be provided]</p>
+                  <p>🕐 Mon – Fri, 8:00 AM – 5:00 PM</p>
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="flex flex-col gap-1 text-sm">
+                <Link to="/browse-pets" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Browse Pets</Link>
+                <Link to="/appointments" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Appointments</Link>
+                <Link to="/notifications" className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>Notifications</Link>
+                <a href="https://www.facebook.com/PVO.LDS" target="_blank" rel="noopener noreferrer"
+                  className="font-light hover:opacity-100 transition-opacity" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+                  PVO Facebook Page ↗
+                </a>
+              </div>
+            </div>
+            <p className="text-center text-xs mt-8 font-light" style={{ color: 'hsla(140,100%,7%,0.35)' }}>
+              © {new Date().getFullYear()} PetEase · In partnership with the Provincial Veterinary Office – Lanao del Sur
+            </p>
+          </footer>
+        </>
+      )}
     </div>
   );
 }

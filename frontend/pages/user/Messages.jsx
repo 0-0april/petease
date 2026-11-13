@@ -449,15 +449,19 @@ export default function Messages() {
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
-    <Layout>
+    <Layout fullscreen>
       {/*
         Layout strategy:
         - Mobile  (<sm): show either sidebar OR chat panel, never both.
           mobilePanel === 'list' → sidebar visible, chat hidden
           mobilePanel === 'chat' → chat visible, sidebar hidden
         - Desktop (sm+): both columns shown side-by-side always.
+
+        The fullscreen Layout slot gives us exactly 100vh minus the navbar.
+        We fill it completely — no glass-card padding, no margins.
       */}
-      <div className="glass-card overflow-hidden flex" style={{ height: 'calc(100vh - 140px)' }}>
+      <div className="flex flex-1 overflow-hidden h-full glass-card rounded-none sm:rounded-2xl sm:mx-4 sm:my-4"
+        style={{ minHeight: 0 }}>
 
         {/* ── Sidebar ── */}
         <div
