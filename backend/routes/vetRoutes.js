@@ -495,7 +495,7 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
             LogID: logData.LogID,
             Medication: medication || '',
             MedDescript: medDescript || null,
-            MedVerified: false,
+            MedVerified: true,
           })
           .select()
           .single();
