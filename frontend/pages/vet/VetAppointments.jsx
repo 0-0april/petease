@@ -386,8 +386,8 @@ const VetAppointments = () => {
             <div key={apt.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{apt.userName}</p>
-                  <p className="text-xs text-gray-500 truncate">{apt.pets.map(p => p.name).join(', ')}</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">{apt.pets.map(p => p.name).join(', ')}</p>
+                  <p className="text-xs text-gray-500 truncate">{apt.userName}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
                   {apt.status}
@@ -447,7 +447,7 @@ const VetAppointments = () => {
                 )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap" style={{ minWidth: '180px' }}>Actions</th>

@@ -531,8 +531,8 @@ const VetDashboard = () => {
                     className="p-4 hover:bg-green-50 cursor-pointer space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{apt.userName}</p>
-                        <p className="text-xs text-gray-500">{apt.pets.map(p => p.name).join(', ')}</p>
+                        <p className="text-sm font-semibold text-gray-900">{apt.pets.map(p => p.name).join(', ')}</p>
+                        <p className="text-xs text-gray-500">{apt.userName}</p>
                       </div>
                       <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
                         {apt.status}
@@ -559,7 +559,7 @@ const VetDashboard = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     </tr>

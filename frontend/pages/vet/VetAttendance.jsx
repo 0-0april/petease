@@ -150,8 +150,8 @@ const VetAttendance = () => {
             <div key={appointment.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{appointment.userName}</p>
-                  <p className="text-xs text-gray-500">{appointment.pets.map(p => p.name).join(', ')}</p>
+                  <p className="text-sm font-semibold text-gray-900">{appointment.pets.map(p => p.name).join(', ')}</p>
+                  <p className="text-xs text-gray-500">{appointment.userName}</p>
                 </div>
                 <StatusBadge status={appointment.status} />
               </div>
@@ -192,7 +192,7 @@ const VetAttendance = () => {
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Pet</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Type</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
