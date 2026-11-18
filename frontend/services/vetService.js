@@ -61,22 +61,23 @@ export const vetService = {
     };
   },
 
-  addMedicalHistory: async (petId, medicalData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newRecord = {
-      id: medicalHistory.length + 1,
-      petId: parseInt(petId),
-      medication: medicalData.medication,
-      date: medicalData.date,
-      notes: medicalData.notes,
-      veterinarian: 'Dr. Sarah Wilson',
-      diagnosis: medicalData.diagnosis,
-      treatment: medicalData.treatment,
-      followUp: medicalData.followUp,
-      createdAt: new Date().toISOString()
-    };
-    medicalHistory.push(newRecord);
-    return newRecord;
+  addMedicalHistory: async (appointmentId, medication, medDescript) => {
+    const response = await api.patch(`/vet/appointments/${appointmentId}/attendance`, {
+      attended: true,
+      medication,
+      medDescript,
+    });
+    return response.data;
+  },
+
+  verifyMedicalHistory: async (medId) => {
+    const response = await api.patch(`/vet/medical-history/${medId}/verify`);
+    return response.data;
+  },
+
+  getMedicalHistoryForPet: async (petId) => {
+    const response = await api.get(`/pets/${petId}/medical-history`);
+    return response.data;
   },
 
   createAnnouncement: async (announcementData) => {

@@ -274,6 +274,206 @@ router.put('/:id', authenticateToken, upload.single('image'), async (req, res) =
   }
 });
 
+// ── GET /api/pets/:id/medical-history ────────────────────────────────────
+// Role-aware: owners see their own (LogID NULL) + verified vet rows.
+//             Vet staff see everything for the pet (all vet rows + owner rows).
+//             Public (no token) sees only verified vet rows.
+router.get('/:id/medical-history', async (req, res) => {
+  try {
+    // Resolve UserPetID from PetID
+    const { data: upRow, error: upErr } = await supabase
+      .from('USERPETS')
+      .select('UserPetID, UserID')
+      .eq('PetID', req.params.id)
+      .single();
+
+    if (upErr || !upRow) return res.status(404).json({ error: 'Pet not found' });
+
+    // Determine caller role from token (optional auth)
+    let callerRole = null;
+    let callerUserId = null;
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      try {
+        const jwt = await import('jsonwebtoken');
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.default.verify(token, process.env.JWT_SECRET);
+        callerRole = decoded.role;
+        callerUserId = decoded.userId || decoded.accId;
+      } catch (_) { /* treat as public */ }
+    }
+
+    // Fetch all rows for this pet with the service name join
+    const { data: rows, error: medErr } = await supabase
+      .from('MEDICALHISTORY')
+      .select(`
+        MedID,
+        Medication,
+        MedDescript,
+        MedVerified,
+        LogID,
+        created_at,
+        APPOINTMENTLOGS (
+          LogID,
+          APPOINTMENT (
+            SERVICES (
+              ServType
+            )
+          )
+        )
+      `)
+      .eq('UserPetID', upRow.UserPetID)
+      .order('created_at', { ascending: false });
+
+    if (medErr) throw medErr;
+
+    // Apply visibility rules
+    const filtered = (rows || []).filter(r => {
+      const isVetEntered = r.LogID !== null;
+      if (callerRole === 'vet') return true; // vet sees all
+      if (isVetEntered) return r.MedVerified === true; // others see vet rows only when verified
+      return true; // owner-entered rows visible to all
+    });
+
+    const result = filtered.map(r => ({
+      medId: r.MedID,
+      medication: r.Medication,
+      medDescript: r.MedDescript,
+      medVerified: r.MedVerified,
+      logId: r.LogID,
+      serviceName: r.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
+      createdAt: r.created_at,
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error('GET medical-history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── POST /api/pets/:id/medical-history  (owner, LogID=null) ───────────────
+router.post('/:id/medical-history', authenticateToken, async (req, res) => {
+  try {
+    const { medication, medDescript } = req.body;
+    if (!medication && !medDescript) {
+      return res.status(400).json({ error: 'Provide at least Medication or Description.' });
+    }
+
+    // Resolve UserPetID and confirm it belongs to the caller
+    const userId = await getUserId(req.user.accId);
+    if (!userId) return res.status(404).json({ error: 'User not found' });
+
+    const { data: upRow, error: upErr } = await supabase
+      .from('USERPETS')
+      .select('UserPetID, UserID')
+      .eq('PetID', req.params.id)
+      .single();
+
+    if (upErr || !upRow) return res.status(404).json({ error: 'Pet not found' });
+    if (upRow.UserID !== userId) return res.status(403).json({ error: 'Not your pet' });
+
+    const { data, error } = await supabase
+      .from('MEDICALHISTORY')
+      .insert({
+        UserPetID: upRow.UserPetID,
+        LogID: null,
+        Medication: medication || '',
+        MedDescript: medDescript || null,
+        MedVerified: false,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({
+      medId: data.MedID,
+      medication: data.Medication,
+      medDescript: data.MedDescript,
+      medVerified: data.MedVerified,
+      logId: null,
+      serviceName: null,
+      createdAt: data.created_at,
+    });
+  } catch (error) {
+    console.error('POST medical-history error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── PUT /api/pets/:id/medical-history/owner  (owner updates own row) ──────
+// Replaces the owner-entered row (LogID NULL) for this pet.
+router.put('/:id/medical-history/owner', authenticateToken, async (req, res) => {
+  try {
+    const { medication, medDescript } = req.body;
+
+    const userId = await getUserId(req.user.accId);
+    if (!userId) return res.status(404).json({ error: 'User not found' });
+
+    const { data: upRow, error: upErr } = await supabase
+      .from('USERPETS')
+      .select('UserPetID, UserID')
+      .eq('PetID', req.params.id)
+      .single();
+
+    if (upErr || !upRow) return res.status(404).json({ error: 'Pet not found' });
+    if (upRow.UserID !== userId) return res.status(403).json({ error: 'Not your pet' });
+
+    // Find existing owner row (LogID IS NULL) for this pet
+    const { data: existing } = await supabase
+      .from('MEDICALHISTORY')
+      .select('MedID')
+      .eq('UserPetID', upRow.UserPetID)
+      .is('LogID', null)
+      .maybeSingle();
+
+    // If no content and no existing row, nothing to do
+    if (!medication && !medDescript) {
+      if (existing) {
+        // Clear the row by deleting it
+        await supabase.from('MEDICALHISTORY').delete().eq('MedID', existing.MedID);
+      }
+      return res.json({ success: true, deleted: true });
+    }
+
+    let data, error;
+    if (existing) {
+      ({ data, error } = await supabase
+        .from('MEDICALHISTORY')
+        .update({ Medication: medication || '', MedDescript: medDescript || null })
+        .eq('MedID', existing.MedID)
+        .select()
+        .single());
+    } else {
+      ({ data, error } = await supabase
+        .from('MEDICALHISTORY')
+        .insert({
+          UserPetID: upRow.UserPetID,
+          LogID: null,
+          Medication: medication || '',
+          MedDescript: medDescript || null,
+          MedVerified: false,
+        })
+        .select()
+        .single());
+    }
+
+    if (error) throw error;
+    res.json({
+      medId: data.MedID,
+      medication: data.Medication,
+      medDescript: data.MedDescript,
+      medVerified: data.MedVerified,
+      logId: null,
+      serviceName: null,
+      createdAt: data.created_at,
+    });
+  } catch (error) {
+    console.error('PUT medical-history/owner error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ── DELETE /api/pets/:id  (auth required) ────────────────────────────────
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {

@@ -302,11 +302,23 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
       return age > 0 ? `${age} years` : 'Less than 1 year';
     };
 
-    // Get medical records for this service
+    // Get medical records for this pet via MEDICALHISTORY (vet sees all rows)
     const { data: medicalRecords } = await supabase
       .from('MEDICALHISTORY')
-      .select('MedID, Medicine, Description, created_at')
-      .eq('ServID', data.ServID)
+      .select(`
+        MedID,
+        Medication,
+        MedDescript,
+        MedVerified,
+        LogID,
+        created_at,
+        APPOINTMENTLOGS (
+          APPOINTMENT (
+            SERVICES ( ServType )
+          )
+        )
+      `)
+      .eq('UserPetID', data.USERPETS.UserPetID)
       .order('created_at', { ascending: false });
 
     const schedDate = new Date(data.AppointSchedDate);
@@ -322,6 +334,7 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
       status: data.AppointStatus.toLowerCase(),
       pets: [{
         id: data.USERPETS.PET.PetID,
+        userPetId: data.USERPETS.UserPetID,
         name: data.USERPETS.PET.PetName,
         breed: data.USERPETS.PET.PetBreed,
         species: data.USERPETS.PET.PetSpecie,
@@ -329,12 +342,15 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
         markings: data.USERPETS.PET.PetMarkings,
         age: calculateAge(data.USERPETS.PET.PetBDay)
       }],
-      medicalRecords: medicalRecords?.map(record => ({
+      medicalRecords: (medicalRecords || []).map(record => ({
         id: record.MedID,
-        medicine: record.Medicine,
-        description: record.Description,
-        date: record.created_at
-      })) || [],
+        medication: record.Medication,
+        medDescript: record.MedDescript,
+        medVerified: record.MedVerified,
+        logId: record.LogID,
+        serviceName: record.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
+        createdAt: record.created_at,
+      })),
       createdAt: data.AppointDateCreated
     };
 
@@ -435,14 +451,14 @@ router.patch('/appointments/:id/cancel', authenticateToken, authorizeRole('vet')
   }
 });
 
-// Mark attendance
+// Mark attendance (and optionally insert a medical history row)
 router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {
-    const { attended, note } = req.body;
+    const { attended, note, medication, medDescript } = req.body;
 
     console.log('📋 Marking attendance:', { appointmentId: req.params.id, attended, staffId: req.user.accId });
 
-    // Insert into APPOINTMENTLOGS table (requirement 22)
+    // Insert into APPOINTMENTLOGS
     const { data: logData, error: logError } = await supabase
       .from('APPOINTMENTLOGS')
       .insert({
@@ -461,6 +477,34 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
 
     console.log('✅ Attendance log created:', logData);
 
+    // If patient showed up AND medical info provided, insert a MEDICALHISTORY row
+    let medRecord = null;
+    if (attended && (medication || medDescript)) {
+      // Resolve UserPetID from the appointment
+      const { data: aptRow, error: aptErr } = await supabase
+        .from('APPOINTMENT')
+        .select('UserPetID')
+        .eq('AppointID', req.params.id)
+        .single();
+
+      if (!aptErr && aptRow) {
+        const { data: medData, error: medErr } = await supabase
+          .from('MEDICALHISTORY')
+          .insert({
+            UserPetID: aptRow.UserPetID,
+            LogID: logData.LogID,
+            Medication: medication || '',
+            MedDescript: medDescript || null,
+            MedVerified: false,
+          })
+          .select()
+          .single();
+
+        if (medErr) console.error('⚠️ Error inserting medical history:', medErr);
+        else medRecord = medData;
+      }
+    }
+
     // Return the appointment data (status remains unchanged)
     const { data: appointment, error: appointError } = await supabase
       .from('APPOINTMENT')
@@ -470,7 +514,7 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
 
     if (appointError) throw appointError;
 
-    res.json({ success: true, appointment, log: logData });
+    res.json({ success: true, appointment, log: logData, medRecord });
   } catch (error) {
     console.error('❌ Mark attendance error:', error);
     res.status(500).json({ error: error.message });
@@ -508,6 +552,44 @@ router.get('/appointments/:id/logs', authenticateToken, authorizeRole('vet'), as
     res.json(logs);
   } catch (error) {
     console.error('Get appointment logs error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verify (confirm) a medical history entry — sets MedVerified=true
+router.patch('/medical-history/:medId/verify', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('MEDICALHISTORY')
+      .update({ MedVerified: true })
+      .eq('MedID', req.params.medId)
+      .select(`
+        MedID,
+        Medication,
+        MedDescript,
+        MedVerified,
+        LogID,
+        created_at,
+        APPOINTMENTLOGS (
+          APPOINTMENT (
+            SERVICES ( ServType )
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    res.json({
+      medId: data.MedID,
+      medication: data.Medication,
+      medDescript: data.MedDescript,
+      medVerified: data.MedVerified,
+      logId: data.LogID,
+      serviceName: data.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
+      createdAt: data.created_at,
+    });
+  } catch (error) {
+    console.error('Verify medical history error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -148,6 +148,11 @@ export const petService = {
     return response.data;
   },
 
+  updateOwnerMedicalHistory: async (petId, medication, medDescript) => {
+    const response = await api.put(`/pets/${petId}/medical-history/owner`, { medication, medDescript });
+    return response.data;
+  },
+
   uploadVaccinationCard: async (file) => {
     const formData = new FormData();
     formData.append('vaccinationCard', file);

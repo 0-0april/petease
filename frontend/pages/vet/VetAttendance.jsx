@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import VetLayout from '../../components/VetLayout';
 import Pagination from '../../components/Pagination';
+import Modal from '../../components/Modal';
 import { vetService } from '../../services/vetService';
 
 const AttendanceBadge = ({ attended, status }) => {
@@ -35,6 +36,12 @@ const VetAttendance = () => {
   const [filter, setFilter] = useState('all');
   const [toast, setToast] = useState(null);
 
+  // Medical record dialog state
+  const [showMedDialog, setShowMedDialog] = useState(false);
+  const [pendingShowAppt, setPendingShowAppt] = useState(null);
+  const [medForm, setMedForm] = useState({ medication: '', medDescript: '' });
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchAppointments();
   }, [currentPage]);
@@ -54,13 +61,52 @@ const VetAttendance = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleMarkAttendance = async (id, attended) => {
+  // Opens the medical-record dialog before marking Show
+  const openShowDialog = (appointment) => {
+    setPendingShowAppt(appointment);
+    setMedForm({ medication: '', medDescript: '' });
+    setShowMedDialog(true);
+  };
+
+  // Called when staff submits the dialog (or skips)
+  const handleShowSubmit = async () => {
+    if (!pendingShowAppt) return;
+    setSubmitting(true);
     try {
-      await vetService.markAttendance(id, attended);
+      const { medication, medDescript } = medForm;
+      const hasMedData = medication.trim() || medDescript.trim();
+
+      // Always mark attendance first
+      await vetService.markAttendance(pendingShowAppt.id, true);
+
+      // Insert medical history row only if at least one field was filled
+      if (hasMedData) {
+        await vetService.addMedicalHistory(
+          pendingShowAppt.id,
+          medication.trim(),
+          medDescript.trim()
+        );
+      }
+
+      setShowMedDialog(false);
+      setPendingShowAppt(null);
       fetchAppointments();
-      showToast(`Marked as ${attended ? 'attended' : 'no-show'}`);
+      showToast(hasMedData ? 'Marked as attended. Medical record saved.' : 'Marked as attended.');
     } catch (error) {
-      showToast('Failed to mark attendance', 'error');
+      console.error('Show submit error:', error);
+      showToast('Failed to mark attendance.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleNoShow = async (id) => {
+    try {
+      await vetService.markAttendance(id, false);
+      fetchAppointments();
+      showToast('Marked as no-show.');
+    } catch (error) {
+      showToast('Failed to mark attendance.', 'error');
     }
   };
 
@@ -136,14 +182,15 @@ const VetAttendance = () => {
                     <td className="px-4 sm:px-6 py-4">
                       {appointment.status === 'confirmed' && !appointment.attended && (
                         <div className="flex flex-col sm:flex-row gap-2">
+                          {/* Show → opens medical-record dialog */}
                           <button
-                            onClick={() => handleMarkAttendance(appointment.id, true)}
+                            onClick={() => openShowDialog(appointment)}
                             className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                           >
                             Show
                           </button>
                           <button
-                            onClick={() => handleMarkAttendance(appointment.id, false)}
+                            onClick={() => handleNoShow(appointment.id)}
                             className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
                           >
                             No Show
@@ -160,6 +207,74 @@ const VetAttendance = () => {
 
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
+
+      {/* Medical Record Dialog — shown after clicking "Show" */}
+      <Modal
+        isOpen={showMedDialog}
+        onClose={() => { if (!submitting) { setShowMedDialog(false); setPendingShowAppt(null); } }}
+        title="Add Medical Record"
+      >
+        {pendingShowAppt && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Patient attended — optionally record medication and notes for{' '}
+              <span className="font-medium text-gray-900">
+                {pendingShowAppt.pets.map(p => p.name).join(', ')}
+              </span>.
+              Skipping is allowed.
+            </p>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Medication</label>
+              <input
+                type="text"
+                value={medForm.medication}
+                onChange={e => setMedForm(f => ({ ...f, medication: e.target.value }))}
+                placeholder="e.g. Amoxicillin 250mg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={medForm.medDescript}
+                onChange={e => setMedForm(f => ({ ...f, medDescript: e.target.value }))}
+                rows={3}
+                placeholder="Diagnosis, treatment notes…"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => { setShowMedDialog(false); setPendingShowAppt(null); }}
+                disabled={submitting}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleShowSubmit}
+                disabled={submitting}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
+              >
+                {submitting ? 'Saving…' : 'Skip'}
+              </button>
+              <button
+                onClick={handleShowSubmit}
+                disabled={submitting || (!medForm.medication.trim() && !medForm.medDescript.trim())}
+                className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Saving…' : 'Save & Mark'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 text-center">
+              "Skip" marks attendance without creating a medical record.
+            </p>
+          </div>
+        )}
+      </Modal>
     </VetLayout>
   );
 };

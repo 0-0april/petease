@@ -710,3 +710,37 @@ VET STAFF PANEL
 
 Adoption, Services
 - Keep current fields; use the Admin Appointment layout/pagination template.
+
+
+
+TASK: Implement vet-staff and owner medical history flows on the existing app.
+
+TABLE: MEDICALHISTORY(MedID PK, UserPetID FK, LogID FK nullable, Medication, MedDescript, MedVerified boolean default false, created_at)
+Source rule: LogID NOT NULL = vet-entered (from attendance log); LogID NULL = owner-entered.
+Service name is not stored: get it by joining the necesary path, check backend/petease.sql for your reference
+
+GLOBAL DISPLAY RULES
+- Entry format (check icon beside it only when MedVerified=true):
+  [check] <Service name>
+  Medication: <Medication>
+  Description: <MedDescript>   (omit this line if empty)
+- If a pet has no medical history rows, render nothing: no header, no empty state.
+
+1. VET STAFF: ATTENDANCE
+- On a confirmed appointment, clicking "Show" in the existing attendance UI opens an extra dialog with optional Medication and MedDescript fields. Medical record input is asked only at this point. Skipping is allowed.
+- If either field is filled, insert a row (UserPetID from the appointment's pet, LogID = attendance log, MedVerified=false).
+- Show the entry immediately in the pet's medical history inside that appointment's "View" panel, with a Confirm button.
+- On Confirm: set MedVerified=true. Verified rows are read-only for everyone and show the check icon. After confirmation, staff see them only in the history view.
+
+2. OWNER: PET DETAILS
+- Remove the current single editable medical history panel.
+- Add Medication and MedDescript fields to the existing pet details form, saved/edited together with the other pet details as today (LogID NULL rows).
+- Below the form, add a separate read-only section "Vet Medical History" listing only rows with LogID NOT NULL AND MedVerified=true for that pet, in the entry format above.
+
+3. PERMISSIONS
+- Vet staff: view owner-entered and vet-entered history for the pet (vet-entered only; owner-entered always). Cannot edit confirmed input.
+- Owner: edit only own rows (LogID NULL). See vet rows only after MedVerified=true, read-only.
+- Unconfirmed vet rows (MedVerified=false) are visible to vet staff only and users.
+
+
+DELIVER: schema migration, queries per view, UI changes (attendance dialog, appointment View panel with Confirm, owner form + read-only vet section). Reuse existing components and styles.

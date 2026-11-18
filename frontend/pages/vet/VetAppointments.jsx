@@ -13,6 +13,47 @@ const STATUS_STYLES = {
   completed: 'bg-blue-100 text-blue-800',
 };
 
+// Renders one medical history entry per the global display rules.
+const MedicalHistoryEntry = ({ record, onConfirm, confirming }) => {
+  const isVetEntered = !!record.logId;
+  const showConfirm = isVetEntered && !record.medVerified && onConfirm;
+
+  return (
+    <div className="border-l-2 border-primary pl-3 bg-gray-50 p-3 rounded-r-lg space-y-0.5">
+      <div className="flex items-center gap-1.5">
+        {record.medVerified && (
+          <svg className="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )}
+        <p className="text-sm font-semibold text-gray-900">
+          {record.serviceName || (isVetEntered ? 'Vet Service' : 'Owner Record')}
+        </p>
+        {!isVetEntered && (
+          <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">Owner</span>
+        )}
+      </div>
+      <p className="text-sm text-gray-700">
+        <span className="font-medium">Medication:</span> {record.medication || '—'}
+      </p>
+      {record.medDescript && (
+        <p className="text-sm text-gray-600">
+          <span className="font-medium">Description:</span> {record.medDescript}
+        </p>
+      )}
+      {showConfirm && (
+        <button
+          onClick={() => onConfirm(record.medId)}
+          disabled={confirming === record.medId}
+          className="mt-2 px-3 py-1 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
+          {confirming === record.medId ? 'Confirming…' : 'Confirm'}
+        </button>
+      )}
+    </div>
+  );
+};
+
 const SERVICE_LABELS = {
   consultation:              'Consultation',
   'anti-rabies':             'Anti-Rabies Vaccine',
@@ -55,6 +96,7 @@ const VetAppointments = () => {
   const [logs, setLogs] = useState([]);
   const [toast, setToast] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [confirmingMed, setConfirmingMed] = useState(null); // medId being confirmed
 
   useEffect(() => {
     clear('/vet/appointments');
@@ -166,23 +208,32 @@ const VetAppointments = () => {
     if (!attendanceModal) return;
     try {
       await vetService.markAttendance(attendanceModal.id, attended);
-      if (attended) {
-        // Only create medical history if patient showed up
-        await vetService.addMedicalHistory(attendanceModal.pets[0]?.id, {
-          medication: attendanceModal.serviceType || formatServiceType(attendanceModal.type),
-          date: attendanceModal.date,
-          notes: `Service performed: ${attendanceModal.serviceType || formatServiceType(attendanceModal.type)}. Appointment on ${attendanceModal.date}.`,
-          diagnosis: '',
-          treatment: attendanceModal.serviceType || formatServiceType(attendanceModal.type),
-          followUp: ''
-        });
-      }
       setAttendanceModal(null);
       fetchAppointments();
-      showToast(attended ? 'Marked as Show. Medical record updated.' : 'Marked as No Show.');
+      showToast(attended ? 'Marked as Show.' : 'Marked as No Show.');
     } catch (error) {
       console.error('Error marking attendance:', error);
       showToast('Failed to update attendance.', 'error');
+    }
+  };
+
+  const handleConfirmMed = async (medId) => {
+    setConfirmingMed(medId);
+    try {
+      const updated = await vetService.verifyMedicalHistory(medId);
+      // Update the record in the local selectedAppointment state immediately
+      setSelectedAppointment(prev => ({
+        ...prev,
+        medicalRecords: prev.medicalRecords.map(r =>
+          r.medId === medId ? { ...r, medVerified: true } : r
+        ),
+      }));
+      showToast('Medical record confirmed.');
+    } catch (error) {
+      console.error('Confirm med error:', error);
+      showToast('Failed to confirm record.', 'error');
+    } finally {
+      setConfirmingMed(null);
     }
   };
 
@@ -499,19 +550,16 @@ const VetAppointments = () => {
               <p className="text-sm font-semibold text-gray-700 mb-2">Medical Records</p>
               {selectedAppointment.medicalRecords && selectedAppointment.medicalRecords.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedAppointment.medicalRecords.map((record, idx) => (
-                    <div key={idx} className="text-sm border-l-2 border-primary pl-3 bg-gray-50 p-2 rounded">
-                      <p className="font-medium">{record.medicine}</p>
-                      <p className="text-gray-600 text-xs">{record.description}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}
-                      </p>
-                    </div>
+                  {selectedAppointment.medicalRecords.map((record) => (
+                    <MedicalHistoryEntry
+                      key={record.id || record.medId}
+                      record={record}
+                      onConfirm={handleConfirmMed}
+                      confirming={confirmingMed}
+                    />
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm text-gray-400">No medical records available.</p>
-              )}
+              ) : null}
             </div>
 
             <div className="border-t pt-4">

@@ -53,12 +53,15 @@ CREATE TABLE public.SERVICES (
 );
 CREATE TABLE public.MEDICALHISTORY (
   MedID uuid NOT NULL DEFAULT gen_random_uuid(),
-  Medicine character varying NOT NULL,
-  Description text,
-  ServID uuid,
+  Medication text NOT NULL,
+  MedDescript text,
+  LogID uuid,
   created_at timestamp with time zone DEFAULT now(),
+  UserPetID uuid,
+  MedVerified boolean,
   CONSTRAINT MEDICALHISTORY_pkey PRIMARY KEY (MedID),
-  CONSTRAINT MEDICALHISTORY_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID)
+  CONSTRAINT MEDICALHISTORY_LogID_fkey FOREIGN KEY (LogID) REFERENCES public.APPOINTMENTLOGS(LogID),
+  CONSTRAINT MEDICALHISTORY_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID)
 );
 CREATE TABLE public.PET (
   PetID uuid NOT NULL DEFAULT gen_random_uuid(),
