@@ -142,7 +142,50 @@ const VetAttendance = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {filteredAppointments.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-8">No appointments.</p>
+          ) : filteredAppointments.map(appointment => (
+            <div key={appointment.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{appointment.userName}</p>
+                  <p className="text-xs text-gray-500">{appointment.pets.map(p => p.name).join(', ')}</p>
+                </div>
+                <StatusBadge status={appointment.status} />
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                  <p className="text-gray-700">{appointment.date}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Type</p>
+                  <p className="text-gray-700 capitalize">{appointment.type}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <AttendanceBadge attended={appointment.attended} status={appointment.status} />
+                {appointment.status === 'confirmed' && !appointment.attended && (
+                  <div className="flex gap-2">
+                    <button onClick={() => openShowDialog(appointment)}
+                      className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700">
+                      Show
+                    </button>
+                    <button onClick={() => handleNoShow(appointment.id)}
+                      className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-md hover:bg-red-600">
+                      No Show
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
@@ -160,9 +203,7 @@ const VetAttendance = () => {
               <tbody className="divide-y divide-gray-100">
                 {filteredAppointments.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-gray-400 text-sm">
-                      No appointments.
-                    </td>
+                    <td colSpan={8} className="px-6 py-10 text-center text-gray-400 text-sm">No appointments.</td>
                   </tr>
                 ) : filteredAppointments.map(appointment => (
                   <tr key={appointment.id} className="hover:bg-gray-50 transition-colors">
@@ -173,26 +214,17 @@ const VetAttendance = () => {
                       {appointment.pets.map(p => p.name).join(', ')}
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-gray-600 capitalize hidden md:table-cell">{appointment.type}</td>
-                    <td className="px-4 sm:px-6 py-4">
-                      <StatusBadge status={appointment.status} />
-                    </td>
-                    <td className="px-4 sm:px-6 py-4">
-                      <AttendanceBadge attended={appointment.attended} status={appointment.status} />
-                    </td>
+                    <td className="px-4 sm:px-6 py-4"><StatusBadge status={appointment.status} /></td>
+                    <td className="px-4 sm:px-6 py-4"><AttendanceBadge attended={appointment.attended} status={appointment.status} /></td>
                     <td className="px-4 sm:px-6 py-4">
                       {appointment.status === 'confirmed' && !appointment.attended && (
                         <div className="flex flex-col sm:flex-row gap-2">
-                          {/* Show → opens medical-record dialog */}
-                          <button
-                            onClick={() => openShowDialog(appointment)}
-                            className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                          >
+                          <button onClick={() => openShowDialog(appointment)}
+                            className="px-3 py-1.5 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
                             Show
                           </button>
-                          <button
-                            onClick={() => handleNoShow(appointment.id)}
-                            className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                          >
+                          <button onClick={() => handleNoShow(appointment.id)}
+                            className="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
                             No Show
                           </button>
                         </div>

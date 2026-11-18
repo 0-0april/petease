@@ -523,44 +523,67 @@ const VetDashboard = () => {
           ) : filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-400">No appointments in this period.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filtered.map(apt => (
-                    <tr
-                      key={apt.id}
-                      onClick={() => handleRowClick(apt)}
-                      className="hover:bg-green-50 cursor-pointer transition-colors"
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{apt.time}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900 capitalize">
-                        {SERVICE_LABELS[apt.type] || apt.type}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {apt.pets.map(p => p.name).join(', ')}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
-                          {apt.status}
-                        </span>
-                      </td>
+            <>
+              {/* Mobile cards */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {filtered.map(apt => (
+                  <div key={apt.id} onClick={() => handleRowClick(apt)}
+                    className="p-4 hover:bg-green-50 cursor-pointer space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{apt.userName}</p>
+                        <p className="text-xs text-gray-500">{apt.pets.map(p => p.name).join(', ')}</p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
+                        {apt.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                        <p className="text-gray-700">{apt.date}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Service</p>
+                        <p className="text-gray-700 capitalize">{SERVICE_LABELS[apt.type] || apt.type}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop table */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pet(s)</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filtered.map(apt => (
+                      <tr key={apt.id} onClick={() => handleRowClick(apt)}
+                        className="hover:bg-green-50 cursor-pointer transition-colors">
+                        <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{apt.time}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 capitalize">{SERVICE_LABELS[apt.type] || apt.type}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{apt.pets.map(p => p.name).join(', ')}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
+                            {apt.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -157,59 +157,89 @@ const VetServices = () => {
             <p className="text-gray-600 font-medium">No services</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {services.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                        <p className="line-clamp-2">{service.description || <span className="text-gray-400">—</span>}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {service.specificDate ? (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                              {new Date(service.specificDate + 'T00:00:00').toLocaleDateString('en-US', {
-                                month: 'short', day: 'numeric', year: 'numeric',
-                              })}
-                            </span>
-                          ) : service.daysAvailable?.length > 0 ? (
-                            service.daysAvailable.map(d => (
-                              <span key={d} className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{d}</span>
-                            ))
-                          ) : (
-                            <span className="text-xs text-gray-400">No availability set</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => openEdit(service)}
-                            className="text-sm text-primary hover:text-primary-dark font-medium">
-                            Edit
-                          </button>
-                          <button onClick={() => handleDelete(service.id)}
-                            className="text-sm text-red-600 hover:text-red-800 font-medium">
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <>
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {services.map(service => (
+                <div key={service.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900">{service.name}</p>
+                    <div className="flex gap-2 shrink-0">
+                      <button onClick={() => openEdit(service)}
+                        className="text-xs text-primary hover:text-primary-dark font-medium">Edit</button>
+                      <button onClick={() => handleDelete(service.id)}
+                        className="text-xs text-red-600 hover:text-red-800 font-medium">Delete</button>
+                    </div>
+                  </div>
+                  {service.description && (
+                    <p className="text-xs text-gray-500">{service.description}</p>
+                  )}
+                  <div className="flex flex-wrap gap-1.5">
+                    {service.specificDate ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        {new Date(service.specificDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    ) : service.daysAvailable?.length > 0 ? (
+                      service.daysAvailable.map(d => (
+                        <span key={d} className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{d}</span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-400">No availability set</span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-100">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {services.map(service => (
+                      <tr key={service.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.name}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                          <p className="line-clamp-2">{service.description || <span className="text-gray-400">—</span>}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1.5">
+                            {service.specificDate ? (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                {new Date(service.specificDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            ) : service.daysAvailable?.length > 0 ? (
+                              service.daysAvailable.map(d => (
+                                <span key={d} className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{d}</span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-400">No availability set</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <button onClick={() => openEdit(service)}
+                              className="text-sm text-primary hover:text-primary-dark font-medium">Edit</button>
+                            <button onClick={() => handleDelete(service.id)}
+                              className="text-sm text-red-600 hover:text-red-800 font-medium">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
 

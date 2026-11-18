@@ -164,18 +164,60 @@ const AdminUsers = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {loading ? (
+            <p className="text-center text-gray-400 text-sm py-8">Loading…</p>
+          ) : paginated.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-8">No users found.</p>
+          ) : paginated.map(user => (
+            <div key={user.UserID} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <input type="checkbox"
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
+                    checked={selectedIds.includes(user.UserID)}
+                    onChange={() => toggleSelect(user.UserID)} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user.UserName}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.AccEmail || '—'}</p>
+                  </div>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[user.AccStatus] || STATUS_STYLES.Active}`}>
+                  {user.AccStatus || 'Active'}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">Last Login</p>
+                <p className="text-sm text-gray-600">
+                  {user.UserLastLogin ? new Date(user.UserLastLogin).toLocaleString() : '—'}
+                </p>
+              </div>
+              <div>
+                {user.AccStatus !== 'Suspended' ? (
+                  <button onClick={() => handleOpenSuspendModal(user)}
+                    className="px-3 py-1.5 text-xs font-medium text-orange-600 hover:text-orange-800 border border-orange-200 rounded-lg hover:bg-orange-50">
+                    Suspend
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400">Suspended</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 w-12 text-center">
-                    <input
-                      type="checkbox"
+                    <input type="checkbox"
                       className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
                       checked={paginated.length > 0 && selectedIds.length === paginated.length}
-                      onChange={toggleSelectAll}
-                    />
+                      onChange={toggleSelectAll} />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
@@ -186,22 +228,16 @@ const AdminUsers = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">Loading…</td>
-                  </tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">Loading…</td></tr>
                 ) : paginated.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No users found.</td>
-                  </tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No users found.</td></tr>
                 ) : paginated.map(user => (
                   <tr key={user.UserID} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-center">
-                      <input
-                        type="checkbox"
+                      <input type="checkbox"
                         className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
                         checked={selectedIds.includes(user.UserID)}
-                        onChange={() => toggleSelect(user.UserID)}
-                      />
+                        onChange={() => toggleSelect(user.UserID)} />
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">{user.UserName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.AccEmail || '—'}</td>
@@ -215,10 +251,8 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-6 py-4">
                       {user.AccStatus !== 'Suspended' ? (
-                        <button
-                          onClick={() => handleOpenSuspendModal(user)}
-                          className="text-orange-600 hover:text-orange-800 text-sm font-medium"
-                        >
+                        <button onClick={() => handleOpenSuspendModal(user)}
+                          className="text-orange-600 hover:text-orange-800 text-sm font-medium">
                           Suspend
                         </button>
                       ) : (

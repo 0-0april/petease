@@ -205,7 +205,42 @@ const VetAdoptions = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {adoptions.map(adoption => (
+                <div key={adoption.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{adoption.petName}</p>
+                      <p className="text-xs text-gray-500">{adoption.adopterName}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${STATUS_STYLES[adoption.status] || 'bg-gray-100 text-gray-600'}`}>
+                      {adoption.status.charAt(0).toUpperCase() + adoption.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Contact</p>
+                      <p className="text-gray-700 text-xs">{adoption.adopterEmail}</p>
+                      {adoption.adopterPhone && <p className="text-gray-400 text-xs">{adoption.adopterPhone}</p>}
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                      <p className="text-gray-700">{formatDate(adoption.createdAt)}</p>
+                    </div>
+                  </div>
+                  {adoption.status === 'approved' && (
+                    <button onClick={() => setSelectedAdoption(adoption)}
+                      className="w-full px-3 py-2 bg-primary text-white text-xs rounded-lg hover:bg-primary-dark font-medium">
+                      Complete Adoption
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gray-50">
@@ -224,8 +259,7 @@ const VetAdoptions = () => {
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {adoption.petName}
                           {adoption.message && (
-                            <p className="text-xs text-gray-400 mt-0.5 italic max-w-[160px] truncate"
-                              title={adoption.message}>
+                            <p className="text-xs text-gray-400 mt-0.5 italic max-w-[160px] truncate" title={adoption.message}>
                               "{adoption.message}"
                             </p>
                           )}
@@ -238,28 +272,18 @@ const VetAdoptions = () => {
                         <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                           {formatDate(adoption.createdAt)}
                           {adoption.status === 'completed' && adoption.completedAt && (
-                            <p className="text-xs text-green-600 mt-0.5">
-                              Done {formatDate(adoption.completedAt)}
-                            </p>
+                            <p className="text-xs text-green-600 mt-0.5">Done {formatDate(adoption.completedAt)}</p>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLES[adoption.status] || 'bg-gray-100 text-gray-600'}`}>
                             {adoption.status.charAt(0).toUpperCase() + adoption.status.slice(1)}
                           </span>
-                          {adoption.waiverDocument && (
-                            <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[100px]"
-                              title={adoption.waiverDocument}>
-                              {adoption.waiverDocument}
-                            </p>
-                          )}
                         </td>
                         <td className="px-6 py-4">
                           {adoption.status === 'approved' && (
-                            <button
-                              onClick={() => setSelectedAdoption(adoption)}
-                              className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-primary-dark font-medium"
-                            >
+                            <button onClick={() => setSelectedAdoption(adoption)}
+                              className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-primary-dark font-medium">
                               Complete
                             </button>
                           )}

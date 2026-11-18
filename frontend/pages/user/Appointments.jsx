@@ -247,7 +247,62 @@ const Appointments = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* ── Mobile cards (< sm) ── */}
+            <div className="sm:hidden space-y-3">
+              {pageRows.map(appointment => (
+                <div key={appointment.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
+                        checked={selectedIds.includes(appointment.id)}
+                        onChange={() => toggleSelect(appointment.id)} />
+                      <span className="text-sm font-semibold text-gray-900 truncate">
+                        {appointment.pets?.map(p => p.name).join(', ') || '—'}
+                      </span>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${
+                      STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Service</p>
+                      <p className="text-gray-700">{typeLabel(appointment.type)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Scheduled</p>
+                      <p className="text-gray-700">{formatDate(appointment.date)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+                      <button
+                        onClick={() => setCancelTarget(appointment.id)}
+                        className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 font-medium">
+                        Cancel
+                      </button>
+                    )}
+                    {(appointment.status === 'cancelled' || appointment.status === 'completed') && (
+                      <button
+                        onClick={() => setDeleteTarget([appointment.id])}
+                        className="px-3 py-1.5 border border-gray-200 text-gray-500 text-xs rounded-lg hover:bg-red-50 hover:text-red-500 font-medium flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Desktop table (sm+) ── */}
+            <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gray-50">

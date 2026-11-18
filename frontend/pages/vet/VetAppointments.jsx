@@ -378,19 +378,71 @@ const VetAppointments = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {displayed.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-8">No appointments found.</p>
+          ) : displayed.map(apt => (
+            <div key={apt.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{apt.userName}</p>
+                  <p className="text-xs text-gray-500 truncate">{apt.pets.map(p => p.name).join(', ')}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
+                  {apt.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                  <p className="text-gray-700">{apt.date}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Service</p>
+                  <p className="text-gray-700">{apt.serviceType || formatServiceType(apt.type)}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button onClick={() => handleViewDetails(apt)}
+                  className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200">
+                  View
+                </button>
+                {activeTab === 'pending' && (
+                  <>
+                    <button onClick={() => handleConfirm(apt.id)}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700">
+                      Confirm
+                    </button>
+                    <button onClick={() => { setCancelModal(apt); setCancelReason(''); }}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600">
+                      Cancel
+                    </button>
+                  </>
+                )}
+                {activeTab === 'confirmed' && (
+                  <button onClick={() => setAttendanceModal(apt)}
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700">
+                    Attendance
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
                 {activeTab === 'pending' && (
                   <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
+                    <input type="checkbox"
                       checked={displayed.length > 0 && selectedIds.length === displayed.length}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" />
                   </th>
                 )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
@@ -412,22 +464,16 @@ const VetAppointments = () => {
                 <tr key={apt.id} className="hover:bg-gray-50">
                   {activeTab === 'pending' && (
                     <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
+                      <input type="checkbox"
                         checked={selectedIds.includes(apt.id)}
                         onChange={() => toggleSelection(apt.id)}
-                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                      />
+                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary" />
                     </td>
                   )}
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.date}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {apt.serviceType || formatServiceType(apt.type)}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.serviceType || formatServiceType(apt.type)}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{apt.userName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {apt.pets.map(p => p.name).join(', ')}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{apt.pets.map(p => p.name).join(', ')}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[apt.status] || 'bg-gray-100 text-gray-600'}`}>
                       {apt.status}
@@ -435,33 +481,25 @@ const VetAppointments = () => {
                   </td>
                   <td className="px-6 py-4 text-sm" style={{ minWidth: '180px' }}>
                     <div className="flex flex-nowrap gap-2 items-center">
-                      <button
-                        onClick={() => handleViewDetails(apt)}
-                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors whitespace-nowrap"
-                      >
+                      <button onClick={() => handleViewDetails(apt)}
+                        className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors whitespace-nowrap">
                         View
                       </button>
                       {activeTab === 'pending' && (
                         <>
-                          <button
-                            onClick={() => handleConfirm(apt.id)}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
-                          >
+                          <button onClick={() => handleConfirm(apt.id)}
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap">
                             Confirm
                           </button>
-                          <button
-                            onClick={() => { setCancelModal(apt); setCancelReason(''); }}
-                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors whitespace-nowrap"
-                          >
+                          <button onClick={() => { setCancelModal(apt); setCancelReason(''); }}
+                            className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors whitespace-nowrap">
                             Cancel
                           </button>
                         </>
                       )}
                       {activeTab === 'confirmed' && (
-                        <button
-                          onClick={() => setAttendanceModal(apt)}
-                          className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
-                        >
+                        <button onClick={() => setAttendanceModal(apt)}
+                          className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap">
                           Attendance
                         </button>
                       )}

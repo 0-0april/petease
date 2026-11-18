@@ -290,7 +290,77 @@ const AdoptionRequests = () => {
               </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {incomingRows.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-8">No requests.</p>
+              ) : incomingRows.map(req => (
+                <div key={req.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
+                        checked={selectedIncoming.includes(req.id)}
+                        onChange={() => setSelectedIncoming(prev =>
+                          prev.includes(req.id) ? prev.filter(x => x !== req.id) : [...prev, req.id]
+                        )} />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <img src={getPetImage(req.petId)} alt={req.petName}
+                          className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                        <span className="text-sm font-semibold text-gray-900 truncate">{req.petName}</span>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${STATUS_STYLES[req.status] || ''}`}>
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Adopter</p>
+                      <button onClick={() => openChat(req.adopterId)}
+                        className="text-primary hover:underline font-medium text-sm">{req.adopterName}</button>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                      <p className="text-gray-700">{formatDate(req.createdAt)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Contact</p>
+                      <p className="text-gray-700 text-xs">{req.adopterEmail}</p>
+                      {req.adopterPhone && <p className="text-gray-400 text-xs">{req.adopterPhone}</p>}
+                    </div>
+                  </div>
+                  {req.status === 'rejected' && req.rejectionReason && (
+                    <p className="text-xs text-red-600">{req.rejectionReason}</p>
+                  )}
+                  {req.status === 'approved' && <p className="text-xs text-blue-600">Awaiting waiver visit</p>}
+                  {req.status === 'completed' && <p className="text-xs text-green-600">✓ Completed by vet</p>}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {req.status === 'pending' && (
+                      <>
+                        <button onClick={() => setApproveTarget(req.id)} disabled={!!actionLoading}
+                          className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium">
+                          {actionLoading === req.id + '-approve' ? '…' : 'Approve'}
+                        </button>
+                        <button onClick={() => setRejectTarget(req)} disabled={!!actionLoading}
+                          className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 disabled:opacity-50 font-medium">
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {req.status === 'completed' && req.waiverUrl && (
+                      <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer" download
+                        className="px-3 py-1.5 bg-green-700 text-white text-xs rounded-lg hover:bg-green-800 font-semibold">
+                        Waiver
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gray-50">
@@ -311,9 +381,7 @@ const AdoptionRequests = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {incomingRows.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-10 text-center text-gray-400 text-sm">No requests.</td>
-                      </tr>
+                      <tr><td colSpan={7} className="px-6 py-10 text-center text-gray-400 text-sm">No requests.</td></tr>
                     ) : incomingRows.map(req => (
                       <tr key={req.id} className="hover:bg-gray-50">
                         <td className="px-4 py-4 text-center">
@@ -413,7 +481,68 @@ const AdoptionRequests = () => {
               </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {sentRows.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-8">No applications.</p>
+              ) : sentRows.map(req => (
+                <div key={req.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
+                        checked={selectedSent.includes(req.id)}
+                        onChange={() => setSelectedSent(prev =>
+                          prev.includes(req.id) ? prev.filter(x => x !== req.id) : [...prev, req.id]
+                        )} />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <img src={getPetImage(req.petId)} alt={req.petName}
+                          className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                        <span className="text-sm font-semibold text-gray-900 truncate">{req.petName}</span>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${STATUS_STYLES[req.status] || ''}`}>
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Owner</p>
+                      <button onClick={() => openChat(req.ownerId)}
+                        className="text-primary hover:underline font-medium text-sm">
+                        {req.ownerName || 'Pet Owner'}
+                      </button>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                      <p className="text-gray-700">{formatDate(req.createdAt)}</p>
+                    </div>
+                  </div>
+                  {req.status === 'rejected' && req.rejectionReason && (
+                    <p className="text-xs text-red-600">{req.rejectionReason}</p>
+                  )}
+                  {req.status === 'approved' && <p className="text-xs text-blue-600">Visit PVO to sign waiver</p>}
+                  {req.status === 'completed' && <p className="text-xs text-green-600">✓ Congratulations!</p>}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {req.status === 'pending' && (
+                      <button onClick={() => setCancelTarget(req.id)} disabled={!!actionLoading}
+                        className="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium">
+                        {actionLoading === req.id + '-cancel' ? '…' : 'Cancel'}
+                      </button>
+                    )}
+                    {req.status === 'completed' && req.waiverUrl && (
+                      <a href={req.waiverUrl} target="_blank" rel="noopener noreferrer" download
+                        className="px-3 py-1.5 bg-green-700 text-white text-xs rounded-lg hover:bg-green-800 font-semibold">
+                        Waiver
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gray-50">
@@ -433,9 +562,7 @@ const AdoptionRequests = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {sentRows.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No applications.</td>
-                      </tr>
+                      <tr><td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">No applications.</td></tr>
                     ) : sentRows.map(req => (
                       <tr key={req.id} className="hover:bg-gray-50">
                         <td className="px-4 py-4 text-center">

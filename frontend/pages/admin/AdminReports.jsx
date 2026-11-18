@@ -89,7 +89,51 @@ const AdminReports = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Mobile cards */}
+        <div className="sm:hidden space-y-3">
+          {loading ? (
+            <p className="text-center text-gray-400 text-sm py-8">Loading…</p>
+          ) : paginated.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-8">No reports found.</p>
+          ) : paginated.map(report => (
+            <div key={report.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{report.reportedUserName}</p>
+                  <p className="text-xs text-gray-500">By: {report.reportedByName}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${STATUS_STYLES[getDisplayStatus(report)] || 'bg-gray-100 text-gray-800'}`}>
+                  {getDisplayStatus(report)}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Reason</p>
+                  <p className="text-gray-700 text-xs">{report.reason}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
+                  <p className="text-gray-700">{new Date(report.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="pt-1">
+                {report.reportedUserAccStatus === 'Suspended' ? (
+                  <span className="text-xs text-gray-400">Done</span>
+                ) : (report.status === 'Open' || report.status === 'Under Review') ? (
+                  <button onClick={() => handleReview(report)}
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200">
+                    Review
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400">Done</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gray-50">
@@ -112,9 +156,7 @@ const AdminReports = () => {
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">{report.reportedUserName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{report.reportedByName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-xs">{report.reason}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(report.createdAt).toLocaleDateString()}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{new Date(report.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_STYLES[getDisplayStatus(report)] || 'bg-gray-100 text-gray-800'}`}>
                         {getDisplayStatus(report)}
@@ -124,10 +166,8 @@ const AdminReports = () => {
                       {report.reportedUserAccStatus === 'Suspended' ? (
                         <span className="text-xs text-gray-400">Done</span>
                       ) : (report.status === 'Open' || report.status === 'Under Review') ? (
-                        <button
-                          onClick={() => handleReview(report)}
-                          className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                        >
+                        <button onClick={() => handleReview(report)}
+                          className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
                           Review
                         </button>
                       ) : (
