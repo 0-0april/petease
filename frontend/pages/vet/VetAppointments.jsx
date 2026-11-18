@@ -14,9 +14,8 @@ const STATUS_STYLES = {
 };
 
 // Renders one medical history entry per the global display rules.
-const MedicalHistoryEntry = ({ record, onConfirm, confirming }) => {
+const MedicalHistoryEntry = ({ record }) => {
   const isVetEntered = !!record.logId;
-  const showConfirm = isVetEntered && !record.medVerified && onConfirm;
 
   return (
     <div className="border-l-2 border-primary pl-3 bg-gray-50 p-3 rounded-r-lg space-y-0.5">
@@ -40,15 +39,6 @@ const MedicalHistoryEntry = ({ record, onConfirm, confirming }) => {
         <p className="text-sm text-gray-600">
           <span className="font-medium">Description:</span> {record.medDescript}
         </p>
-      )}
-      {showConfirm && (
-        <button
-          onClick={() => onConfirm(record.medId)}
-          disabled={confirming === record.medId}
-          className="mt-2 px-3 py-1 text-xs font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
-        >
-          {confirming === record.medId ? 'Confirming…' : 'Confirm'}
-        </button>
       )}
     </div>
   );
@@ -96,7 +86,6 @@ const VetAppointments = () => {
   const [logs, setLogs] = useState([]);
   const [toast, setToast] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [confirmingMed, setConfirmingMed] = useState(null); // medId being confirmed
 
   // Med-record dialog (shown when staff clicks Show inside Attendance modal)
   const [showMedDialog, setShowMedDialog] = useState(false);
@@ -269,26 +258,6 @@ const VetAppointments = () => {
       showToast('Failed to mark attendance.', 'error');
     } finally {
       setMedSubmitting(false);
-    }
-  };
-
-  const handleConfirmMed = async (medId) => {
-    setConfirmingMed(medId);
-    try {
-      const updated = await vetService.verifyMedicalHistory(medId);
-      // Update the record in the local selectedAppointment state immediately
-      setSelectedAppointment(prev => ({
-        ...prev,
-        medicalRecords: prev.medicalRecords.map(r =>
-          r.medId === medId ? { ...r, medVerified: true } : r
-        ),
-      }));
-      showToast('Medical record confirmed.');
-    } catch (error) {
-      console.error('Confirm med error:', error);
-      showToast('Failed to confirm record.', 'error');
-    } finally {
-      setConfirmingMed(null);
     }
   };
 
@@ -647,8 +616,6 @@ const VetAppointments = () => {
                     <MedicalHistoryEntry
                       key={record.medId}
                       record={record}
-                      onConfirm={handleConfirmMed}
-                      confirming={confirmingMed}
                     />
                   ))}
                 </div>
