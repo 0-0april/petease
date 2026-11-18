@@ -26,8 +26,11 @@ export const vetService = {
     return response.data;
   },
 
-  markAttendance: async (id, attended) => {
-    const response = await api.patch(`/vet/appointments/${id}/attendance`, { attended });
+  markAttendance: async (id, attended, medication = null, medDescript = null) => {
+    const body = { attended };
+    if (medication !== null) body.medication = medication;
+    if (medDescript !== null) body.medDescript = medDescript;
+    const response = await api.patch(`/vet/appointments/${id}/attendance`, body);
     return response.data;
   },
 

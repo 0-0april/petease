@@ -68,30 +68,40 @@ const VetAttendance = () => {
     setShowMedDialog(true);
   };
 
-  // Called when staff submits the dialog (or skips)
+  // Skip: mark attended only, no medical record
+  const handleSkip = async () => {
+    if (!pendingShowAppt) return;
+    setSubmitting(true);
+    try {
+      await vetService.markAttendance(pendingShowAppt.id, true);
+      setShowMedDialog(false);
+      setPendingShowAppt(null);
+      fetchAppointments();
+      showToast('Marked as attended.');
+    } catch (error) {
+      console.error('Skip error:', error);
+      showToast('Failed to mark attendance.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Save & Mark: mark attended + insert medical record in one call
   const handleShowSubmit = async () => {
     if (!pendingShowAppt) return;
     setSubmitting(true);
     try {
       const { medication, medDescript } = medForm;
-      const hasMedData = medication.trim() || medDescript.trim();
-
-      // Always mark attendance first
-      await vetService.markAttendance(pendingShowAppt.id, true);
-
-      // Insert medical history row only if at least one field was filled
-      if (hasMedData) {
-        await vetService.addMedicalHistory(
-          pendingShowAppt.id,
-          medication.trim(),
-          medDescript.trim()
-        );
-      }
-
+      await vetService.markAttendance(
+        pendingShowAppt.id,
+        true,
+        medication.trim() || null,
+        medDescript.trim() || null
+      );
       setShowMedDialog(false);
       setPendingShowAppt(null);
       fetchAppointments();
-      showToast(hasMedData ? 'Marked as attended. Medical record saved.' : 'Marked as attended.');
+      showToast('Marked as attended. Medical record saved.');
     } catch (error) {
       console.error('Show submit error:', error);
       showToast('Failed to mark attendance.', 'error');
@@ -287,7 +297,7 @@ const VetAttendance = () => {
                 Cancel
               </button>
               <button
-                onClick={handleShowSubmit}
+                onClick={handleSkip}
                 disabled={submitting}
                 className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
               >
