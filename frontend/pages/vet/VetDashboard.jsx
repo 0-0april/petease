@@ -100,20 +100,26 @@ function getSpecies(appointment) {
 function ServiceUsageChart({ appointments }) {
   const months = lastNMonths(6);
 
-  // Collect all service types present in data
-  const allTypes = useMemo(() => {
-    const types = new Set(appointments.map(a => a.type));
-    return [...types];
-  }, [appointments]);
+  // Only count completed appointments
+  const completed = useMemo(
+    () => appointments.filter(a => a.status === 'completed'),
+    [appointments]
+  );
 
-  // Total appointments per service type
+  // Collect all service types present in completed data
+  const allTypes = useMemo(() => {
+    const types = new Set(completed.map(a => a.type));
+    return [...types];
+  }, [completed]);
+
+  // Total completed appointments per service type
   const totalPerType = useMemo(() => {
     const counts = {};
-    appointments.forEach(a => {
+    completed.forEach(a => {
       counts[a.type] = (counts[a.type] || 0) + 1;
     });
     return counts;
-  }, [appointments]);
+  }, [completed]);
 
   const grandTotal = Object.values(totalPerType).reduce((s, v) => s + v, 0) || 1;
 
@@ -138,12 +144,12 @@ function ServiceUsageChart({ appointments }) {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const isOther = si >= mainTypes.length;
         const typesToCount = isOther ? otherTypes : [mainTypes[si]];
-        return appointments.filter(a => {
+        return completed.filter(a => {
           return typesToCount.includes(a.type) && monthKey(a.date) === key;
         }).length;
       });
     });
-  }, [appointments, mainTypes, otherTypes, seriesLabels.length]);
+  }, [completed, mainTypes, otherTypes, seriesLabels.length]);
 
   const datasets = seriesLabels.map((label, i) => ({
     label,
@@ -198,8 +204,8 @@ function ServiceUsageChart({ appointments }) {
       aria-label="Service usage line chart showing monthly appointment trends per service type"
     >
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Vet Services Usage</h2>
-      {appointments.length === 0 ? (
-        <p className="text-gray-400 text-sm">No data available.</p>
+      {completed.length === 0 ? (
+        <p className="text-gray-400 text-sm">No completed appointments yet.</p>
       ) : (
         <div style={{ height: '280px' }}>
           <Line data={data} options={options} aria-label="Service usage monthly trends" />
