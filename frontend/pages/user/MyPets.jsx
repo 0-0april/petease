@@ -85,7 +85,7 @@ const MyPets = () => {
     try {
       const rows = await petService.getMedicalHistory(petId);
       // Owner view: only verified vet rows (LogID NOT NULL + MedVerified=true)
-      setVetHistory(rows.filter(r => r.logId !== null && r.medVerified === true));
+      setVetHistory(rows.filter(r => r.logId != null && r.medVerified === true));
     } catch (err) {
       console.error('Error loading vet history:', err);
       setVetHistory([]);

@@ -343,10 +343,10 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
         age: calculateAge(data.USERPETS.PET.PetBDay)
       }],
       medicalRecords: (medicalRecords || []).map(record => ({
-        id: record.MedID,
+        medId: record.MedID,
         medication: record.Medication,
         medDescript: record.MedDescript,
-        medVerified: record.MedVerified,
+        medVerified: record.MedVerified === true,
         logId: record.LogID,
         serviceName: record.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
         createdAt: record.created_at,
