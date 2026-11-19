@@ -6,8 +6,10 @@ let medicalHistory = [...mockMedicalHistory];
 let adoptionWaivers = [...mockAdoptionWaivers];
 
 export const vetService = {
-  getAllAppointments: async (page = 1, limit = 10) => {
-    const response = await api.get('/vet/appointments', { params: { page, limit } });
+  getAllAppointments: async (page = 1, limit = 10, q = '') => {
+    const params = { page, limit };
+    if (q.trim()) params.q = q.trim();
+    const response = await api.get('/vet/appointments', { params });
     return response.data;
   },
 

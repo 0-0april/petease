@@ -162,8 +162,13 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
     const limit = parseInt(req.query.limit) || 10;
     const startIndex = (page - 1) * limit;
 
-    // Get appointments with count
-    const { data, error, count } = await supabase
+    // Escape ILIKE wildcards in user-supplied search term
+    const rawQ = (req.query.q || '').trim();
+    const escapedQ = rawQ.replace(/[%_\\]/g, c => `\\${c}`);
+    const searchPattern = escapedQ ? `%${escapedQ}%` : null;
+
+    // Build base query
+    let query = supabase
       .from('APPOINTMENT')
       .select(`
         AppointID,
@@ -196,8 +201,22 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
           created_at
         )
       `, { count: 'exact' })
-      .order('AppointDateCreated', { ascending: false })
-      .range(startIndex, startIndex + limit - 1);
+      .order('AppointDateCreated', { ascending: false });
+
+    // Apply search filter across owner name (USER.UserName) and pet name (PET.PetName).
+    // Supabase supports filtering on embedded resource columns via the foreignTable syntax
+    // in .or(). Using the relationship alias defined in the select above.
+    if (searchPattern) {
+      query = query.or(
+        `UserName.ilike.${searchPattern},PetName.ilike.${searchPattern}`,
+        { foreignTable: 'USERPETS' }
+      );
+    }
+
+    query = query.range(startIndex, startIndex + limit - 1);
+
+    // Get appointments with count
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('❌ Error fetching vet appointments:', error);

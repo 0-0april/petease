@@ -78,6 +78,7 @@ const VetAppointments = () => {
   const [filterDate, setFilterDate] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [cancelModal, setCancelModal] = useState(null);
@@ -92,10 +93,19 @@ const VetAppointments = () => {
   const [medForm, setMedForm] = useState({ medication: '', medDescript: '' });
   const [medSubmitting, setMedSubmitting] = useState(false);
 
+  // Debounce: update debouncedQuery 300 ms after the user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+      setCurrentPage(1); // reset to page 1 on every new query
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     clear('/vet/appointments');
     fetchAppointments();
-  }, [currentPage, activeTab]);
+  }, [currentPage, activeTab, debouncedQuery]);
 
   useEffect(() => {
     // Clear selections when changing tabs
@@ -104,7 +114,7 @@ const VetAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      const data = await vetService.getAllAppointments(currentPage, 10);
+      const data = await vetService.getAllAppointments(currentPage, 10, debouncedQuery);
       console.log('📅 Fetched appointments:', data.appointments.length);
       console.log('📊 Sample appointment:', data.appointments[0]);
       setAppointments(data.appointments);
@@ -290,8 +300,14 @@ const VetAppointments = () => {
       // Filter by date
       if (filterDate && a.date !== filterDate) return false;
 
-      // Search by user name
-      if (searchQuery && !a.userName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      // Client-side search fallback: covers the already-loaded page while the
+      // debounce timer is pending, and handles the name fields returned by the server.
+      if (debouncedQuery) {
+        const q = debouncedQuery.toLowerCase().trim().replace(/\s+/g, ' ');
+        const ownerMatch = a.userName?.toLowerCase().includes(q);
+        const petMatch = a.pets?.some(p => p.name?.toLowerCase().includes(q));
+        if (!ownerMatch && !petMatch) return false;
+      }
 
       return true;
     })
@@ -336,6 +352,43 @@ const VetAppointments = () => {
           ))}
         </div>
 
+        {/* Search bar — applies to all tabs */}
+        <div className="relative">
+          <label htmlFor="apt-search" className="sr-only">Search owner or pet name</label>
+          <div className="relative flex items-center">
+            <svg
+              className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              id="apt-search"
+              type="search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') setSearchQuery(''); }}
+              placeholder="Search owner or pet name"
+              aria-label="Search owner or pet name"
+              className="w-full pl-9 pr-10 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary"
+              style={{ fontSize: '16px', minHeight: '44px' }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                className="absolute right-3 text-gray-400 hover:text-gray-600 p-1"
+                style={{ minHeight: '44px', minWidth: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center">
           {activeTab === 'pending' && selectedIds.length > 0 && (
@@ -368,15 +421,6 @@ const VetAppointments = () => {
             placeholder="Filter by date"
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          {activeTab === 'completed' && (
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search…"
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary flex-1 min-w-[200px]"
-            />
-          )}
           <select
             value={sortOrder}
             onChange={e => setSortOrder(e.target.value)}
@@ -385,12 +429,12 @@ const VetAppointments = () => {
             <option value="desc">Newest</option>
             <option value="asc">Oldest</option>
           </select>
-          {(filterDate || searchQuery) && (
+          {filterDate && (
             <button
-              onClick={() => { setFilterDate(''); setSearchQuery(''); }}
+              onClick={() => setFilterDate('')}
               className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg"
             >
-              Clear Filters
+              Clear Date
             </button>
           )}
         </div>
@@ -405,7 +449,11 @@ const VetAppointments = () => {
         {/* Mobile cards */}
         <div className="sm:hidden space-y-3">
           {displayed.length === 0 ? (
-            <p className="text-center text-gray-400 text-sm py-8">No appointments found.</p>
+            <p className="text-center text-gray-400 text-sm py-8">
+              {debouncedQuery
+                ? `No appointments found matching "${debouncedQuery}".`
+                : 'No appointments found.'}
+            </p>
           ) : displayed.map(apt => (
             <div key={apt.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
@@ -481,7 +529,9 @@ const VetAppointments = () => {
               {displayed.length === 0 ? (
                 <tr>
                   <td colSpan={activeTab === 'pending' ? 7 : 6} className="px-6 py-10 text-center text-gray-400 text-sm">
-                    No appointments found.
+                    {debouncedQuery
+                      ? `No appointments found matching "${debouncedQuery}".`
+                      : 'No appointments found.'}
                   </td>
                 </tr>
               ) : displayed.map(apt => (
@@ -730,7 +780,7 @@ const VetAppointments = () => {
                 type="text"
                 value={medForm.medication}
                 onChange={e => setMedForm(f => ({ ...f, medication: e.target.value }))}
-                placeholder="e.g. Amoxicillin 250mg"
+                placeholder=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -740,7 +790,7 @@ const VetAppointments = () => {
                 value={medForm.medDescript}
                 onChange={e => setMedForm(f => ({ ...f, medDescript: e.target.value }))}
                 rows={3}
-                placeholder="Diagnosis, treatment notes…"
+                placeholder=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
@@ -767,9 +817,6 @@ const VetAppointments = () => {
                 {medSubmitting ? 'Saving…' : 'Save & Mark'}
               </button>
             </div>
-            <p className="text-xs text-gray-400 text-center">
-              "Skip" marks attendance without creating a medical record.
-            </p>
           </div>
         )}
       </Modal>
