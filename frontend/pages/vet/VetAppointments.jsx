@@ -353,43 +353,7 @@ const VetAppointments = () => {
         </div>
 
         {/* Search bar — applies to all tabs */}
-        <div className="flex justify-end">
-          <label htmlFor="apt-search" className="sr-only">Search owner or pet name</label>
-          <div className="relative flex items-center w-full max-w-sm">
-            <svg
-              className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            <input
-              id="apt-search"
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Escape') setSearchQuery(''); }}
-              placeholder="Search owner or pet name"
-              aria-label="Search owner or pet name"
-              className="w-full pl-9 pr-10 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              style={{ fontSize: '16px', minHeight: '44px' }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
-                className="absolute right-3 text-gray-400 hover:text-gray-600 p-1"
-                style={{ minHeight: '44px', minWidth: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Filters */}
+        {/* Filters + Search — single row */}
         <div className="flex flex-wrap gap-3 items-center">
           {activeTab === 'pending' && selectedIds.length > 0 && (
             <div className="flex gap-2 items-center bg-blue-50 px-4 py-2 rounded-lg">
@@ -437,6 +401,38 @@ const VetAppointments = () => {
               Clear Date
             </button>
           )}
+          {/* Search — right-aligned in the same row */}
+          <label htmlFor="apt-search" className="sr-only">Search owner or pet name</label>
+          <div className="relative flex items-center ml-auto w-full max-w-xs">
+            <svg
+              className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              id="apt-search"
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') setSearchQuery(''); }}
+              placeholder="Search owner or pet name"
+              aria-label="Search owner or pet name"
+              className="w-full pl-9 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                className="absolute right-3 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         {toast && (
