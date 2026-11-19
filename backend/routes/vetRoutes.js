@@ -556,6 +556,111 @@ router.get('/appointments/:id/logs', authenticateToken, authorizeRole('vet'), as
   }
 });
 
+// ── GET /vet/dashboard/completed-appointments ─────────────────────────────
+// Returns appointments that have an APPOINTMENTLOGS row with LogAttendance=true
+// (the patient "showed up"). This is the only authoritative completion signal —
+// AppointStatus is never updated by the attendance route, so we query the log
+// table directly. Returns data in the same shape as GET /vet/appointments.
+router.get('/dashboard/completed-appointments', authenticateToken, authorizeRole('vet'), async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 500;
+
+    // Pull every attendance log that recorded a "show"
+    const { data: logs, error: logError } = await supabase
+      .from('APPOINTMENTLOGS')
+      .select(`
+        LogID,
+        AppointID,
+        LogNote,
+        created_at,
+        APPOINTMENT!APPOINTMENTLOGS_AppointID_fkey (
+          AppointID,
+          AppointDateCreated,
+          AppointSchedDate,
+          AppointStatus,
+          USERPETS!APPOINTMENT_UserPetID_fkey (
+            UserPetID,
+            USER (
+              UserID,
+              UserName,
+              ACCOUNT (
+                AccPhoneNum
+              )
+            ),
+            PET (
+              PetID,
+              PetName,
+              PetBreed,
+              PetSpecie
+            )
+          ),
+          SERVICES!APPOINTMENT_ServID_fkey (
+            ServID,
+            ServType
+          )
+        )
+      `)
+      .eq('LogAttendance', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (logError) {
+      console.error('❌ Error fetching completed appointments:', logError);
+      throw logError;
+    }
+
+    // De-duplicate: one appointment may have multiple attendance logs.
+    // Keep the most-recent log per appointment (already sorted desc).
+    const seen = new Set();
+    const unique = (logs || []).filter(log => {
+      if (!log.APPOINTMENT) return false;
+      const id = log.APPOINTMENT.AppointID;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+
+    const appointments = unique.map(log => {
+      const apt = log.APPOINTMENT;
+      const schedDate = new Date(apt.AppointSchedDate);
+      return {
+        id: apt.AppointID,
+        logId: log.LogID,
+        userId: apt.USERPETS.USER.UserID,
+        userName: apt.USERPETS.USER.UserName,
+        userPhone: apt.USERPETS.USER.ACCOUNT?.AccPhoneNum || 'N/A',
+        date: schedDate.toISOString().split('T')[0],
+        time: schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        type: apt.SERVICES.ServType,
+        serviceType: apt.SERVICES.ServType,
+        // Always "completed" for dashboard purposes — these all have LogAttendance=true
+        status: 'completed',
+        pets: [{
+          id: apt.USERPETS.PET.PetID,
+          name: apt.USERPETS.PET.PetName,
+          breed: apt.USERPETS.PET.PetBreed,
+          species: apt.USERPETS.PET.PetSpecie,
+        }],
+        attended: true,
+        createdAt: apt.AppointDateCreated,
+        notes: log.LogNote || '',
+        completedAt: log.created_at,
+      };
+    });
+
+    console.log(`✅ Dashboard completed appointments: ${appointments.length}`);
+    res.json({
+      appointments,
+      total: appointments.length,
+      page: 1,
+      totalPages: 1,
+    });
+  } catch (error) {
+    console.error('❌ Dashboard completed appointments error:', error);
+    res.status(500).json({ error: error.message, details: error });
+  }
+});
+
 // Verify (confirm) a medical history entry — sets MedVerified=true
 router.patch('/medical-history/:medId/verify', authenticateToken, authorizeRole('vet'), async (req, res) => {
   try {

@@ -744,3 +744,18 @@ GLOBAL DISPLAY RULES
 
 
 DELIVER: schema migration, queries per view, UI changes (attendance dialog, appointment View panel with Confirm, owner form + read-only vet section). Reuse existing components and styles.
+
+TASK: Fix the vet staff dashboard so it shows only completed appointments, sourced from the AppointmentLog table.
+
+SOURCE OF TRUTH
+- Read from AppointmentLog only. Inspect its schema first and identify the column that marks completion (e.g. status/AttendanceStatus). State which column and value you treat as "completed" before coding.
+- Join other tables (appointment, pet, owner, service) only to display details. They must not decide which rows appear.
+
+FILTER
+- Apply the completed filter in the query (server-side), not in the UI.
+- Exclude every other state: pending, confirmed-not-yet-attended, cancelled, no-show.
+- Scope to the logged-in vet staff's own clinic/records only if the schema already supports it. Do not add new scoping rules.
+
+DISPLAY
+- Each row: date/time, pet, owner, service, plus the existing "View" action. Keep the current dashboard layout, components and styles.
+- Sort by most recent first. Paginate or limit if the list is

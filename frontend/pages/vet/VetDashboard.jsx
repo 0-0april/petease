@@ -100,19 +100,16 @@ function getSpecies(appointment) {
 function ServiceUsageChart({ appointments }) {
   const months = lastNMonths(6);
 
-  // Only count completed appointments
-  const completed = useMemo(
-    () => appointments.filter(a => a.status === 'completed'),
-    [appointments]
-  );
+  // All rows are already completed (sourced from LogAttendance=true)
+  const completed = appointments;
 
-  // Collect all service types present in completed data
+  // Collect all service types present in data
   const allTypes = useMemo(() => {
     const types = new Set(completed.map(a => a.type));
     return [...types];
   }, [completed]);
 
-  // Total completed appointments per service type
+  // Total appointments per service type
   const totalPerType = useMemo(() => {
     const counts = {};
     completed.forEach(a => {
@@ -218,20 +215,15 @@ function ServiceUsageChart({ appointments }) {
 // ─── Chart: Species Distribution (pie) ───────────────────────────────────────
 
 function SpeciesDistributionChart({ appointments }) {
-  // Only count pets from completed appointments
-  const completedAppointments = useMemo(
-    () => appointments.filter(a => a.status === 'completed'),
-    [appointments]
-  );
-
+  // All rows are already completed (sourced from LogAttendance=true)
   const speciesCounts = useMemo(() => {
     const counts = {};
-    completedAppointments.forEach(a => {
+    appointments.forEach(a => {
       const s = getSpecies(a);
       counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [completedAppointments]);
+  }, [appointments]);
 
   const labels = Object.keys(speciesCounts);
   const values = Object.values(speciesCounts);
@@ -299,7 +291,7 @@ function SpeciesDistributionChart({ appointments }) {
       aria-label="Species distribution pie chart showing percentage of appointments per pet species"
     >
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Species Distribution</h2>
-      {completedAppointments.length === 0 ? (
+      {appointments.length === 0 ? (
         <p className="text-gray-400 text-sm">No completed appointments yet.</p>
       ) : (
         <div style={{ height: '280px' }}>
@@ -310,22 +302,21 @@ function SpeciesDistributionChart({ appointments }) {
   );
 }
 
-// ─── Chart: Completed vs Cancelled (line) ────────────────────────────────────
+// ─── Chart: Completed Appointments Over Time (line) ──────────────────────────
 
 function CompletedVsCancelledChart({ appointments }) {
   const months = lastNMonths(6);
 
+  // All rows are already completed — plot monthly completed count
   const seriesData = useMemo(() => {
     const now = new Date();
     const completed = [];
-    const cancelled = [];
     for (let mi = 0; mi < 6; mi++) {
       const d = new Date(now.getFullYear(), now.getMonth() - (5 - mi), 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      completed.push(appointments.filter(a => a.status === 'completed' && monthKey(a.date) === key).length);
-      cancelled.push(appointments.filter(a => a.status === 'cancelled' && monthKey(a.date) === key).length);
+      completed.push(appointments.filter(a => monthKey(a.date) === key).length);
     }
-    return { completed, cancelled };
+    return { completed };
   }, [appointments]);
 
   const data = {
@@ -334,19 +325,8 @@ function CompletedVsCancelledChart({ appointments }) {
       {
         label: 'Completed',
         data: seriesData.completed,
-        borderColor: '#16a34a',       // fixed green
+        borderColor: '#16a34a',
         backgroundColor: '#16a34a22',
-        borderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        tension: 0.3,
-        fill: false,
-      },
-      {
-        label: 'Cancelled',
-        data: seriesData.cancelled,
-        borderColor: '#dc2626',       // fixed red
-        backgroundColor: '#dc262622',
         borderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
@@ -384,14 +364,14 @@ function CompletedVsCancelledChart({ appointments }) {
   return (
     <div
       className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
-      aria-label="Line chart comparing monthly completed vs cancelled appointments"
+      aria-label="Line chart showing monthly completed appointments"
     >
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Appointments: Completed vs Cancelled</h2>
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Completed Appointments Over Time</h2>
       {appointments.length === 0 ? (
-        <p className="text-gray-400 text-sm">No data available.</p>
+        <p className="text-gray-400 text-sm">No completed appointments yet.</p>
       ) : (
         <div style={{ height: '280px' }}>
-          <Line data={data} options={options} aria-label="Completed vs cancelled appointments monthly trends" />
+          <Line data={data} options={options} aria-label="Completed appointments monthly trend" />
         </div>
       )}
     </div>
@@ -428,8 +408,8 @@ const VetDashboard = () => {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        // Fetch a large set so chart data covers all months
-        const data = await vetService.getAllAppointments(1, 500);
+        // Source from APPOINTMENTLOGS where LogAttendance=true (the "show" outcome)
+        const data = await vetService.getCompletedAppointments(500);
         setAllAppointments(data.appointments);
       } catch (err) {
         console.error(err);
@@ -457,9 +437,14 @@ const VetDashboard = () => {
   };
 
   const todayStr = new Date().toISOString().split('T')[0];
+  // All rows in allAppointments are completed (LogAttendance=true)
   const todayCount = allAppointments.filter(a => a.date === todayStr).length;
-  const pendingCount = allAppointments.filter(a => a.status === 'pending').length;
-  const confirmedCount = allAppointments.filter(a => a.status === 'confirmed').length;
+  const now = new Date();
+  const thisMonthCount = allAppointments.filter(a => {
+    const d = new Date(a.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  const totalCount = allAppointments.length;
 
   return (
     <VetLayout>
@@ -486,16 +471,16 @@ const VetDashboard = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-sm text-gray-500">Today's Appointments</p>
+            <p className="text-sm text-gray-500">Completed Today</p>
             <p className="text-4xl font-bold text-primary mt-1">{todayCount}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-sm text-gray-500">Pending Confirmation</p>
-            <p className="text-4xl font-bold text-yellow-600 mt-1">{pendingCount}</p>
+            <p className="text-sm text-gray-500">Completed This Month</p>
+            <p className="text-4xl font-bold text-blue-600 mt-1">{thisMonthCount}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-sm text-gray-500">Confirmed</p>
-            <p className="text-4xl font-bold text-green-600 mt-1">{confirmedCount}</p>
+            <p className="text-sm text-gray-500">Total Completed</p>
+            <p className="text-4xl font-bold text-green-600 mt-1">{totalCount}</p>
           </div>
         </div>
 

@@ -11,6 +11,12 @@ export const vetService = {
     return response.data;
   },
 
+  // Dashboard-only: appointments sourced from APPOINTMENTLOGS where LogAttendance=true
+  getCompletedAppointments: async (limit = 500) => {
+    const response = await api.get('/vet/dashboard/completed-appointments', { params: { limit } });
+    return response.data;
+  },
+
   getAppointmentById: async (id) => {
     const response = await api.get(`/vet/appointments/${id}`);
     return response.data;
