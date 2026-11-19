@@ -422,7 +422,7 @@ const AdoptionRequests = () => {
                             </p>
                           )}
                           {req.status === 'approved' && (
-                            <p className="text-xs text-blue-600 mt-1">Awaiting waiver visit</p>
+                            <p className="text-xs text-blue-600 mt-1"></p>
                           )}
                           {req.status === 'completed' && (
                             <p className="text-xs text-green-600 mt-1">✓ Completed by vet</p>
