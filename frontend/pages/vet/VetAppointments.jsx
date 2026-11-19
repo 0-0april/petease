@@ -33,11 +33,11 @@ const MedicalHistoryEntry = ({ record }) => {
         )}
       </div>
       <p className="text-sm text-gray-700">
-        <span className="font-medium">Medication:</span> {record.medication || '—'}
+        {record.medication || '—'}
       </p>
       {record.medDescript && (
         <p className="text-sm text-gray-600">
-          <span className="font-medium">Description:</span> {record.medDescript}
+          {record.medDescript}
         </p>
       )}
     </div>
@@ -724,13 +724,6 @@ const VetAppointments = () => {
       >
         {attendanceModal && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Patient attended — optionally record medication and notes for{' '}
-              <span className="font-medium text-gray-900">
-                {attendanceModal.pets?.map(p => p.name).join(', ')}
-              </span>.
-              Skipping is allowed.
-            </p>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Medication</label>
               <input
