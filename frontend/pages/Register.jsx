@@ -46,6 +46,7 @@ export default function Register() {
   const [emailError, setEmailError] = useState('');
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -190,7 +191,46 @@ export default function Register() {
             <Field label="Username"    icon={ICONS.user}  type="text"     name="username" value={form.username} onChange={e => set('username', e.target.value)} placeholder="johndoe" required />
             <Field label="Name"   icon={ICONS.user}  type="text"     name="name"     value={form.name}     onChange={e => set('name',     e.target.value)} placeholder="John Doe" required />
             <Field label="Email" icon={ICONS.email} type="email"  name="email"    value={form.email}    onChange={e => { set('email', e.target.value); setEmailError(EMAIL_REGEX.test(e.target.value) || !e.target.value ? '' : 'Invalid email'); }} error={emailError} placeholder="you@example.com" required autoComplete="email" />
-            <Field label="Password"    icon={ICONS.lock}  type="password" name="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" required minLength={6} autoComplete="new-password" />
+            {/* Password with show/hide toggle */}
+            <div>
+              <p className="label-caps mb-2">Password</p>
+              <div className="flex items-center gap-2.5">
+                <svg className="w-4 h-4 shrink-0 opacity-40" fill="none" stroke="currentColor"
+                  strokeWidth={1.6} viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={ICONS.lock} />
+                </svg>
+                <div className="relative flex-1">
+                  <input
+                    className="input-ul w-full pr-10"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={form.password}
+                    onChange={e => set('password', e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4-9-7a9.77 9.77 0 012.168-5.168M6.1 6.1A9.956 9.956 0 0112 5c5 0 9 4 9 7a9.956 9.956 0 01-2.343 4.343M3 3l18 18" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
             <Field label="Phone" icon={ICONS.phone} type="tel"     name="phone"    value={form.phone}    onChange={e => set('phone',    e.target.value)} placeholder="+1 (555) 000-0000" required />
             <Field label="Address"     icon={ICONS.pin}   textarea        name="address"  value={form.address}  onChange={e => set('address',  e.target.value)} placeholder="123 Main St, City, State" required />
 
