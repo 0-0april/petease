@@ -353,7 +353,7 @@ const VetAppointments = () => {
         </div>
 
         {/* Search bar — applies to all tabs */}
-        <div className="flex justify-center">
+        <div className="flex justify-right">
           <label htmlFor="apt-search" className="sr-only">Search owner or pet name</label>
           <div className="relative flex items-center w-full max-w-sm">
             <svg
