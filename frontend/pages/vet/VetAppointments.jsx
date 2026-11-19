@@ -365,7 +365,7 @@ const VetAppointments = () => {
             </svg>
             <input
               id="apt-search"
-              type="search"
+              type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Escape') setSearchQuery(''); }}
