@@ -353,9 +353,9 @@ const VetAppointments = () => {
         </div>
 
         {/* Search bar — applies to all tabs */}
-        <div className="relative">
+        <div className="flex justify-center">
           <label htmlFor="apt-search" className="sr-only">Search owner or pet name</label>
-          <div className="relative flex items-center">
+          <div className="relative flex items-center w-full max-w-sm">
             <svg
               className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
