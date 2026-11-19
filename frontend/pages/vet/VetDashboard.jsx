@@ -212,6 +212,93 @@ function ServiceUsageChart({ appointments }) {
   );
 }
 
+// ─── Chart: Service Distribution (pie) ───────────────────────────────────────
+
+function ServiceDistributionChart({ appointments }) {
+  const serviceCounts = useMemo(() => {
+    const counts = {};
+    appointments.forEach(a => {
+      const label = SERVICE_LABELS[a.type] || a.type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      counts[label] = (counts[label] || 0) + 1;
+    });
+    return counts;
+  }, [appointments]);
+
+  const labels = Object.keys(serviceCounts);
+  const values = Object.values(serviceCounts);
+  const total = values.reduce((s, v) => s + v, 0) || 1;
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        data: values,
+        backgroundColor: SERVICE_LINE_COLORS.slice(0, labels.length),
+        borderColor: '#ffffff',
+        borderWidth: 2,
+        hoverOffset: 6,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 14,
+          font: { size: 12 },
+          generateLabels(chart) {
+            const ds = chart.data.datasets[0];
+            return chart.data.labels.map((label, i) => {
+              const value = ds.data[i];
+              const pct = Math.round((value / total) * 100);
+              return {
+                text: `${label} — ${pct}%`,
+                fillStyle: ds.backgroundColor[i],
+                strokeStyle: ds.borderColor,
+                lineWidth: ds.borderWidth,
+                datasetIndex: 0,
+                index: i,
+                hidden: false,
+              };
+            });
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const v = ctx.parsed;
+            const pct = Math.round((v / total) * 100);
+            return ` ${ctx.label}: ${v} appt${v !== 1 ? 's' : ''} (${pct}%)`;
+          },
+        },
+      },
+    },
+  };
+
+  return (
+    <div
+      className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
+      aria-label="Service distribution pie chart showing share of completed appointments per service type"
+    >
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Service Distribution</h2>
+      {appointments.length === 0 ? (
+        <p className="text-gray-400 text-sm">No completed appointments yet.</p>
+      ) : (
+        <div style={{ height: '280px' }}>
+          <Pie data={data} options={options} aria-label="Service distribution pie chart" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Chart: Species Distribution (pie) ───────────────────────────────────────
 
 function SpeciesDistributionChart({ appointments }) {
@@ -492,8 +579,9 @@ const VetDashboard = () => {
             {/* 1. Service Usage — full width */}
             <ServiceUsageChart appointments={allAppointments} />
 
-            {/* 2 & 3 — side by side on wider screens */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 2, 3 & 4 — three across on wider screens */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <ServiceDistributionChart appointments={allAppointments} />
               <SpeciesDistributionChart appointments={allAppointments} />
               <CompletedVsCancelledChart appointments={allAppointments} />
             </div>
