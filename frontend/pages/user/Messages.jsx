@@ -466,6 +466,17 @@ export default function Messages() {
                 {selectedMsgIds.length > 0 && (
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
+                      onClick={() => selectedMsgIds.length === 1
+                        ? setDeleteConfirmId(selectedMsgIds[0])
+                        : setDeleteConfirmId('__multi__')
+                      }
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                      style={{ color: 'hsla(0,70%,50%,0.85)' }}
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                      <span>({selectedMsgIds.length})</span>
+                    </button>
+                    <button
                       onClick={() => { setShowReport(true); setReportDone(false); }}
                       className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
                       style={{ color: 'hsla(0,70%,50%,0.85)' }}
