@@ -169,6 +169,7 @@ router.get('/with/:userId', authenticateToken, async (req, res) => {
       ...m,
       from_name: m.FROM_USER?.UserName || null,
       to_name: m.TO_USER?.UserName || null,
+      is_mine: m.MessFrom === sender.UserID,   // authoritative sender flag
     }));
 
     res.json(formatted);

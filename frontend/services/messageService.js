@@ -25,14 +25,13 @@ export const messageService = {
 
   getMessages: async (userId) => {
     const response = await api.get(`/messages/with/${userId}`);
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     return response.data.map(msg => ({
       id: msg.MessID,
       senderId: msg.MessFrom,
       receiverId: msg.MessTo,
       content: msg.MessContent,
       createdAt: msg.MessTimeStamp,
-      isSent: msg.MessFrom === user.UserID
+      isSent: msg.is_mine,   // set by the backend — no localStorage comparison
     }));
   },
 
