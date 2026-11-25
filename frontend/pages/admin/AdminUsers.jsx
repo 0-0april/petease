@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout';
 import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import { adminService } from '../../services/adminService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PAGE_SIZE = 10;
 
@@ -13,6 +14,9 @@ const STATUS_STYLES = {
 };
 
 const AdminUsers = () => {
+  const { user: authUser } = useAuth();
+  // IsMainAdmin is null/undefined for legacy rows; treat falsy as non-main
+  const isMainAdmin = authUser?.IsMainAdmin === true;
   const [allUsers, setAllUsers]               = useState([]);
   const [loading, setLoading]                 = useState(true);
   const [currentPage, setCurrentPage]         = useState(1);
@@ -121,12 +125,16 @@ const AdminUsers = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Users</h1>
-          <button
-            onClick={() => setShowInviteModal(true)}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
-          >
-            + Invite Staff
-          </button>
+          {isMainAdmin ? (
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium"
+            >
+              + Invite Staff
+            </button>
+          ) : (
+            <span className="text-xs text-gray-400 italic">Only the main admin can invite staff.</span>
+          )}
         </div>
 
         {toast && (
@@ -154,13 +162,16 @@ const AdminUsers = () => {
             </select>
           </div>
 
-          {selectedIds.length > 0 && (
+          {selectedIds.length > 0 && isMainAdmin && (
             <button
               onClick={() => handleOpenSuspendModal(null)}
               className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium whitespace-nowrap"
             >
               Suspend Selected ({selectedIds.length})
             </button>
+          )}
+          {selectedIds.length > 0 && !isMainAdmin && (
+            <span className="text-xs text-gray-400 italic">Only the main admin can suspend users from this tab.</span>
           )}
         </div>
 
@@ -194,14 +205,14 @@ const AdminUsers = () => {
                 </p>
               </div>
               <div>
-                {user.AccStatus !== 'Suspended' ? (
+                {user.AccStatus !== 'Suspended' && isMainAdmin ? (
                   <button onClick={() => handleOpenSuspendModal(user)}
                     className="px-3 py-1.5 text-xs font-medium text-orange-600 hover:text-orange-800 border border-orange-200 rounded-lg hover:bg-orange-50">
                     Suspend
                   </button>
-                ) : (
+                ) : user.AccStatus === 'Suspended' ? (
                   <span className="text-xs text-gray-400">Suspended</span>
-                )}
+                ) : null}
               </div>
             </div>
           ))}
@@ -250,14 +261,14 @@ const AdminUsers = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {user.AccStatus !== 'Suspended' ? (
+                      {user.AccStatus !== 'Suspended' && isMainAdmin ? (
                         <button onClick={() => handleOpenSuspendModal(user)}
                           className="text-orange-600 hover:text-orange-800 text-sm font-medium">
                           Suspend
                         </button>
-                      ) : (
+                      ) : user.AccStatus === 'Suspended' ? (
                         <span className="text-xs text-gray-400">Suspended</span>
-                      )}
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -269,7 +280,8 @@ const AdminUsers = () => {
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
 
-      {/* Invite Admin / Vet Staff Modal */}
+      {/* Invite Admin / Vet Staff Modal — main admin only */}
+      {isMainAdmin && (
       <Modal isOpen={showInviteModal} onClose={() => { if (!inviteSubmitting) { setShowInviteModal(false); setShowInvitePass(false); } }} title="Invite Staff">
         <form onSubmit={handleInviteSubmit} className="space-y-4">
           <div>
@@ -347,6 +359,7 @@ const AdminUsers = () => {
           </button>
         </form>
       </Modal>
+      )}
 
       {/* Suspend Confirmation Modal */}
       <Modal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} title="Suspend">

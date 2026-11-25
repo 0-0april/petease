@@ -49,4 +49,23 @@ export const messageService = {
   deleteMessage: async (messageId) => {
     await api.delete(`/messages/${messageId}`);
   },
+
+  blockUser: async (userId) => {
+    const response = await api.post(`/messages/block/${userId}`);
+    return response.data;
+  },
+
+  unblockUser: async (userId) => {
+    const response = await api.delete(`/messages/block/${userId}`);
+    return response.data;
+  },
+
+  getBlockStatus: async (userId) => {
+    const response = await api.get(`/messages/block-status/${userId}`);
+    return response.data;
+  },
+
+  deleteConversation: async (userId) => {
+    await api.delete(`/messages/conversation/${userId}`);
+  },
 };

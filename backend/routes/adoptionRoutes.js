@@ -166,7 +166,7 @@ router.get('/incoming', authenticateToken, async (req, res) => {
         ),
         USER!ADOPTION_UserID_fkey (
           UserID, UserName,
-          ACCOUNT ( AccEmail, AccPhoneNum )
+          ACCOUNT ( AccEmail, AccPhoneNum, AccStatus )
         )
       `)
       .in('UserPetsID', userPetIds)
@@ -175,7 +175,14 @@ router.get('/incoming', authenticateToken, async (req, res) => {
 
     if (error) throw error;
 
-    res.json((data || []).map(a => ({
+    // Hide non-completed requests from suspended adopters
+    const visible = (data || []).filter(a => {
+      const status = a.AdoptStatus?.toLowerCase();
+      if (status === 'completed') return true; // always show completed adoptions
+      return a.USER?.ACCOUNT?.AccStatus !== 'Suspended';
+    });
+
+    res.json(visible.map(a => ({
       ...a,
       PetName: a.USERPETS?.PET?.PetName,
       PetImg: a.USERPETS?.PET?.PetImg,

@@ -86,7 +86,7 @@ router.get('/', async (req, res) => {
         ),
         USER (
           UserID, UserName,
-          ACCOUNT ( AccUserName )
+          ACCOUNT ( AccUserName, AccStatus )
         )
       `)
       .eq('PET.PetAvailable', true)
@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
     if (error) throw error;
 
     const pets = (userpets || [])
-      .filter(row => row.PET)
+      .filter(row => row.PET && row.USER?.ACCOUNT?.AccStatus !== 'Suspended')
       .map(row => ({
         ...row.PET,
         ownerId: row.UserID,
@@ -132,9 +132,11 @@ router.get('/my-pets', authenticateToken, async (req, res) => {
     if (error) throw error;
 
     const pets = (userpets || [])
+      .filter(row => row.UserPetIsDeleted !== true)
       .map(row => row.PET)
       .filter(Boolean)
       .map(pet => ({ ...pet, owner_username: ownerUsername }));
+// Note: UserPetIsDeleted rows are excluded by the query below
 
     res.json(pets);
   } catch (error) {
@@ -157,7 +159,7 @@ router.get('/:id', async (req, res) => {
         ),
         USER (
           UserID, UserName,
-          ACCOUNT ( AccUserName )
+          ACCOUNT ( AccUserName, AccStatus )
         )
       `)
       .eq('PET.PetID', req.params.id)
@@ -310,6 +312,7 @@ router.get('/:id/medical-history', async (req, res) => {
         MedID,
         Medication,
         MedDescript,
+        MedSumDiagnosis,
         MedVerified,
         LogID,
         created_at,
@@ -340,6 +343,7 @@ router.get('/:id/medical-history', async (req, res) => {
       medication: r.Medication,
       medDescript: r.MedDescript,
       medVerified: r.MedVerified,
+      medSumDiagnosis: r.MedSumDiagnosis || null,
       logId: r.LogID,
       serviceName: r.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
       createdAt: r.created_at,

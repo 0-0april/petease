@@ -32,12 +32,17 @@ const MedicalHistoryEntry = ({ record }) => {
           <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">Owner</span>
         )}
       </div>
+      {record.medSumDiagnosis && (
+        <p className="text-sm text-gray-800">
+          <span className="font-medium">Diagnosis:</span> {record.medSumDiagnosis}
+        </p>
+      )}
       <p className="text-sm text-gray-700">
-        {record.medication || '—'}
+        <span className="font-medium">Medication:</span> {record.medication || '—'}
       </p>
       {record.medDescript && (
         <p className="text-sm text-gray-600">
-          {record.medDescript}
+          <span className="font-medium">Description:</span> {record.medDescript}
         </p>
       )}
     </div>
@@ -90,7 +95,7 @@ const VetAppointments = () => {
 
   // Med-record dialog (shown when staff clicks Show inside Attendance modal)
   const [showMedDialog, setShowMedDialog] = useState(false);
-  const [medForm, setMedForm] = useState({ medication: '', medDescript: '' });
+  const [medForm, setMedForm] = useState({ summary: '', medication: '', medDescript: '' });
   const [medSubmitting, setMedSubmitting] = useState(false);
 
   // Debounce: update debouncedQuery 300 ms after the user stops typing
@@ -223,37 +228,22 @@ const VetAppointments = () => {
 
   // Show — open the med-record dialog first
   const openShowDialog = () => {
-    setMedForm({ medication: '', medDescript: '' });
+    setMedForm({ summary: '', medication: '', medDescript: '' });
     setShowMedDialog(true);
-  };
-
-  // Skip: mark Show only, no med record
-  const handleShowSkip = async () => {
-    if (!attendanceModal) return;
-    setMedSubmitting(true);
-    try {
-      await vetService.markAttendance(attendanceModal.id, true);
-      setShowMedDialog(false);
-      setAttendanceModal(null);
-      fetchAppointments();
-      showToast('Marked as Show.');
-    } catch {
-      showToast('Failed to mark attendance.', 'error');
-    } finally {
-      setMedSubmitting(false);
-    }
   };
 
   // Save & Mark: mark Show + insert med record in one call
   const handleShowSave = async () => {
     if (!attendanceModal) return;
+    if (!medForm.summary.trim()) return; // summary is required
     setMedSubmitting(true);
     try {
       await vetService.markAttendance(
         attendanceModal.id,
         true,
         medForm.medication.trim() || null,
-        medForm.medDescript.trim() || null
+        medForm.medDescript.trim() || null,
+        medForm.summary.trim()
       );
       setShowMedDialog(false);
       setAttendanceModal(null);
@@ -771,6 +761,19 @@ const VetAppointments = () => {
         {attendanceModal && (
           <div className="space-y-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Summary / Diagnosis <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={medForm.summary}
+                onChange={e => setMedForm(f => ({ ...f, summary: e.target.value }))}
+                rows={3}
+                placeholder="Enter diagnosis or clinical summary…"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                autoFocus
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Medication</label>
               <input
                 type="text"
@@ -799,15 +802,8 @@ const VetAppointments = () => {
                 Back
               </button>
               <button
-                onClick={handleShowSkip}
-                disabled={medSubmitting}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
-              >
-                {medSubmitting ? 'Saving…' : 'Skip'}
-              </button>
-              <button
                 onClick={handleShowSave}
-                disabled={medSubmitting || (!medForm.medication.trim() && !medForm.medDescript.trim())}
+                disabled={medSubmitting || !medForm.summary.trim()}
                 className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {medSubmitting ? 'Saving…' : 'Save & Mark'}

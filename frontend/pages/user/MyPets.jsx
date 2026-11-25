@@ -35,6 +35,11 @@ const VetMedEntry = ({ record }) => (
         {record.serviceName || 'Vet Service'}
       </p>
     </div>
+    {record.medSumDiagnosis && (
+      <p className="text-sm text-gray-800">
+        <span className="font-medium">Diagnosis:</span> {record.medSumDiagnosis}
+      </p>
+    )}
     <p className="text-sm text-gray-700">
       <span className="font-medium">Medication:</span> {record.medication || '—'}
     </p>
@@ -58,6 +63,9 @@ const MyPets = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [vaccinationFile, setVaccinationFile] = useState(null);
   const [vaccinationUploading, setVaccinationUploading] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => localStorage.getItem('mypets_banner_dismissed') === 'true'
+  );
 
   // Vet medical history rows for the pet currently open in the modal
   const [vetHistory, setVetHistory] = useState([]);
@@ -255,6 +263,22 @@ const MyPets = () => {
           </button>
         </div>
 
+        {!bannerDismissed && (
+          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium">
+            <span>🐾 All animals listed are not for sale.</span>
+            <button
+              onClick={() => {
+                setBannerDismissed(true);
+                localStorage.setItem('mypets_banner_dismissed', 'true');
+              }}
+              className="shrink-0 text-amber-600 hover:text-amber-900 leading-none text-lg font-bold"
+              aria-label="Dismiss banner"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {feedback && (
           <div className={`px-4 py-3 rounded-lg text-sm font-medium ${
             feedback.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
@@ -388,6 +412,7 @@ const MyPets = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="adoption">For Adoption</option>
                 <option value="appointment">For Appointment Only</option>
+                <option value="both">Both (Adoption + Appointment)</option>
               </select>
             </div>
           </div>

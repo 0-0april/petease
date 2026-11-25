@@ -34,10 +34,11 @@ export const vetService = {
     return response.data;
   },
 
-  markAttendance: async (id, attended, medication = null, medDescript = null) => {
+  markAttendance: async (id, attended, medication = null, medDescript = null, summary = null) => {
     const body = { attended };
     if (medication !== null) body.medication = medication;
     if (medDescript !== null) body.medDescript = medDescript;
+    if (summary !== null) body.note = summary;
     const response = await api.patch(`/vet/appointments/${id}/attendance`, body);
     return response.data;
   },

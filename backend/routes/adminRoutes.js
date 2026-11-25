@@ -48,7 +48,7 @@ router.post('/invite', authenticateToken, authorizeRole('admin'), async (req, re
     if (role === 'admin') {
       const { error: roleError } = await supabase
         .from('ADMIN')
-        .insert({ AdminName: name, AccID: account.AccID });
+        .insert({ AdminName: name, AccID: account.AccID, IsMainAdmin: false });
       if (roleError) throw roleError;
     } else {
       const { error: roleError } = await supabase
@@ -91,6 +91,17 @@ router.get('/users', authenticateToken, authorizeRole('admin'), async (req, res)
 router.patch('/users/:userId/suspend', authenticateToken, authorizeRole('admin'), async (req, res) => {
   const { userId } = req.params;
   try {
+    // Only main admins may suspend from the Users tab
+    const { data: callerAdmin, error: callerError } = await supabase
+      .from('ADMIN')
+      .select('IsMainAdmin')
+      .eq('AccID', req.user.accId)
+      .single();
+
+    if (callerError || !callerAdmin?.IsMainAdmin) {
+      return res.status(403).json({ error: 'Only the main admin can suspend users from the Users tab.' });
+    }
+
     // Look up the AccID for this UserID
     const { data: userRow, error: userError } = await supabase
       .from('USER')

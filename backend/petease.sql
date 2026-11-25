@@ -18,6 +18,7 @@ CREATE TABLE public.ADMIN (
   AdminAddress text,
   AccID uuid NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  IsMainAdmin boolean,
   CONSTRAINT ADMIN_pkey PRIMARY KEY (AdminID),
   CONSTRAINT ADMIN_AccID_fkey FOREIGN KEY (AccID) REFERENCES public.ACCOUNT(AccID)
 );
@@ -59,6 +60,7 @@ CREATE TABLE public.MEDICALHISTORY (
   created_at timestamp with time zone DEFAULT now(),
   UserPetID uuid,
   MedVerified boolean,
+  MedSumDiagnosis text,
   CONSTRAINT MEDICALHISTORY_pkey PRIMARY KEY (MedID),
   CONSTRAINT MEDICALHISTORY_LogID_fkey FOREIGN KEY (LogID) REFERENCES public.APPOINTMENTLOGS(LogID),
   CONSTRAINT MEDICALHISTORY_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID)
@@ -84,6 +86,7 @@ CREATE TABLE public.USERPETS (
   UserID uuid NOT NULL,
   PetID uuid NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  UserPetIsDeleted boolean,
   CONSTRAINT USERPETS_pkey PRIMARY KEY (UserPetID),
   CONSTRAINT USERPETS_PetID_fkey FOREIGN KEY (PetID) REFERENCES public.PET(PetID),
   CONSTRAINT USERPETS_UserID_fkey FOREIGN KEY (UserID) REFERENCES public.USER(UserID)
@@ -110,6 +113,7 @@ CREATE TABLE public.APPOINTMENT (
   AppointStatus USER-DEFINED NOT NULL DEFAULT 'Pending'::appoint_status,
   created_at timestamp with time zone DEFAULT now(),
   CancellationReason text,
+  AppointIsDeleted boolean,
   CONSTRAINT APPOINTMENT_pkey PRIMARY KEY (AppointID),
   CONSTRAINT APPOINTMENT_ServID_fkey FOREIGN KEY (ServID) REFERENCES public.SERVICES(ServID),
   CONSTRAINT APPOINTMENT_UserPetID_fkey FOREIGN KEY (UserPetID) REFERENCES public.USERPETS(UserPetID)
@@ -132,6 +136,7 @@ CREATE TABLE public.MESSAGES (
   MessContent text NOT NULL,
   MessTimeStamp timestamp with time zone NOT NULL DEFAULT now(),
   created_at timestamp with time zone DEFAULT now(),
+  MessIsDeleted boolean,
   CONSTRAINT MESSAGES_pkey PRIMARY KEY (MessID),
   CONSTRAINT MESSAGES_MessFrom_fkey FOREIGN KEY (MessFrom) REFERENCES public.USER(UserID),
   CONSTRAINT MESSAGES_MessTo_fkey FOREIGN KEY (MessTo) REFERENCES public.USER(UserID)

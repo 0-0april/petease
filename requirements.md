@@ -759,3 +759,80 @@ FILTER
 DISPLAY
 - Each row: date/time, pet, owner, service, plus the existing "View" action. Keep the current dashboard layout, components and styles.
 - Sort by most recent first. Paginate or limit if the list is
+
+
+My Pets
+add "Both" (adoption and appointment) choice for register type in adding pet details, and when it is ticked, it should both display in browse pets tab and could be listed for appointment booking too
+
+below the header, there should be banner in top telling the users all animals listed is not for sale, put 'x' button so users can hide the banner
+
+Messages (Users can block co-users). if a user blocks the user, they their chat input is disabled and they cannot see each other's pet listing
+- if the user chose to delete a chat, it should set the Messages table's MessIsDeleted Column to true
+
+if the account was suspended by the admin, the pet they uploaded/listed should not be displayed anywhere including their pending appointments and pending adoptions and they should hide the user from the messages even if there is an history chats under that. but if there is a completed adoption or appointment under that user, it should still be displayed
+
+
+
+Appoinment:
+
+if there the user missed the appointment or the date is beyond the set schedule, it should message a certain user directly through the announcement that is in the message tab. it should notify the user aswell and directs to the appointment tab once the notification clicked
+
+in the admin's user tab, when the admin invites another admin, it's Admin table's "IsMainAdmin" should be false
+and when the IsMainAdmin value is false, it should not be allowed to suspend users or add another staffs un the users tab. tho it can review announcements but it should
+
+
+Vet Staff ( appointment tab, confirmed part)
+- when the vet staff marks the appointment attendance as "Show", it should add another input for medical records. the medication and its decription is already there, on top of of medication input, add Summary/Diagnosis input that is required.
+
+therefore remove the skip button, only enable the Save & Mark button if the diagnosis/summary is filled.
+
+
+
+
+
+
+in users panel if the pet pet's adoption is completed and has waiver not null anymore, it automatically cancels the adoption request sent that matches to it's userpetid value from adoption table, change the value to the adoption table's AdoptIsDeleted to true.
+
+then add new row to the userpets table that has the same value/fk(from pet table) of the pet adopted. the same pet information should be transfered to the user who adopted or requested to adopt it. and shows to the new owner/user's my pets tab
+
+
+Implement these changes. Use backend/petease.sql as the schema reference for table and column names. Keep existing layouts and displays unless a change requires otherwise.
+
+USER PANEL
+
+My Pets
+- Add/Edit Pet: add "Both" (Adoption + Appointment) to Registration Type. "Both" pets appear in Browse Pets and are bookable for appointments.
+- Add a dismissible banner (X button) below the header: "All animals listed are not for sale."
+
+Messages
+- Blocking: if a user blocks another, both users' chat inputs are disabled and neither sees the other's pet listings.
+- Deleting a chat sets Messages.MessIsDeleted = TRUE.
+
+Suspended accounts
+- Hide the suspended user's pets everywhere, including others' pending appointments and adoptions.
+- Hide the user in Messages, even with existing chat history.
+- Exception: still show completed adoptions/appointments involving that user.
+
+Appointment
+- On a missed appointment or a date past the schedule: send the user a direct announcement in Messages, and create a notification that opens the Appointment tab.
+
+Adoption completion (status completed and Waiver not null)
+1. Set AdoptIsDeleted = TRUE on all other adoption requests with the same UserPetID (not the completed one).
+2. Ownership transfer:
+   - Set UserPets.UserPetIsDeleted = TRUE on the original owner's row.
+   - Insert a new UserPets row: new owner's user FK, same Pet FK, CreatedAt = completion time, UserPetIsDeleted = FALSE.
+   - The pet must show in the new owner's My Pets.
+
+ADMIN PANEL
+
+Users tab
+- Inviting an admin sets Admin.IsMainAdmin = FALSE.
+- If IsMainAdmin = FALSE: block suspending users and adding staff in the Users tab.
+- Non-main admins can still review announcements and evaluate reports. They can suspend a reported user only from the Reports tab.
+
+VET STAFF PANEL
+
+Appointment > Confirmed
+- When attendance = "Show", add a required Summary/Diagnosis input above the existing Medication and description inputs. display it inside view modal together with the previous medical records and to the user's my pet pet card and also display it in the browse pets tab's pet profile (this is when it was displayed as both or changed to adoption register type)
+- Remove the Skip button. Enable Save & Mark only when Summary/Diagnosis is filled, and put its value to the MedicalRecord table's MedSumDiagnosis column
+

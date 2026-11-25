@@ -181,7 +181,8 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
             UserID,
             UserName,
             ACCOUNT (
-              AccPhoneNum
+              AccPhoneNum,
+              AccStatus
             )
           ),
           PET (
@@ -225,7 +226,15 @@ router.get('/appointments', authenticateToken, authorizeRole('vet'), async (req,
     console.log('✅ Found appointments:', data?.length || 0);
 
     // Transform data
-    const appointments = data.map(apt => {
+    const appointments = data
+      .filter(apt => {
+        // Hide pending/confirmed appointments where the pet owner is suspended
+        // (still show completed/cancelled so history is preserved)
+        const status = (apt.AppointStatus || '').toLowerCase();
+        if (status === 'completed' || status === 'cancelled') return true;
+        return apt.USERPETS?.USER?.ACCOUNT?.AccStatus !== 'Suspended';
+      })
+      .map(apt => {
       const schedDate = new Date(apt.AppointSchedDate);
       
       // Find the most recent attendance log (where LogAttendance is true)
@@ -328,6 +337,7 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
         MedID,
         Medication,
         MedDescript,
+        MedSumDiagnosis,
         MedVerified,
         LogID,
         created_at,
@@ -366,6 +376,7 @@ router.get('/appointments/:id', authenticateToken, authorizeRole('vet'), async (
         medication: record.Medication,
         medDescript: record.MedDescript,
         medVerified: record.MedVerified === true,
+        medSumDiagnosis: record.MedSumDiagnosis || null,
         logId: record.LogID,
         serviceName: record.APPOINTMENTLOGS?.APPOINTMENT?.SERVICES?.ServType || null,
         createdAt: record.created_at,
@@ -514,6 +525,7 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
             LogID: logData.LogID,
             Medication: medication || '',
             MedDescript: medDescript || null,
+            MedSumDiagnosis: req.body.note || null,
             MedVerified: true,
           })
           .select()
@@ -521,6 +533,74 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
 
         if (medErr) console.error('⚠️ Error inserting medical history:', medErr);
         else medRecord = medData;
+      }
+    }
+
+    // If patient did NOT attend — send a direct message + notification to the user
+    if (!attended) {
+      try {
+        // Resolve the appointment's owner info
+        const { data: aptInfo } = await supabase
+          .from('APPOINTMENT')
+          .select(`
+            AppointSchedDate,
+            USERPETS!APPOINTMENT_UserPetID_fkey (
+              USER (
+                UserID,
+                AccID
+              ),
+              PET ( PetName )
+            ),
+            SERVICES!APPOINTMENT_ServID_fkey ( ServType )
+          `)
+          .eq('AppointID', req.params.id)
+          .single();
+
+        if (aptInfo) {
+          const userID   = aptInfo.USERPETS?.USER?.UserID;
+          const userAccID = aptInfo.USERPETS?.USER?.AccID;
+          const petName  = aptInfo.USERPETS?.PET?.PetName  || 'your pet';
+          const servType = aptInfo.SERVICES?.ServType      || 'your appointment';
+          const schedDate = aptInfo.AppointSchedDate
+            ? new Date(aptInfo.AppointSchedDate).toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'short', day: 'numeric',
+              })
+            : 'the scheduled date';
+
+          const missedMsg =
+            `Your appointment for ${petName} (${servType}) on ${schedDate} was marked as missed. ` +
+            `Please contact us to reschedule.`;
+
+          // Find a system sender: use the vet's own UserID as MessFrom if they're also a user,
+          // otherwise insert an ANNOUNCEMENT-style message via the vet's account acting as admin.
+          // Per schema MESSAGES requires USER FKs for both sides — we look up the vet's UserID.
+          const { data: vetUserRow } = await supabase
+            .from('USER')
+            .select('UserID')
+            .eq('AccID', req.user.accId)
+            .maybeSingle();
+
+          if (userID && vetUserRow?.UserID) {
+            await supabase.from('MESSAGES').insert({
+              MessFrom: vetUserRow.UserID,
+              MessTo:   userID,
+              MessContent: missedMsg,
+            });
+          }
+
+          // Always send a notification regardless of message delivery
+          if (userAccID) {
+            await createNotification({
+              accId:   userAccID,
+              title:   'Missed appointment',
+              message: missedMsg,
+              type:    'appointment',
+            });
+          }
+        }
+      } catch (notifErr) {
+        console.error('⚠️ No-show notification error:', notifErr);
+        // non-fatal — continue
       }
     }
 
@@ -691,6 +771,7 @@ router.patch('/medical-history/:medId/verify', authenticateToken, authorizeRole(
         MedID,
         Medication,
         MedDescript,
+        MedSumDiagnosis,
         MedVerified,
         LogID,
         created_at,
@@ -1084,26 +1165,38 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
       console.error('⚠️ Error updating pet availability:', petError);
     }
 
-    // Cancel all other pending/approved adoption requests for this pet
-    // so other applicants know it's been adopted
-    const { data: petUserpets } = await supabase
-      .from('USERPETS')
-      .select('UserPetID')
-      .eq('PetID', petIdToUpdate);
+    // ── Adoption completion: ownership transfer + soft-delete other requests ──
 
-    if (petUserpets?.length > 0) {
-      const userPetIds = petUserpets.map(u => u.UserPetID);
+    // 1. Find the completed adoption's UserPetsID (original owner's USERPETS row)
+    const { data: completedAdoption } = await supabase
+      .from('ADOPTION')
+      .select(`
+        UserPetsID,
+        UserID,
+        USER!ADOPTION_UserID_fkey ( AccID, UserID ),
+        USERPETS!ADOPTION_UserPetsID_fkey ( UserPetID, PetID, UserID )
+      `)
+      .eq('AdoptID', req.params.id)
+      .single();
+
+    const completedUserPetsID = completedAdoption?.UserPetsID;
+    const originalOwnerUserPetID = completedAdoption?.USERPETS?.UserPetID;
+    const adoptedPetID = completedAdoption?.USERPETS?.PetID;
+    // The adopter's UserID is stored in ADOPTION.UserID
+    const adopterUserID = completedAdoption?.UserID;
+
+    // 2. Soft-delete ALL other adoption requests for the same UserPetsID (not the completed one)
+    if (completedUserPetsID) {
       const { data: otherRequests } = await supabase
         .from('ADOPTION')
         .select('AdoptID, USER!ADOPTION_UserID_fkey(AccID)')
-        .in('UserPetsID', userPetIds)
-        .in('AdoptStatus', ['Pending', 'Approved'])
+        .eq('UserPetsID', completedUserPetsID)
         .neq('AdoptID', req.params.id);
 
       if (otherRequests?.length > 0) {
         await supabase
           .from('ADOPTION')
-          .update({ AdoptStatus: 'Cancelled' })
+          .update({ AdoptIsDeleted: true })
           .in('AdoptID', otherRequests.map(r => r.AdoptID));
 
         // Notify the other applicants
@@ -1113,11 +1206,31 @@ router.post('/adoptions/:id/complete', authenticateToken, authorizeRole('vet'), 
               accId: other.USER.AccID,
               title: 'Adoption unavailable',
               message: `Sorry, ${adoption.USERPETS?.PET?.PetName || 'this pet'} has already been adopted by someone else.`,
-              type: 'adoption'
+              type: 'adoption',
             });
           }
         }
       }
+    }
+
+    // 3. Mark original owner's USERPETS row as deleted
+    if (originalOwnerUserPetID) {
+      await supabase
+        .from('USERPETS')
+        .update({ UserPetIsDeleted: true })
+        .eq('UserPetID', originalOwnerUserPetID);
+    }
+
+    // 4. Insert a new USERPETS row for the adopter
+    if (adopterUserID && adoptedPetID) {
+      await supabase
+        .from('USERPETS')
+        .insert({
+          UserID: adopterUserID,
+          PetID: adoptedPetID,
+          UserPetIsDeleted: false,
+          created_at: new Date().toISOString(),
+        });
     }
 
     console.log('✅ Adoption completed successfully');

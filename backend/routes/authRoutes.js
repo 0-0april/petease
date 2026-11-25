@@ -110,6 +110,7 @@ router.post('/google', async (req, res) => {
         email,
         role,
         accStatus: existingAccount?.AccStatus || 'Active',
+        IsMainAdmin: role === 'admin' ? (userData?.IsMainAdmin ?? null) : undefined,
         ...userData
       }
     });
@@ -258,6 +259,7 @@ router.post('/login', async (req, res) => {
         role,
         accStatus: account.AccStatus || 'Active',
         UserID: userData?.UserID,
+        IsMainAdmin: role === 'admin' ? (userData?.IsMainAdmin ?? null) : undefined,
         ...userData
       }
     });

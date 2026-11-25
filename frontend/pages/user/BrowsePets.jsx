@@ -13,6 +13,31 @@ const getAgeInMonths = (birthday) => {
   return (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
 };
 
+// Shared vet medical record display component
+const VetMedEntry = ({ record }) => (
+  <div className="border-l-2 border-primary pl-3 bg-gray-50 p-3 rounded-r-lg space-y-0.5">
+    <div className="flex items-center gap-1.5">
+      <svg className="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p className="text-sm font-semibold text-gray-900">{record.serviceName || 'Vet Service'}</p>
+    </div>
+    {record.medSumDiagnosis && (
+      <p className="text-sm text-gray-800">
+        <span className="font-medium">Diagnosis:</span> {record.medSumDiagnosis}
+      </p>
+    )}
+    <p className="text-sm text-gray-700">
+      <span className="font-medium">Medication:</span> {record.medication || '—'}
+    </p>
+    {record.medDescript && (
+      <p className="text-sm text-gray-600">
+        <span className="font-medium">Description:</span> {record.medDescript}
+      </p>
+    )}
+  </div>
+);
+
 const SpeciesIcon = ({ species }) => {
   const s = (species || '').toLowerCase();
   if (s === 'dog') {
@@ -47,13 +72,18 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
   const [msgStep, setMsgStep] = useState(null);
   const [msgContent, setMsgContent] = useState('');
   const [msgLoading, setMsgLoading] = useState(false);
+  const [vetHistory, setVetHistory] = useState([]);
 
   const ageInMonths = getAgeInMonths(pet.birthday);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    // Load verified vet medical records for this pet
+    petService.getMedicalHistory(pet.id)
+      .then(rows => setVetHistory(rows.filter(r => r.logId != null && r.medVerified === true)))
+      .catch(() => setVetHistory([]));
     return () => { document.body.style.overflow = 'unset'; };
-  }, []);
+  }, [pet.id]);
 
   const handleAdopt = async () => {
     setAdoptLoading(true);
@@ -120,6 +150,16 @@ const PetProfilePanel = ({ pet, onClose, onMessageSent }) => {
             </div>
           )}
 
+          {vetHistory.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Vet Medical Records</p>
+              <div className="space-y-2">
+                {vetHistory.map(record => (
+                  <VetMedEntry key={record.medId} record={record} />
+                ))}
+              </div>
+            </div>
+          )}
           {pet.vaccinationCard && (
             <div className="mt-3 flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
