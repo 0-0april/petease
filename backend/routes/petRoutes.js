@@ -129,7 +129,7 @@ router.get('/my-pets', authenticateToken, async (req, res) => {
         )
       `)
       .eq('UserID', userId)
-      .eq('UserPetIsDeleted', false);
+      .or('UserPetIsDeleted.eq.false,UserPetIsDeleted.is.null');
 
     if (error) throw error;
 
