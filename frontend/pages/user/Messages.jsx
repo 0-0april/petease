@@ -150,6 +150,7 @@ export default function Messages() {
   }, [location.state, conversations]);
   useEffect(() => {
     if (selectedUser) {
+      setMessages([]);          // clear previous conversation immediately
       fetchMessages(selectedUser.id);
       fetchBlockStatus(selectedUser.id);
     }
