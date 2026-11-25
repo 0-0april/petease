@@ -186,9 +186,7 @@ export default function Messages() {
   };
   const fetchMessages = async (userId) => {
     try {
-      const { messages: data, blockStatus: bs } = await messageService.getMessages(userId);
-      // Always update block status from the authoritative source
-      setBlockStatus(bs);
+      const data = await messageService.getMessages(userId);
       setMessages(prev => {
         // Only append genuinely new messages — prevents full re-render that resets scroll
         if (!prev.length) return data;
