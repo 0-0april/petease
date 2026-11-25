@@ -508,8 +508,11 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
     console.log('✅ Attendance log created:', logData);
 
     // If patient showed up AND medical info provided, insert a MEDICALHISTORY row
+    // Extract all three medical fields from the request body
+    const medSumDiagnosis = req.body.note || null;
+
     let medRecord = null;
-    if (attended && (medication || medDescript)) {
+    if (attended && (medication || medDescript || medSumDiagnosis)) {
       // Resolve UserPetID from the appointment
       const { data: aptRow, error: aptErr } = await supabase
         .from('APPOINTMENT')
@@ -525,7 +528,7 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
             LogID: logData.LogID,
             Medication: medication || '',
             MedDescript: medDescript || null,
-            MedSumDiagnosis: req.body.note || null,
+            MedSumDiagnosis: medSumDiagnosis,
             MedVerified: true,
           })
           .select()
