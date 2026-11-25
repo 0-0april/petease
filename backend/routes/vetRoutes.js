@@ -607,11 +607,12 @@ router.patch('/appointments/:id/attendance', authenticateToken, authorizeRole('v
       }
     }
 
-    // Return the appointment data (status remains unchanged)
+    // Mark the appointment as Completed regardless of show/no-show
     const { data: appointment, error: appointError } = await supabase
       .from('APPOINTMENT')
-      .select('*')
+      .update({ AppointStatus: 'Completed' })
       .eq('AppointID', req.params.id)
+      .select()
       .single();
 
     if (appointError) throw appointError;
