@@ -2,7 +2,6 @@ import api from './api';
 
 export const messageService = {
   sendMessage: async (receiverId, content) => {
-    console.log('Sending message to:', receiverId, 'content:', content);
     const response = await api.post('/messages', {
       messTo: receiverId,
       messContent: content
@@ -23,17 +22,22 @@ export const messageService = {
     }));
   },
 
+  // Returns { messages: [...], blockStatus: { blocked, iBlockedThem, theyBlockedMe } }
   getMessages: async (userId) => {
     const response = await api.get(`/messages/with/${userId}`);
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return response.data.map(msg => ({
+    const { messages, blockStatus } = response.data;
+    const mapped = (messages || []).map(msg => ({
       id: msg.MessID,
       senderId: msg.MessFrom,
       receiverId: msg.MessTo,
       content: msg.MessContent,
       createdAt: msg.MessTimeStamp,
-      isSent: msg.MessFrom === user.UserID
+      isSent: msg.is_mine,
     }));
+    return {
+      messages: mapped,
+      blockStatus: blockStatus || { blocked: false, iBlockedThem: false, theyBlockedMe: false },
+    };
   },
 
   getAnnouncements: async () => {
@@ -50,7 +54,18 @@ export const messageService = {
     await api.delete(`/messages/${messageId}`);
   },
 
-  deleteConversation: async (userId) => {
-    await api.delete(`/messages/conversation/${userId}`);
+  blockUser: async (userId) => {
+    const response = await api.post(`/messages/block/${userId}`);
+    return response.data;
+  },
+
+  unblockUser: async (userId) => {
+    const response = await api.delete(`/messages/block/${userId}`);
+    return response.data;
+  },
+
+  getBlockStatus: async (userId) => {
+    const response = await api.get(`/messages/block-status/${userId}`);
+    return response.data;
   },
 };
