@@ -541,7 +541,7 @@ export default function Messages() {
                     style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
                     <LockIcon />
                     <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-                      You have blocked this person.
+                      This user blocked you.
                     </span>
                   </div>
                 </div>
@@ -551,7 +551,7 @@ export default function Messages() {
                     style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
                     <LockIcon />
                     <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-                      This user blocked you.
+                      You have blocked this person.
                     </span>
                   </div>
                 </div>
