@@ -253,6 +253,12 @@ export default function Messages() {
         description: reportDesc,
         messageLog,
       });
+      // Block the reported user automatically as confirmation
+      if (!blockStatus?.iBlockedThem) {
+        try { await messageService.blockUser(selectedUser.id); } catch { /* non-fatal */ }
+        await fetchBlockStatus(selectedUser.id);
+        fetchConversations();
+      }
       setReportDone(true);
       setReportDesc('');
       setSelectedMsgIds([]);
@@ -491,63 +497,67 @@ export default function Messages() {
                   style={{ color: 'hsl(140,100%,7%)' }}>
                   {selectedUser.name}
                 </p>
-                {/* Block / unblock + delete conversation actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={handleToggleBlock}
-                    disabled={blockLoading}
-                    title={blockStatus?.iBlockedThem ? 'Unblock user' : 'Block user'}
-                    className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      blockStatus?.iBlockedThem
-                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        : 'hover:bg-red-50 text-gray-500 hover:text-red-600'
-                    }`}
-                  >
-                    {blockStatus?.iBlockedThem ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                      </svg>
-                    )}
-                    <span className="hidden sm:inline">{blockStatus?.iBlockedThem ? 'Unblock' : 'Block'}</span>
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteConv(true)}
-                    title="Delete conversation"
-                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </button>
-                </div>
+                {/* Actions — appear only when a bubble is selected */}
                 {selectedMsgIds.length > 0 && (
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Delete (own messages only) */}
                     {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
                       <button
                         onClick={() => selectedMsgIds.length === 1
                           ? setDeleteConfirmId(selectedMsgIds[0])
                           : setDeleteConfirmId('__multi__')
                         }
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
                         style={{ color: 'hsla(0,70%,45%,0.90)' }}
+                        title="Delete selected"
                       >
                         <TrashIcon className="w-4 h-4" />
                         <span className="hidden xs:inline">Delete</span>
                       </button>
                     )}
+                    {/* Report + Block */}
                     <button
                       onClick={() => { setShowReport(true); setReportDone(false); }}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
                       style={{ color: 'hsla(0,70%,50%,0.85)' }}
+                      title="Report user"
                     >
                       <FlagIcon className="w-4 h-4" />
                       <span className="hidden xs:inline">Report</span>
                       <span>({selectedMsgIds.length})</span>
+                    </button>
+                    {/* Block / Unblock */}
+                    <button
+                      onClick={handleToggleBlock}
+                      disabled={blockLoading}
+                      title={blockStatus?.iBlockedThem ? 'Unblock user' : 'Block user'}
+                      className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        blockStatus?.iBlockedThem
+                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : 'hover:bg-red-50 text-gray-500 hover:text-red-600'
+                      }`}
+                    >
+                      {blockStatus?.iBlockedThem ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                      )}
+                      <span className="hidden sm:inline">{blockStatus?.iBlockedThem ? 'Unblock' : 'Block'}</span>
+                    </button>
+                    {/* Delete conversation */}
+                    <button
+                      onClick={() => setShowDeleteConv(true)}
+                      title="Delete conversation"
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                      <span className="hidden sm:inline">Del. Chat</span>
                     </button>
                   </div>
                 )}
@@ -598,7 +608,7 @@ export default function Messages() {
               {messages.length > 0 && selectedMsgIds.length === 0 && (
                 <div className="px-4 py-1.5 text-center">
                   <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.32)' }}>
-                    Tap a bubble to select for delete or report
+                    Tap a bubble to select — then delete, report, block, or delete the chat
                   </p>
                 </div>
               )}
@@ -782,8 +792,11 @@ export default function Messages() {
                   <button type="submit" disabled={reportSending}
                     className="w-full py-2 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                     style={{ background: 'hsl(0,65%,50%)' }}>
-                    {reportSending ? 'Submitting…' : 'Submit'}
+                    {reportSending ? 'Submitting…' : 'Submit & Block'}
                   </button>
+                  <p className="text-xs text-center" style={{ color: 'hsla(140,100%,7%,0.40)' }}>
+                    Submitting will also block this user.
+                  </p>
                 </form>
               </>
             )}
