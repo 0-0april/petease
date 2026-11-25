@@ -141,6 +141,7 @@ export default function Messages() {
   // Block status for the open conversation
   const [blockStatus,  setBlockStatus]  = useState(null); // { blocked, iBlockedThem, theyBlockedMe }
   const [blockLoading, setBlockLoading] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
 
   /* ── data fetching ───────────────────────────────────────────── */
   useEffect(() => { fetchConversations(); fetchAnnouncements(); }, []);
@@ -501,22 +502,16 @@ export default function Messages() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     {/* Block / Unblock — left of Delete */}
                     <button
-                      onClick={handleToggleBlock}
+                      onClick={() => setShowBlockConfirm(true)}
                       disabled={blockLoading}
                       title={blockStatus?.iBlockedThem ? 'Unblock user' : 'Block user'}
-                      className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
-                        blockStatus?.iBlockedThem
-                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          : 'hover:bg-orange-50 text-gray-500 hover:text-orange-600'
-                      }`}
+                      className="p-1.5 rounded-lg transition-colors hover:bg-red-50 shrink-0"
+                      style={{ color: 'hsl(0,65%,50%)' }}
                     >
                       {blockStatus?.iBlockedThem
                         ? <UnblockIcon className="w-4 h-4" />
                         : <BlockIcon className="w-4 h-4" />
                       }
-                      <span className="hidden xs:inline">
-                        {blockStatus?.iBlockedThem ? 'Unblock' : 'Block'}
-                      </span>
                     </button>
                     {/* Delete (own messages only) */}
                     {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
@@ -525,20 +520,18 @@ export default function Messages() {
                           ? setDeleteConfirmId(selectedMsgIds[0])
                           : setDeleteConfirmId('__multi__')
                         }
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
-                        style={{ color: 'hsla(0,70%,45%,0.90)' }}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-red-50 shrink-0"
+                        style={{ color: 'hsl(0,65%,50%)' }}
                       >
                         <TrashIcon className="w-4 h-4" />
-                        <span className="hidden xs:inline">Delete</span>
                       </button>
                     )}
                     <button
                       onClick={() => { setShowReport(true); setReportDone(false); }}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-red-50 shrink-0"
                       style={{ color: 'hsla(0,70%,50%,0.85)' }}
                     >
                       <FlagIcon className="w-4 h-4" />
-                      <span className="hidden xs:inline">Report</span>
                       <span>({selectedMsgIds.length})</span>
                     </button>
                   </div>
@@ -643,6 +636,45 @@ export default function Messages() {
           )}
         </div>
       </div>
+
+      {/* ── Block confirmation ── */}
+      {showBlockConfirm && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.35)' }}
+          onClick={() => setShowBlockConfirm(false)}>
+          <div className="glass-card w-full max-w-sm p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <p className="text-sm font-bold" style={{ color: 'hsl(140,100%,7%)' }}>
+              {blockStatus?.iBlockedThem
+                ? `Unblock ${selectedUser.name}?`
+                : `Block ${selectedUser.name}?`}
+            </p>
+            <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
+              {blockStatus?.iBlockedThem
+                ? 'You will be able to message each other and see each other\'s pet listings again.'
+                : 'Neither of you will be able to message the other or see each other\'s pet listings.'}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBlockConfirm(false)}
+                className="flex-1 py-2 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowBlockConfirm(false);
+                  await handleToggleBlock();
+                }}
+                disabled={blockLoading}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
+                style={{ background: 'hsl(0,65%,50%)' }}
+              >
+                {blockStatus?.iBlockedThem ? 'Unblock' : 'Block'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Delete confirmation ── */}
       {deleteConfirmId && (
