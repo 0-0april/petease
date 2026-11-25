@@ -112,6 +112,9 @@ export default function Messages() {
   const [search,           setSearch]           = useState('');
   const [sending,          setSending]          = useState(false);
 
+  // Block status for the currently-open conversation
+  const [blockStatus, setBlockStatus] = useState({ blocked: false, iBlockedThem: false, theyBlockedMe: false });
+
   // Mobile: 'list' | 'chat' — controls which panel is visible on small screens
   const [mobilePanel, setMobilePanel] = useState('list');
 
@@ -148,6 +151,7 @@ export default function Messages() {
   useEffect(() => {
     if (selectedUser) {
       setMessages([]);
+      setBlockStatus({ blocked: false, iBlockedThem: false, theyBlockedMe: false });
       fetchMessages(selectedUser.id);
     }
     setSelectedMsgIds([]);
@@ -169,12 +173,13 @@ export default function Messages() {
   };
   const fetchMessages = async (userId) => {
     try {
-      const data = await messageService.getMessages(userId);
+      const { messages: fetched, blockStatus: bs } = await messageService.getMessages(userId);
+      setBlockStatus(bs);
       setMessages(prev => {
         // Only append genuinely new messages — prevents full re-render that resets scroll
-        if (!prev.length) return data;
+        if (!prev.length) return fetched;
         const existingIds = new Set(prev.map(m => m.id));
-        const incoming = data.filter(m => !existingIds.has(m.id));
+        const incoming = fetched.filter(m => !existingIds.has(m.id));
         return incoming.length ? [...prev, ...incoming] : prev;
       });
     } catch (e) { console.error('messages:', e); }
@@ -215,6 +220,9 @@ export default function Messages() {
         description: reportDesc,
         messageLog,
       });
+      // Block the user so chat stays disabled
+      await messageService.blockUser(selectedUser.id);
+      setBlockStatus(prev => ({ ...prev, blocked: true, iBlockedThem: true }));
       setReportDone(true);
       setReportDesc('');
       setSelectedMsgIds([]);
@@ -527,22 +535,34 @@ export default function Messages() {
                   </p>
                 </div>
               )}
-              <form onSubmit={handleSendMessage} className="p-3 sm:p-4 shrink-0"
-                style={{ borderTop: '1px solid rgba(255,255,255,0.35)' }}>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    placeholder="Message…"
-                    className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
-                  />
-                  <button type="submit" disabled={sending || !newMessage.trim()} className="btn-pay shrink-0"
-                    style={{ padding: '10px 16px', fontSize: '0.8125rem' }}>
-                    {sending ? '…' : 'Send'}
-                  </button>
+              {blockStatus.iBlockedThem ? (
+                <div className="p-3 sm:p-4 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.35)' }}>
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
+                    <LockIcon />
+                    <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
+                      You have blocked this user. Messaging is disabled.
+                    </span>
+                  </div>
                 </div>
-              </form>
+              ) : (
+                <form onSubmit={handleSendMessage} className="p-3 sm:p-4 shrink-0"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.35)' }}>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={e => setNewMessage(e.target.value)}
+                      placeholder="Message…"
+                      className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
+                    />
+                    <button type="submit" disabled={sending || !newMessage.trim()} className="btn-pay shrink-0"
+                      style={{ padding: '10px 16px', fontSize: '0.8125rem' }}>
+                      {sending ? '…' : 'Send'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </>
           )}
 

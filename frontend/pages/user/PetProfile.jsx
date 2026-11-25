@@ -20,6 +20,8 @@ const PetProfile = () => {
   const [adoptDone, setAdoptDone] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageSending, setMessageSending] = useState(false);
+  const [ownerBlockStatus, setOwnerBlockStatus] = useState({ iBlockedThem: false });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,6 +74,8 @@ const PetProfile = () => {
   };
 
   const handleSendMessage = async () => {
+    if (!message.trim()) return;
+    setMessageSending(true);
     try {
       await messageService.sendMessage(pet.ownerId, message);
       setShowMessageModal(false);
@@ -79,6 +83,20 @@ const PetProfile = () => {
       alert('Message sent successfully');
     } catch (error) {
       alert('Failed to send message');
+    } finally {
+      setMessageSending(false);
+    }
+  };
+
+  const openMessageModal = async () => {
+    setMessage('');
+    setOwnerBlockStatus({ iBlockedThem: false });
+    setShowMessageModal(true);
+    try {
+      const bs = await messageService.getBlockStatus(pet.ownerId);
+      setOwnerBlockStatus(bs);
+    } catch (e) {
+      console.error('Failed to fetch block status', e);
     }
   };
 
@@ -119,7 +137,7 @@ const PetProfile = () => {
                     </button>
                   )}
                   <button
-                    onClick={() => setShowMessageModal(true)}
+                    onClick={openMessageModal}
                     className="border border-primary text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white font-medium"
                   >
                     Message
@@ -149,16 +167,35 @@ const PetProfile = () => {
       </div>
 
       <Modal isOpen={showMessageModal} onClose={() => setShowMessageModal(false)} title="Message">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          rows="4"
-          placeholder="Message…"
-        />
-        <button onClick={handleSendMessage} className="w-full mt-4 bg-primary text-white py-2 rounded-md hover:bg-primary-dark">
-          Send
-        </button>
+        {ownerBlockStatus.iBlockedThem ? (
+          <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.10)' }}>
+            <svg className="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span className="text-sm text-gray-500">
+              You have blocked this user. Messaging is disabled.
+            </span>
+          </div>
+        ) : (
+          <>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              rows="4"
+              placeholder="Message…"
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={messageSending || !message.trim()}
+              className="w-full mt-4 bg-primary text-white py-2 rounded-md hover:bg-primary-dark disabled:opacity-60"
+            >
+              {messageSending ? 'Sending…' : 'Send'}
+            </button>
+          </>
+        )}
       </Modal>
 
       {/* Adoption Request Modal */}
