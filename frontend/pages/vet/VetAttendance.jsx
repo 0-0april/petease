@@ -64,39 +64,22 @@ const VetAttendance = () => {
   // Opens the medical-record dialog before marking Show
   const openShowDialog = (appointment) => {
     setPendingShowAppt(appointment);
-    setMedForm({ medication: '', medDescript: '' });
+    setMedForm({ medication: '', medDescript: '', medSumDiagnosis: '' });
     setShowMedDialog(true);
   };
 
-  // Skip: mark attended only, no medical record
-  const handleSkip = async () => {
-    if (!pendingShowAppt) return;
-    setSubmitting(true);
-    try {
-      await vetService.markAttendance(pendingShowAppt.id, true);
-      setShowMedDialog(false);
-      setPendingShowAppt(null);
-      fetchAppointments();
-      showToast('Marked as attended.');
-    } catch (error) {
-      console.error('Skip error:', error);
-      showToast('Failed to mark attendance.', 'error');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Save & Mark: mark attended + insert medical record in one call
+  // Save & Mark: mark attended + insert medical record (medication/description/diagnosis required)
   const handleShowSubmit = async () => {
     if (!pendingShowAppt) return;
     setSubmitting(true);
     try {
-      const { medication, medDescript } = medForm;
+      const { medication, medDescript, medSumDiagnosis } = medForm;
       await vetService.markAttendance(
         pendingShowAppt.id,
         true,
         medication.trim() || null,
-        medDescript.trim() || null
+        medDescript.trim() || null,
+        medSumDiagnosis.trim() || null
       );
       setShowMedDialog(false);
       setPendingShowAppt(null);
@@ -259,15 +242,16 @@ const VetAttendance = () => {
         {pendingShowAppt && (
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Patient attended — optionally record medication and notes for{' '}
+              Record the medical details for{' '}
               <span className="font-medium text-gray-900">
                 {pendingShowAppt.pets.map(p => p.name).join(', ')}
               </span>.
-              Skipping is allowed.
             </p>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Medication</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Medication <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={medForm.medication}
@@ -278,12 +262,25 @@ const VetAttendance = () => {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Summary / Diagnosis <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={medForm.medSumDiagnosis}
+                onChange={e => setMedForm(f => ({ ...f, medSumDiagnosis: e.target.value }))}
+                placeholder="e.g. Mild respiratory infection"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <textarea
                 value={medForm.medDescript}
                 onChange={e => setMedForm(f => ({ ...f, medDescript: e.target.value }))}
                 rows={3}
-                placeholder="Diagnosis, treatment notes…"
+                placeholder="Additional treatment notes…"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
             </div>
@@ -297,22 +294,15 @@ const VetAttendance = () => {
                 Cancel
               </button>
               <button
-                onClick={handleSkip}
-                disabled={submitting}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
-              >
-                {submitting ? 'Saving…' : 'Skip'}
-              </button>
-              <button
                 onClick={handleShowSubmit}
-                disabled={submitting || (!medForm.medication.trim() && !medForm.medDescript.trim())}
+                disabled={submitting || (!medForm.medication.trim() && !medForm.medSumDiagnosis.trim())}
                 className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Saving…' : 'Save & Mark'}
               </button>
             </div>
             <p className="text-xs text-gray-400 text-center">
-              "Skip" marks attendance without creating a medical record.
+              Medication or Summary is required to save a medical record.
             </p>
           </div>
         )}
