@@ -35,19 +35,7 @@ const TrashIcon = ({ className, style }) => (
   </svg>
 );
 
-const BlockIcon = ({ className, style }) => (
-  <svg className={className || 'w-4 h-4'} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-  </svg>
-);
 
-const UnblockIcon = ({ className, style }) => (
-  <svg className={className || 'w-4 h-4'} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-  </svg>
-);
 
 const BackIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,12 +216,6 @@ export default function Messages() {
         description: reportDesc,
         messageLog,
       });
-      // Auto-block on report (if not already blocked)
-      if (!blockStatus?.iBlockedThem) {
-        try { await messageService.blockUser(selectedUser.id); } catch { /* non-fatal */ }
-        await fetchBlockStatus(selectedUser.id);
-        fetchConversations();
-      }
       setReportDone(true);
       setReportDesc('');
       setSelectedMsgIds([]);
@@ -472,22 +454,18 @@ export default function Messages() {
                   style={{ color: 'hsl(140,100%,7%)' }}>
                   {selectedUser.name}
                 </p>
+                {/* Delete conversation button */}
+                <button
+                  onClick={() => setShowDeleteConv(true)}
+                  title="Delete conversation"
+                  className="p-1.5 rounded-lg transition-colors hover:bg-red-50 shrink-0"
+                  style={{ color: 'hsl(0,65%,50%)' }}
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
                 {selectedMsgIds.length > 0 && (
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {/* Block / Unblock — left of Delete */}
-                    <button
-                      onClick={() => setShowBlockConfirm(true)}
-                      disabled={blockLoading}
-                      title={blockStatus?.iBlockedThem ? 'Unblock user' : 'Block user'}
-                      className="p-1.5 rounded-lg transition-colors hover:bg-red-50 shrink-0"
-                      style={{ color: 'hsl(0,65%,50%)' }}
-                    >
-                      {blockStatus?.iBlockedThem
-                        ? <UnblockIcon className="w-4 h-4" />
-                        : <BlockIcon className="w-4 h-4" />
-                      }
-                    </button>
-                    {/* Delete (own messages only) */}
+                    {/* Delete selected messages (own messages only) */}
                     {selectedMsgIds.every(id => messages.find(m => m.id === id)?.isSent) && (
                       <button
                         onClick={() => selectedMsgIds.length === 1
@@ -563,31 +541,19 @@ export default function Messages() {
               )}
               <form onSubmit={handleSendMessage} className="p-3 sm:p-4 shrink-0"
                 style={{ borderTop: '1px solid rgba(255,255,255,0.35)' }}>
-                {blockStatus?.blocked ? (
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
-                    style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
-                    <LockIcon />
-                    <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-                      {blockStatus.iBlockedThem
-                        ? 'You have blocked this user. Unblock to send messages.'
-                        : 'You cannot message this user.'}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={e => setNewMessage(e.target.value)}
-                      placeholder="Message…"
-                      className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
-                    />
-                    <button type="submit" disabled={sending || !newMessage.trim()} className="btn-pay shrink-0"
-                      style={{ padding: '10px 16px', fontSize: '0.8125rem' }}>
-                      {sending ? '…' : 'Send'}
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={e => setNewMessage(e.target.value)}
+                    placeholder="Message…"
+                    className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
+                  />
+                  <button type="submit" disabled={sending || !newMessage.trim()} className="btn-pay shrink-0"
+                    style={{ padding: '10px 16px', fontSize: '0.8125rem' }}>
+                    {sending ? '…' : 'Send'}
+                  </button>
+                </div>
               </form>
             </>
           )}
@@ -611,39 +577,43 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* ── Block confirmation ── */}
-      {showBlockConfirm && selectedUser && (
+      {/* ── Delete conversation confirmation ── */}
+      {showDeleteConv && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.35)' }}
-          onClick={() => setShowBlockConfirm(false)}>
-          <div className="glass-card w-full max-w-sm p-6 space-y-4" onClick={e => e.stopPropagation()}>
+          onClick={() => setShowDeleteConv(false)}>
+          <div
+            className="glass-card w-full max-w-sm p-6 space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
             <p className="text-sm font-bold" style={{ color: 'hsl(140,100%,7%)' }}>
-              {blockStatus?.iBlockedThem
-                ? `Unblock ${selectedUser.name}?`
-                : `Block ${selectedUser.name}?`}
+              Delete conversation with {selectedUser.name}?
             </p>
             <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
-              {blockStatus?.iBlockedThem
-                ? 'You will be able to message each other and see each other\'s pet listings again.'
-                : 'Neither of you will be able to message the other or see each other\'s pet listings.'}
+              All messages in this thread will be hidden from your view. This cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowBlockConfirm(false)}
+                onClick={() => setShowDeleteConv(false)}
                 className="flex-1 py-2 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={async () => {
-                  setShowBlockConfirm(false);
-                  await handleToggleBlock();
+                  try {
+                    await messageService.deleteConversation(selectedUser.id);
+                    setMessages([]);
+                    setSelectedUser(null);
+                    setMobilePanel('list');
+                    fetchConversations();
+                  } catch { alert('Failed to delete conversation.'); }
+                  finally { setShowDeleteConv(false); }
                 }}
-                disabled={blockLoading}
-                className="flex-1 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
+                className="flex-1 py-2 rounded-xl text-sm font-semibold text-white"
                 style={{ background: 'hsl(0,65%,50%)' }}
               >
-                {blockStatus?.iBlockedThem ? 'Unblock' : 'Block'}
+                Delete
               </button>
             </div>
           </div>
