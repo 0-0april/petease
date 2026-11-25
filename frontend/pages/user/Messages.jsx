@@ -541,7 +541,17 @@ export default function Messages() {
                     style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
                     <LockIcon />
                     <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
-                      You have blocked this user. Messaging is disabled.
+                      You have blocked this person.
+                    </span>
+                  </div>
+                </div>
+              ) : blockStatus.theyBlockedMe ? (
+                <div className="p-3 sm:p-4 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.35)' }}>
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.40)' }}>
+                    <LockIcon />
+                    <span className="text-sm" style={{ color: 'hsla(140,100%,7%,0.42)' }}>
+                      This user blocked you.
                     </span>
                   </div>
                 </div>
