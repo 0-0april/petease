@@ -133,6 +133,9 @@ function NavDropdown({ label, items, navigate }) {
 
 export default function Landing() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => localStorage.getItem('nosale_banner_dismissed') === 'true'
+  );
   const navigate = useNavigate();
   return (
     <div className="relative min-h-screen overflow-x-hidden"
@@ -237,6 +240,23 @@ export default function Landing() {
           </div>
         )}
       </div>
+
+      {/* "Not for sale" banner — dismissible, sitewide */}
+      {!bannerDismissed && (
+        <div className="sticky top-16 sm:top-18 z-30 px-3 sm:px-6 lg:px-8 pt-2">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-sm font-medium"
+            style={{ background: 'hsla(43,100%,51%,0.18)', border: '1px solid hsla(43,100%,51%,0.40)', color: 'hsl(35,90%,30%)' }}>
+            <span>🐾 All animals listed are not for sale.</span>
+            <button
+              onClick={() => {
+                setBannerDismissed(true);
+                localStorage.setItem('nosale_banner_dismissed', 'true');
+              }}
+              className="shrink-0 text-lg leading-none hover:opacity-60 transition-opacity"
+              aria-label="Dismiss banner">×</button>
+          </div>
+        </div>
+      )}
 
       {/* ── Hero Section ── */}
       <section className="relative z-10 pt-16 pb-0 px-4 overflow-hidden">

@@ -74,7 +74,7 @@ const CancelModal = ({ onConfirm, onClose }) => {
           </button>
           <button onClick={() => onConfirm(finalReason)} disabled={!finalReason}
             className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium">
-            Confirm
+            Confirm Cancel
           </button>
         </div>
       </div>
@@ -82,19 +82,22 @@ const CancelModal = ({ onConfirm, onClose }) => {
   );
 };
 
-const ConfirmModal = ({ message, onConfirm, onClose }) => (
+/* Bulk-cancel confirmation — no reason required, just a quick confirm */
+const BulkCancelModal = ({ count, onConfirm, onClose }) => (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div className="glass-card w-full max-w-sm p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm</h3>
-      <p className="text-sm text-gray-600 mb-5">{message}</p>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">Cancel Appointments</h3>
+      <p className="text-sm text-gray-600 mb-5">
+        Cancel {count} selected appointment{count > 1 ? 's' : ''}? This cannot be undone.
+      </p>
       <div className="flex space-x-3">
         <button onClick={onClose}
           className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
-          Cancel
+          Keep
         </button>
         <button onClick={onConfirm}
           className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 text-sm font-medium">
-          Delete
+          Confirm Cancel
         </button>
       </div>
     </div>
@@ -104,11 +107,11 @@ const ConfirmModal = ({ message, onConfirm, onClose }) => (
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);   // single appointment id
+  const [bulkCancelOpen, setBulkCancelOpen] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [deleteTarget, setDeleteTarget] = useState(null); // array of ids
   const { notify, clear } = useBadge();
 
   useEffect(() => {
@@ -144,6 +147,7 @@ const Appointments = () => {
     try {
       await appointmentService.cancelAppointment(cancelTarget, reason);
       setCancelTarget(null);
+      setSelectedIds(prev => prev.filter(id => id !== cancelTarget));
       showFeedback('Appointment cancelled.');
       fetchAppointments();
     } catch {
@@ -151,17 +155,18 @@ const Appointments = () => {
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
+  const handleBulkCancelConfirmed = async () => {
     try {
-      await Promise.all(deleteTarget.map(id => appointmentService.softDeleteAppointment(id)));
+      await Promise.all(
+        selectedIds.map(id => appointmentService.cancelAppointment(id, 'Cancelled by user'))
+      );
       setSelectedIds([]);
-      setDeleteTarget(null);
-      showFeedback(`${deleteTarget.length} appointment${deleteTarget.length > 1 ? 's' : ''} removed.`);
+      setBulkCancelOpen(false);
+      showFeedback(`${selectedIds.length} appointment${selectedIds.length > 1 ? 's' : ''} cancelled.`);
       fetchAppointments();
     } catch {
-      showFeedback('Failed to delete.', 'error');
-      setDeleteTarget(null);
+      showFeedback('Failed to cancel appointments.', 'error');
+      setBulkCancelOpen(false);
     }
   };
 
@@ -176,17 +181,27 @@ const Appointments = () => {
     return type ? type.charAt(0).toUpperCase() + type.slice(1) : '—';
   };
 
+  // Only pending/confirmed rows are selectable for bulk cancel
+  const selectableIds = appointments
+    .filter(a => a.status === 'pending' || a.status === 'confirmed')
+    .map(a => a.id);
+
   // Pagination
   const totalPages = Math.max(1, Math.ceil(appointments.length / PAGE_SIZE));
   const pageRows   = appointments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  // Select helpers (page-scoped)
-  const allPageSelected = pageRows.length > 0 && pageRows.every(r => selectedIds.includes(r.id));
+  const pageSelectableIds = pageRows
+    .filter(a => a.status === 'pending' || a.status === 'confirmed')
+    .map(a => a.id);
+
+  const allPageSelected =
+    pageSelectableIds.length > 0 &&
+    pageSelectableIds.every(id => selectedIds.includes(id));
+
   const toggleSelectAll = (e) => {
-    const ids = pageRows.map(r => r.id);
     setSelectedIds(e.target.checked
-      ? [...new Set([...selectedIds, ...ids])]
-      : selectedIds.filter(id => !ids.includes(id))
+      ? [...new Set([...selectedIds, ...pageSelectableIds])]
+      : selectedIds.filter(id => !pageSelectableIds.includes(id))
     );
   };
   const toggleSelect = (id) =>
@@ -214,18 +229,18 @@ const Appointments = () => {
           </div>
         )}
 
-        {/* Bulk delete toolbar */}
+        {/* Bulk cancel toolbar */}
         {selectedIds.length > 0 && (
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setDeleteTarget(selectedIds)}
+              onClick={() => setBulkCancelOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  d="M6 18L18 6M6 6l12 12" />
               </svg>
-              Delete Selected ({selectedIds.length})
+              Cancel Selected ({selectedIds.length})
             </button>
             <button onClick={() => setSelectedIds([])}
               className="text-sm text-gray-500 hover:text-gray-700">
@@ -249,56 +264,50 @@ const Appointments = () => {
           <>
             {/* ── Mobile cards (< sm) ── */}
             <div className="sm:hidden space-y-3">
-              {pageRows.map(appointment => (
-                <div key={appointment.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <input type="checkbox"
-                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
-                        checked={selectedIds.includes(appointment.id)}
-                        onChange={() => toggleSelect(appointment.id)} />
-                      <span className="text-sm font-semibold text-gray-900 truncate">
-                        {appointment.pets?.map(p => p.name).join(', ') || '—'}
+              {pageRows.map(appointment => {
+                const cancellable = appointment.status === 'confirmed' || appointment.status === 'pending';
+                return (
+                  <div key={appointment.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {cancellable && (
+                          <input type="checkbox"
+                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0"
+                            checked={selectedIds.includes(appointment.id)}
+                            onChange={() => toggleSelect(appointment.id)} />
+                        )}
+                        <span className="text-sm font-semibold text-gray-900 truncate">
+                          {appointment.pets?.map(p => p.name).join(', ') || '—'}
+                        </span>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${
+                        STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${
-                      STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                    <div>
-                      <p className="text-xs text-gray-400 uppercase tracking-wide">Service</p>
-                      <p className="text-gray-700">{typeLabel(appointment.type)}</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Service</p>
+                        <p className="text-gray-700">{typeLabel(appointment.type)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Scheduled</p>
+                        <p className="text-gray-700">{formatDate(appointment.date)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-400 uppercase tracking-wide">Scheduled</p>
-                      <p className="text-gray-700">{formatDate(appointment.date)}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
-                      <button
-                        onClick={() => setCancelTarget(appointment.id)}
-                        className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 font-medium">
-                        Cancel
-                      </button>
-                    )}
-                    {(appointment.status === 'cancelled' || appointment.status === 'completed') && (
-                      <button
-                        onClick={() => setDeleteTarget([appointment.id])}
-                        className="px-3 py-1.5 border border-gray-200 text-gray-500 text-xs rounded-lg hover:bg-red-50 hover:text-red-500 font-medium flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Remove
-                      </button>
+                    {cancellable && (
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={() => setCancelTarget(appointment.id)}
+                          className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 font-medium">
+                          Cancel
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* ── Desktop table (sm+) ── */}
@@ -321,55 +330,46 @@ const Appointments = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {pageRows.map(appointment => (
-                      <tr key={appointment.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-4 text-center">
-                          <input type="checkbox"
-                            className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
-                            checked={selectedIds.includes(appointment.id)}
-                            onChange={() => toggleSelect(appointment.id)} />
-                        </td>
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                          {appointment.pets?.map(p => p.name).join(', ') || '—'}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-gray-600">
-                          {typeLabel(appointment.type)}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
-                          {formatDate(appointment.date)}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
-                          }`}>
-                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-2">
-                            {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+                    {pageRows.map(appointment => {
+                      const cancellable = appointment.status === 'confirmed' || appointment.status === 'pending';
+                      return (
+                        <tr key={appointment.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-4 text-center">
+                            {cancellable && (
+                              <input type="checkbox"
+                                className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                checked={selectedIds.includes(appointment.id)}
+                                onChange={() => toggleSelect(appointment.id)} />
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                            {appointment.pets?.map(p => p.name).join(', ') || '—'}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-600">
+                            {typeLabel(appointment.type)}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                            {formatDate(appointment.date)}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                              STATUS_STYLES[appointment.status] || 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            {cancellable && (
                               <button
                                 onClick={() => setCancelTarget(appointment.id)}
                                 className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-lg hover:bg-red-50 font-medium">
                                 Cancel
                               </button>
                             )}
-                            {(appointment.status === 'cancelled' || appointment.status === 'completed') && (
-                              <button
-                                onClick={() => setDeleteTarget([appointment.id])}
-                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
-                                title="Remove from list"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -380,6 +380,7 @@ const Appointments = () => {
         )}
       </div>
 
+      {/* Single-appointment cancel modal */}
       {cancelTarget && (
         <CancelModal
           onConfirm={handleCancelConfirmed}
@@ -387,11 +388,12 @@ const Appointments = () => {
         />
       )}
 
-      {deleteTarget && (
-        <ConfirmModal
-          message={`Remove ${deleteTarget.length} appointment${deleteTarget.length > 1 ? 's' : ''} from your list? This cannot be undone.`}
-          onConfirm={handleDeleteConfirm}
-          onClose={() => setDeleteTarget(null)}
+      {/* Bulk cancel confirmation modal */}
+      {bulkCancelOpen && (
+        <BulkCancelModal
+          count={selectedIds.length}
+          onConfirm={handleBulkCancelConfirmed}
+          onClose={() => setBulkCancelOpen(false)}
         />
       )}
     </Layout>

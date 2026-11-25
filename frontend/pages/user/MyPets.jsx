@@ -63,10 +63,7 @@ const MyPets = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [vaccinationFile, setVaccinationFile] = useState(null);
   const [vaccinationUploading, setVaccinationUploading] = useState(false);
-  const [bannerDismissed, setBannerDismissed] = useState(
-    () => localStorage.getItem('mypets_banner_dismissed') === 'true'
-  );
-
+  const [bannerDismissed, setBannerDismissed] = useState(false); // kept for compat but unused — banner moved to Layout
   // Vet medical history rows for the pet currently open in the modal
   const [vetHistory, setVetHistory] = useState([]);
   const [vetHistoryLoading, setVetHistoryLoading] = useState(false);
@@ -262,22 +259,6 @@ const MyPets = () => {
             + Pet
           </button>
         </div>
-
-        {!bannerDismissed && (
-          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium">
-            <span>🐾 All animals listed are not for sale.</span>
-            <button
-              onClick={() => {
-                setBannerDismissed(true);
-                localStorage.setItem('mypets_banner_dismissed', 'true');
-              }}
-              className="shrink-0 text-amber-600 hover:text-amber-900 leading-none text-lg font-bold"
-              aria-label="Dismiss banner"
-            >
-              ×
-            </button>
-          </div>
-        )}
 
         {feedback && (
           <div className={`px-4 py-3 rounded-lg text-sm font-medium ${

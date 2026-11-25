@@ -121,22 +121,22 @@ router.get('/my-pets', authenticateToken, async (req, res) => {
     const { data: userpets, error } = await supabase
       .from('USERPETS')
       .select(`
+        UserPetID,
         PET (
           PetID, PetName, PetBDay, PetSpecie, PetBreed,
           PetMarkings, PetGender, PetDetails, PetImg,
           PetAvailable, PetRegType, PetVaccinationCardFile
         )
       `)
-      .eq('UserID', userId);
+      .eq('UserID', userId)
+      .eq('UserPetIsDeleted', false);
 
     if (error) throw error;
 
     const pets = (userpets || [])
-      .filter(row => row.UserPetIsDeleted !== true)
       .map(row => row.PET)
       .filter(Boolean)
       .map(pet => ({ ...pet, owner_username: ownerUsername }));
-// Note: UserPetIsDeleted rows are excluded by the query below
 
     res.json(pets);
   } catch (error) {
@@ -478,25 +478,30 @@ router.put('/:id/medical-history/owner', authenticateToken, async (req, res) => 
   }
 });
 
-// ── DELETE /api/pets/:id  (auth required) ────────────────────────────────
+// ── DELETE /api/pets/:id  (auth required — soft-delete) ──────────────────
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
+    const userId = await getUserId(req.user.accId);
+    if (!userId) return res.status(404).json({ error: 'User not found' });
+
+    // Soft-delete: mark the owner's USERPETS row as deleted
     const { error: linkError } = await supabase
       .from('USERPETS')
-      .delete()
-      .eq('PetID', req.params.id);
+      .update({ UserPetIsDeleted: true })
+      .eq('PetID', req.params.id)
+      .eq('UserID', userId);
 
     if (linkError) throw linkError;
 
-    const { error: petError } = await supabase
+    // Mark pet unavailable so it no longer appears in Browse Pets
+    await supabase
       .from('PET')
-      .delete()
+      .update({ PetAvailable: false })
       .eq('PetID', req.params.id);
-
-    if (petError) throw petError;
 
     res.json({ success: true });
   } catch (error) {
+    console.error('DELETE PET ERROR:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -51,6 +51,14 @@ export default function Layout({ children, fullscreen = false }) {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [warnDismissed, setWarnDismissed] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(
+    () => localStorage.getItem('nosale_banner_dismissed') === 'true'
+  );
+
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    localStorage.setItem('nosale_banner_dismissed', 'true');
+  };
 
   const handleLogout = () => { logout(); navigate('/landing'); };
   const isActive = (p) => pathname === p;
@@ -201,12 +209,25 @@ export default function Layout({ children, fullscreen = false }) {
         )}
       </div>
 
+      {/* "Not for sale" banner — below navbar, dismissible, sitewide */}
+      {!bannerDismissed && (
+        <div className="relative z-30 px-3 sm:px-6 lg:px-8 pt-2 pb-0">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-sm font-medium"
+            style={{ background: 'hsla(43,100%,51%,0.18)', border: '1px solid hsla(43,100%,51%,0.40)', color: 'hsl(35,90%,30%)' }}>
+            <span>🐾 All animals listed are not for sale.</span>
+            <button
+              onClick={dismissBanner}
+              className="shrink-0 text-lg leading-none hover:opacity-60 transition-opacity"
+              aria-label="Dismiss banner">×</button>
+          </div>
+        </div>
+      )}
+
       {fullscreen ? (
         /* Full-screen slot — fills everything below the navbar, no padding, no footer */
         <div className="relative z-20 flex flex-col overflow-hidden"
           style={{
             height: 'calc(100vh - 56px)',
-            /* Use dvh where supported so mobile browser chrome is excluded */
           }}>
           {children}
         </div>
