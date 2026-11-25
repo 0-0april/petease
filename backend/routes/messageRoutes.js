@@ -65,6 +65,7 @@ router.get('/conversations', authenticateToken, async (req, res) => {
       .from('MESSAGES')
       .select('MessFrom, MessTo, MessContent, MessTimeStamp')
       .or(`MessFrom.eq.${sender.UserID},MessTo.eq.${sender.UserID}`)
+      .or('MessIsDeleted.eq.false,MessIsDeleted.is.null')
       .order('MessTimeStamp', { ascending: false });
 
     if (error) throw error;
@@ -148,6 +149,7 @@ router.get('/with/:userId', authenticateToken, async (req, res) => {
       .or(
         `and(MessFrom.eq.${sender.UserID},MessTo.eq.${otherId}),and(MessFrom.eq.${otherId},MessTo.eq.${sender.UserID})`
       )
+      .or('MessIsDeleted.eq.false,MessIsDeleted.is.null')
       .order('MessTimeStamp', { ascending: true });
 
     if (error) throw error;
@@ -161,6 +163,28 @@ router.get('/with/:userId', authenticateToken, async (req, res) => {
     res.json(formatted);
   } catch (error) {
     console.error('Get messages error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── DELETE /api/messages/conversation/:userId ────────────────────────────
+// Soft-deletes the entire thread for the deleting user
+router.delete('/conversation/:userId', authenticateToken, async (req, res) => {
+  try {
+    const me = await getUserInfo(req.user.accId);
+    if (!me) return res.status(404).json({ error: 'User not found' });
+
+    const { error } = await supabase
+      .from('MESSAGES')
+      .update({ MessIsDeleted: true })
+      .or(
+        `and(MessFrom.eq.${me.UserID},MessTo.eq.${req.params.userId}),and(MessFrom.eq.${req.params.userId},MessTo.eq.${me.UserID})`
+      );
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete conversation error:', error);
     res.status(500).json({ error: error.message });
   }
 });

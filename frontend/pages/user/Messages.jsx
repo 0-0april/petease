@@ -138,10 +138,8 @@ export default function Messages() {
   // Delete message confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-  // Block status for the open conversation
-  const [blockStatus,  setBlockStatus]  = useState(null); // { blocked, iBlockedThem, theyBlockedMe }
-  const [blockLoading, setBlockLoading] = useState(false);
-  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  // Delete conversation confirmation
+  const [showDeleteConv, setShowDeleteConv] = useState(false);
 
   /* ── data fetching ───────────────────────────────────────────── */
   useEffect(() => { fetchConversations(); fetchAnnouncements(); }, []);
@@ -164,10 +162,8 @@ export default function Messages() {
     if (selectedUser) {
       setMessages([]);
       fetchMessages(selectedUser.id);
-      fetchBlockStatus(selectedUser.id);
     }
     setSelectedMsgIds([]);
-    setBlockStatus(null);
   }, [selectedUser]);
 
   const fetchConversations = async () => {
@@ -195,28 +191,6 @@ export default function Messages() {
         return incoming.length ? [...prev, ...incoming] : prev;
       });
     } catch (e) { console.error('messages:', e); }
-  };
-
-  const fetchBlockStatus = async (userId) => {
-    try {
-      const data = await messageService.getBlockStatus(userId);
-      setBlockStatus(data);
-    } catch (e) { console.error('blockStatus:', e); }
-  };
-
-  const handleToggleBlock = async () => {
-    if (!selectedUser || blockLoading) return;
-    setBlockLoading(true);
-    try {
-      if (blockStatus?.iBlockedThem) {
-        await messageService.unblockUser(selectedUser.id);
-      } else {
-        await messageService.blockUser(selectedUser.id);
-      }
-      await fetchBlockStatus(selectedUser.id);
-      fetchConversations();
-    } catch (e) { console.error('block toggle:', e); }
-    finally { setBlockLoading(false); }
   };
 
   const handleSendMessage = async (e) => {

@@ -49,4 +49,8 @@ export const messageService = {
   deleteMessage: async (messageId) => {
     await api.delete(`/messages/${messageId}`);
   },
+
+  deleteConversation: async (userId) => {
+    await api.delete(`/messages/conversation/${userId}`);
+  },
 };
