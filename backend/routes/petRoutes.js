@@ -75,6 +75,36 @@ router.post('/upload-vaccination-card', authenticateToken, upload.single('vaccin
 // ── GET /api/pets  (public – available pets for adoption) ──────────────────
 router.get('/', async (req, res) => {
   try {
+    // Optional auth — decode token if present so we can filter blocked owners
+    let callerUserId = null;
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      try {
+        const jwt = await import('jsonwebtoken');
+        const decoded = jwt.default.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+        const { data: callerRow } = await supabase
+          .from('USER')
+          .select('UserID')
+          .eq('AccID', decoded.accId)
+          .maybeSingle();
+        callerUserId = callerRow?.UserID || null;
+      } catch { /* treat as unauthenticated */ }
+    }
+
+    // If logged in, resolve all block relationships for this user
+    let blockedOwnerIds = new Set();
+    if (callerUserId) {
+      const { data: blocks } = await supabase
+        .from('USERBLOCKS')
+        .select('BlockerID, BlockedID')
+        .or(`BlockerID.eq.${callerUserId},BlockedID.eq.${callerUserId}`);
+      blockedOwnerIds = new Set(
+        (blocks || []).map(b =>
+          b.BlockerID === callerUserId ? b.BlockedID : b.BlockerID
+        )
+      );
+    }
+
     const { data: userpets, error } = await supabase
       .from('USERPETS')
       .select(`
@@ -95,7 +125,11 @@ router.get('/', async (req, res) => {
     if (error) throw error;
 
     const pets = (userpets || [])
-      .filter(row => row.PET && row.USER?.ACCOUNT?.AccStatus !== 'Suspended')
+      .filter(row =>
+        row.PET &&
+        row.USER?.ACCOUNT?.AccStatus !== 'Suspended' &&
+        !blockedOwnerIds.has(row.UserID)          // hide pets from blocked/blocking users
+      )
       .map(row => ({
         ...row.PET,
         ownerId: row.UserID,
