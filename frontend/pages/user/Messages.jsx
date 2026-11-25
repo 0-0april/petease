@@ -126,8 +126,7 @@ export default function Messages() {
   // Delete message confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
-  // Delete conversation confirmation
-  const [showDeleteConv, setShowDeleteConv] = useState(false);
+
 
   /* ── data fetching ───────────────────────────────────────────── */
   useEffect(() => { fetchConversations(); fetchAnnouncements(); }, []);
@@ -454,15 +453,6 @@ export default function Messages() {
                   style={{ color: 'hsl(140,100%,7%)' }}>
                   {selectedUser.name}
                 </p>
-                {/* Delete conversation button */}
-                <button
-                  onClick={() => setShowDeleteConv(true)}
-                  title="Delete conversation"
-                  className="p-1.5 rounded-lg transition-colors hover:bg-red-50 shrink-0"
-                  style={{ color: 'hsl(0,65%,50%)' }}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
                 {selectedMsgIds.length > 0 && (
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
@@ -574,49 +564,6 @@ export default function Messages() {
           )}
         </div>
       </div>
-
-      {/* ── Delete conversation confirmation ── */}
-      {showDeleteConv && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.35)' }}
-          onClick={() => setShowDeleteConv(false)}>
-          <div
-            className="glass-card w-full max-w-sm p-6 space-y-4"
-            onClick={e => e.stopPropagation()}
-          >
-            <p className="text-sm font-bold" style={{ color: 'hsl(140,100%,7%)' }}>
-              Delete conversation with {selectedUser.name}?
-            </p>
-            <p className="text-xs" style={{ color: 'hsla(140,100%,7%,0.55)' }}>
-              All messages in this thread will be hidden from your view. This cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConv(false)}
-                className="flex-1 py-2 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await messageService.deleteConversation(selectedUser.id);
-                    setMessages([]);
-                    setSelectedUser(null);
-                    setMobilePanel('list');
-                    fetchConversations();
-                  } catch { alert('Failed to delete conversation.'); }
-                  finally { setShowDeleteConv(false); }
-                }}
-                className="flex-1 py-2 rounded-xl text-sm font-semibold text-white"
-                style={{ background: 'hsl(0,65%,50%)' }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Delete confirmation ── */}
       {deleteConfirmId && (
