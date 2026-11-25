@@ -137,6 +137,7 @@ CREATE TABLE public.MESSAGES (
   MessTimeStamp timestamp with time zone NOT NULL DEFAULT now(),
   created_at timestamp with time zone DEFAULT now(),
   MessIsDeleted boolean,
+  MessIsUserBlocked boolean,
   CONSTRAINT MESSAGES_pkey PRIMARY KEY (MessID),
   CONSTRAINT MESSAGES_MessFrom_fkey FOREIGN KEY (MessFrom) REFERENCES public.USER(UserID),
   CONSTRAINT MESSAGES_MessTo_fkey FOREIGN KEY (MessTo) REFERENCES public.USER(UserID)
