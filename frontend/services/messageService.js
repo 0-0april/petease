@@ -25,13 +25,14 @@ export const messageService = {
 
   getMessages: async (userId) => {
     const response = await api.get(`/messages/with/${userId}`);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     return response.data.map(msg => ({
       id: msg.MessID,
       senderId: msg.MessFrom,
       receiverId: msg.MessTo,
       content: msg.MessContent,
       createdAt: msg.MessTimeStamp,
-      isSent: msg.is_mine,   // set by the backend — no localStorage comparison
+      isSent: msg.MessFrom === user.UserID
     }));
   },
 
@@ -47,24 +48,5 @@ export const messageService = {
 
   deleteMessage: async (messageId) => {
     await api.delete(`/messages/${messageId}`);
-  },
-
-  blockUser: async (userId) => {
-    const response = await api.post(`/messages/block/${userId}`);
-    return response.data;
-  },
-
-  unblockUser: async (userId) => {
-    const response = await api.delete(`/messages/block/${userId}`);
-    return response.data;
-  },
-
-  getBlockStatus: async (userId) => {
-    const response = await api.get(`/messages/block-status/${userId}`);
-    return response.data;
-  },
-
-  deleteConversation: async (userId) => {
-    await api.delete(`/messages/conversation/${userId}`);
   },
 };
